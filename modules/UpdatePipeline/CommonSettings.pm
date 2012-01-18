@@ -1,4 +1,5 @@
 package UpdatePipeline::CommonSettings;
+use Pathogens::ConfigSettings;
 use Moose;
 
 has 'environment'                   => ( is => 'rw', isa => 'Str', default => 'production');

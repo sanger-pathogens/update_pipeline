@@ -8,7 +8,7 @@
 
 =cut
 
-
+BEGIN { unshift(@INC, './modules') }
 use strict;
 use warnings;
 use UpdatePipeline::IRODS;

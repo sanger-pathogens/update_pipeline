@@ -19,6 +19,7 @@ use Moose;
 use IRODS::Study;
 use IRODS::File;
 use Warehouse::File;
+use Warehouse::Database;
 use UpdatePipeline::FileMetaData;
 extends 'UpdatePipeline::CommonSettings';
 
@@ -31,7 +32,7 @@ has '_warehouse_dbh'   => ( is => 'rw', lazy_build => 1 );
 sub _build__warehouse_dbh
 {
   my ($self) = @_;
-  Warehouse::Database->(settings => $self->_database_settings->{warehouse})->connect;
+  Warehouse::Database->new(settings => $self->_database_settings->{warehouse})->connect;
 }
 
 sub _build__irods_studies
@@ -74,7 +75,6 @@ sub _build_files_metadata
       sample_accession_number => $irods_file_metadata->{sample_accession_number},
     );
     # get data from warehouse
-    # build UpdatePipeline::FileMetaData objects for each
     push(@files_metadata, $file_metadata);
   }
   
@@ -103,16 +103,16 @@ sub print_file_metadata
   
   for my $file_metadata (@{$self->files_metadata})
   {
-    print $file_metadata->study_name               .', ';
-    print $file_metadata->study_accession_number   .', ';
-    print $file_metadata->file_md5                 .', ';
-    print $file_metadata->file_type                .', ';
-    print $file_metadata->file_name                .', ';
-    print $file_metadata->library_name             .', ';
-    print $file_metadata->library_ssid             .', ';
-    print $file_metadata->total_reads              .', ';
-    print $file_metadata->sample_name              .', ';
-    print $file_metadata->sample_accession_number  ."\n";
+    print( ($file_metadata->study_name              ? $file_metadata->study_name              : '')  .', ');
+    print( ($file_metadata->study_accession_number  ? $file_metadata->study_accession_number  : '')  .', ');
+    print( ($file_metadata->file_md5                ? $file_metadata->file_md5                : '')  .', ');
+    print( ($file_metadata->file_type               ? $file_metadata->file_type               : '')  .', ');
+    print( ($file_metadata->file_name               ? $file_metadata->file_name               : '')  .', ');
+    print( ($file_metadata->library_name            ? $file_metadata->library_name            : '')  .', ');
+    print( ($file_metadata->library_ssid            ? $file_metadata->library_ssid            : '')  .', ');
+    print( ($file_metadata->total_reads             ? $file_metadata->total_reads             : '')  .', ');
+    print( ($file_metadata->sample_name             ? $file_metadata->sample_name             : '')  .', ');
+    print( ($file_metadata->sample_accession_number ? $file_metadata->sample_accession_number : '')  ."\n");
   }
 }
 
