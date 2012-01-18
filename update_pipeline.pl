@@ -246,33 +246,6 @@ sub get_irods_metadata_for_bam {
 }
 
 
-
-sub lookup_bam_files_for_study
-{
-    my ($study_name) = @_;
-
-    my $irods_dir = '/software/irods/icommands/bin/';
-    my $command   = $irods_dir . "imeta qu -z seq -d study = '".$study_name."' and target = 1 and total_reads != 0";
-
-    open( my $irods, "$command |" );
-
-    my @bam_file_location;
-    my  $attribute  = '';
-    while (<$irods>) {
-        my $data_obj;
-        if (/^collection: (.+)$/) { $attribute = $1; }
-        if (/^dataObj: (.+)$/)    { $data_obj  = $1; }
-        if(defined ($data_obj))
-        {
-          push(@bam_file_location, "$attribute/$data_obj");
-        }
-        
-    }
-    close $irods;
-
-    return \@bam_file_location;
-}
-
 sub get_study_names
 {
   my ($study_file) = @_;

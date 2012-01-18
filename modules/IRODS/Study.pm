@@ -19,14 +19,16 @@ extends 'IRODS::Common';
 
 has 'name'                          => ( is => 'rw', isa => 'Str', required   => 1 );
 has 'file_containing_irods_output'  => ( is => 'rw', isa => 'Str'); # Used for testing, pass a file with output from IRODS
-has 'file_locations'                => ( is => 'rw', lazy_build => 1 );
+has 'file_locations'                => ( is => 'rw', isa => 'ArrayRef', lazy_build => 1 );
 
 sub _build_file_locations
 {
   my ($self) = @_; 
-  open( my $irods, $self->_stream_location() );
-
   my @file_location;
+  my $irods_stream = $self->_stream_location() ;
+  
+  open( my $irods, $irods_stream ) or return  \@file_location;
+
   my  $attribute  = '';
   while (<$irods>) {
       my $data_obj;
@@ -56,3 +58,5 @@ sub _stream_location
   
   return $self->bin_directory . "imeta qu -z seq -d study = '".$self->name."' and target = 1 and total_reads != 0 |";
 }
+
+1;
