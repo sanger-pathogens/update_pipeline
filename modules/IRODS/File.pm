@@ -9,7 +9,7 @@ my $file = IRODS::File->new(
   file_location => '/seq/1234/1234_5.bam'
   );
 
-my %file_metadata = $file->file_metadata();
+my %file_metadata = $file->file_attributes();
 
 =cut
 
