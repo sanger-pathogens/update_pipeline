@@ -15,10 +15,13 @@ my %file_metadata = $file->file_attributes();
 
 package IRODS::File;
 use Moose;
+use File::Spec;
 extends 'IRODS::Common';
 
 has 'file_location'                 => ( is => 'rw', isa => 'Str',  required   => 1 );
+
 has 'file_attributes'               => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
+has 'file_name'                     => ( is => 'rw', isa => 'Str', lazy_build => 1 );
 has 'file_containing_irods_output'  => ( is => 'rw', isa => 'Str'); # Used for testing, pass a file with output from IRODS
 
 sub _build_file_attributes
@@ -26,6 +29,7 @@ sub _build_file_attributes
    my ($self) = @_;
    my %file_attributes;
    my $irods_stream = $self->_stream_location() ;
+   $file_attributes{file_name}  = $self->file_name();
 
    open( my $irods, $irods_stream ) or return  \%file_attributes;
    
@@ -35,8 +39,17 @@ sub _build_file_attributes
        if (/^value: (.+)$/)     { $file_attributes{$attribute} = $1; }
    }
    close $irods;
-
+   
    return \%file_attributes;
+}
+
+sub _build_file_name
+{
+  my ($self) = @_; 
+  
+  my ($volume,$directories,$file_name) = File::Spec->splitpath( $self->file_location );
+  
+  return $file_name;
 }
 
 sub _stream_location

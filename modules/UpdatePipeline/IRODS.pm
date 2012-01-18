@@ -18,6 +18,7 @@ package UpdatePipeline::IRODS;
 use Moose;
 use IRODS::Study;
 use IRODS::File;
+use Warehouse::File;
 use UpdatePipeline::FileMetaData;
 extends 'UpdatePipeline::CommonSettings';
 
@@ -27,6 +28,11 @@ has 'files_metadata'   => ( is => 'rw', isa => 'ArrayRef', lazy_build => 1 );
 has '_irods_studies'   => ( is => 'rw', isa => 'ArrayRef', lazy_build => 1 );
 has '_warehouse_dbh'   => ( is => 'rw', lazy_build => 1 );
 
+sub _build__warehouse_dbh
+{
+  my ($self) = @_;
+  Warehouse::Database->(settings => $self->_database_settings->{warehouse})->connect;
+}
 
 sub _build__irods_studies
 {
@@ -53,13 +59,23 @@ sub _build_files_metadata
     my $warehouse_file = Warehouse::File->new(
       input_metadata => $irods_file_metadata,
       _dbh => $self->_warehouse_dbh
-          )->file_metadata;
+          )->file_attributes;
     
-    my %file_metadata = UpdatePipeline::FileMetaData->new(
+    my $file_metadata = UpdatePipeline::FileMetaData->new(
+      study_name              => $irods_file_metadata->{study},
+      study_accession_number  => $irods_file_metadata->{study_accession_number},
+      file_md5                => $irods_file_metadata->{md5},
+      file_type               => $irods_file_metadata->{type},
+      file_name               => $irods_file_metadata->{file_name},
+      library_name            => $irods_file_metadata->{library},
+      library_ssid            => $irods_file_metadata->{library_id},
+      total_reads             => $irods_file_metadata->{total_reads},
+      sample_name             => $irods_file_metadata->{sample},
+      sample_accession_number => $irods_file_metadata->{sample_accession_number},
     );
     # get data from warehouse
     # build UpdatePipeline::FileMetaData objects for each
-    push(@files_metadata, \%file_metadata);
+    push(@files_metadata, $file_metadata);
   }
   
   return \@files_metadata;
@@ -79,6 +95,25 @@ sub _get_irods_file_metadata_for_studies
   }
   
   return \@files_metadata;
+}
+
+sub print_file_metadata
+{
+  my ($self) = @_;
+  
+  for my $file_metadata (@{$self->files_metadata})
+  {
+    print $file_metadata->study_name               .', ';
+    print $file_metadata->study_accession_number   .', ';
+    print $file_metadata->file_md5                 .', ';
+    print $file_metadata->file_type                .', ';
+    print $file_metadata->file_name                .', ';
+    print $file_metadata->library_name             .', ';
+    print $file_metadata->library_ssid             .', ';
+    print $file_metadata->total_reads              .', ';
+    print $file_metadata->sample_name              .', ';
+    print $file_metadata->sample_accession_number  ."\n";
+  }
 }
 
 
