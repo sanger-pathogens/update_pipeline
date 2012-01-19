@@ -49,6 +49,7 @@ sub _build_report
 {
   my ($self) = @_;
   my %report;
+  my %inconsistent_files;
   
   $report{files_missing_from_tracking} = 0;
   $report{total_files_in_irods} = 0;
@@ -66,6 +67,9 @@ sub _build_report
         $report{$consistency_value} = 0 unless defined($report{$consistency_value});
         $report{$consistency_value}++;
         
+        $inconsistent_files{$consistency_value} = [] unless defined($inconsistent_files{$consistency_value});
+        push($inconsistent_files{$consistency_value}, $file_metadata->file_name_without_extension});
+        
         $report{num_inconsistent}++;
       }
       else
@@ -81,6 +85,9 @@ sub _build_report
     }
     $report{total_files_in_irods}++;
   }
+  
+  use Data::Dumper;
+  print Dumper %inconsistent_files;
   
   return \%report;
 }
@@ -102,9 +109,9 @@ sub _compare_file_metadata_with_vrtrack_lane_metadata
   return "vr_undef_total_reads"  unless defined($lane_metadata->{total_reads});
   
   my $f_sample_name = $file_metadata->sample_name;
-  $f_sample_name =~ tr/\W/_/g;
+  $f_sample_name =~ s/\W/_/g;
   my $l_sample_name = $lane_metadata->{sample_name};
-  $l_sample_name =~ tr/\W/_/g;
+  $l_sample_name =~ s/\W/_/g;
   
   if( defined($f_sample_name) && $f_sample_name ne $l_sample_name)
   {

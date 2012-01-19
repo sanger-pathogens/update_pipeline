@@ -57,4 +57,3 @@ my $pipeline_report  = $validate_pipeline->report();
 print Dumper $pipeline_report;
 
 
-
