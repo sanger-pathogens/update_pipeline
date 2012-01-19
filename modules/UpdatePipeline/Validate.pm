@@ -103,15 +103,15 @@ sub _compare_file_metadata_with_vrtrack_lane_metadata
   {
     return "study_name";
   } 
-  elsif( defined($file_metadata->library_name ) && $file_metadata->study_name ne $lane_metadata->{library_name} )
+  elsif( defined($file_metadata->library_name ) && $file_metadata->library_name ne $lane_metadata->{library_name} )
   {
     return "library_name";
   }
-  elsif( defined($file_metadata->library_ssid ) && $file_metadata->study_name ne $lane_metadata->{library_ssid} )
+  elsif( defined($file_metadata->library_ssid ) && $file_metadata->library_ssid ne $lane_metadata->{library_ssid} )
   {
     return "library_ssid";
   }
-  elsif( defined($file_metadata->total_reads ) && $file_metadata->study_name ne $lane_metadata->{total_reads} )
+  elsif( defined($file_metadata->total_reads ) && $file_metadata->total_reads ne $lane_metadata->{total_reads} )
   {
     return "total_reads";
   }

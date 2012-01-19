@@ -51,7 +51,7 @@ unless ($vrtrack) {
 }
 
 my @study_names = UpdatePipeline::Studies->new(filename => $studyfile)->study_names;
-my $validate_pipeline = UpdatePipeline::Validate->new(study_names => \@study_names, _vrtrack => $vrtrack);
+my $validate_pipeline = UpdatePipeline::Validate->new(study_names => @study_names, _vrtrack => $vrtrack);
 my $pipeline_report  = $validate_pipeline->report();
 
 print Dumper $pipeline_report;
