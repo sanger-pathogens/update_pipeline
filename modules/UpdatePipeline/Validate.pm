@@ -89,17 +89,17 @@ sub _compare_file_metadata_with_vrtrack_lane_metadata
 {
   my ($self, $file_metadata, $lane_metadata) = @_;
   
-  return "vr_sample_name"  unless defined($lane_metadata->{sample_name});
-  return "vr_study_name"   unless defined($lane_metadata->{study_name});
-  return "vr_library_name" unless defined($lane_metadata->{library_name});
-  return "vr_library_ssid" unless defined($lane_metadata->{library_ssid});
-  return "vr_total_reads"  unless defined($lane_metadata->{total_reads});
-  
   return "file_sample_name"  unless defined($file_metadata->{sample_name});
   return "file_study_name"   unless defined($file_metadata->{study_name});
   return "file_library_name" unless defined($file_metadata->{library_name});
   return "file_library_ssid" unless defined($file_metadata->{library_ssid});
   return "file_total_reads"  unless defined($file_metadata->{total_reads});
+  
+  return "vr_sample_name"  unless defined($lane_metadata->{sample_name});
+  return "vr_study_name"   unless defined($lane_metadata->{study_name});
+  return "vr_library_name" unless defined($lane_metadata->{library_name});
+  return "vr_library_ssid" unless defined($lane_metadata->{library_ssid});
+  return "vr_total_reads"  unless defined($lane_metadata->{total_reads});
   
   if( defined($file_metadata->sample_name)    && $file_metadata->sample_name ne $lane_metadata->{sample_name})
   {
