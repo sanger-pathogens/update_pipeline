@@ -15,13 +15,13 @@ use UpdatePipeline::VRTrack::LaneMetaData;
 has 'filename'    => ( is => 'rw', required => 1 );
 has 'study_names' => ( is => 'rw', isa => 'ArrayRef[Str]', lazy_build => 1 );
 
-sub build_study_names
+sub _build_study_names
 {
   my ($self) = @_;
   my @studies;
   
-  if ( -s $filename ) {
-      open( my $STU, "$filename" ) or die "Can't open $filename: $!\n";
+  if ( -s $self->filename ) {
+      open( my $STU, $self->filename ) or die "Can't open $self->filename: $!\n";
       while (<$STU>) {
           if ($_) {    #Ignore empty lines
               chomp;

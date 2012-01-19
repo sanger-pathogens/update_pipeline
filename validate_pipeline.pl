@@ -50,7 +50,7 @@ unless ($vrtrack) {
     die "Can't connect to tracking database: $db \n";
 }
 
-my @study_names = UpdatePipeline::Studies->new(filename => $studyfile);
+my @study_names = UpdatePipeline::Studies->new(filename => $studyfile)->study_names;
 my $validate_pipeline = UpdatePipeline::Validate->new(study_names => \@study_names, _vrtrack => $vrtrack);
 my $pipeline_report  = $validate_pipeline->report();
 
