@@ -89,31 +89,37 @@ sub _compare_file_metadata_with_vrtrack_lane_metadata
 {
   my ($self, $file_metadata, $lane_metadata) = @_;
   
-  return "sample_name"  unless defined($lane_metadata->{sample_name});
-  return "study_name"   unless defined($lane_metadata->{study_name});
-  return "library_name" unless defined($lane_metadata->{library_name});
-  return "library_ssid" unless defined($lane_metadata->{library_ssid});
-  return "total_reads"  unless defined($lane_metadata->{total_reads});
+  return "vr_sample_name"  unless defined($lane_metadata->{sample_name});
+  return "vr_study_name"   unless defined($lane_metadata->{study_name});
+  return "vr_library_name" unless defined($lane_metadata->{library_name});
+  return "vr_library_ssid" unless defined($lane_metadata->{library_ssid});
+  return "vr_total_reads"  unless defined($lane_metadata->{total_reads});
+  
+  return "file_sample_name"  unless defined($file_metadata->{sample_name});
+  return "file_study_name"   unless defined($file_metadata->{study_name});
+  return "file_library_name" unless defined($file_metadata->{library_name});
+  return "file_library_ssid" unless defined($file_metadata->{library_ssid});
+  return "file_total_reads"  unless defined($file_metadata->{total_reads});
   
   if( defined($file_metadata->sample_name)    && $file_metadata->sample_name ne $lane_metadata->{sample_name})
   {
-    return "sample_name";
+    return "vr_sample_name";
   }
   elsif( defined($file_metadata->study_name ) && $file_metadata->study_name ne $lane_metadata->{study_name} )
   {
-    return "study_name";
+    return "vr_study_name";
   } 
   elsif( defined($file_metadata->library_name ) && $file_metadata->library_name ne $lane_metadata->{library_name} )
   {
-    return "library_name";
+    return "vr_library_name";
   }
   elsif( defined($file_metadata->library_ssid ) && $file_metadata->library_ssid ne $lane_metadata->{library_ssid} )
   {
-    return "library_ssid";
+    return "vr_library_ssid";
   }
   elsif( defined($file_metadata->total_reads ) && $file_metadata->total_reads ne $lane_metadata->{total_reads} )
   {
-    return "total_reads";
+    return "vr_total_reads";
   }
   
   return;
