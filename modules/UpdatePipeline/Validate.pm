@@ -67,8 +67,8 @@ sub _build_report
         $report{$consistency_value} = 0 unless defined($report{$consistency_value});
         $report{$consistency_value}++;
         
-        $inconsistent_files{$consistency_value} = [] unless defined($inconsistent_files{$consistency_value});
-        push($inconsistent_files{$consistency_value}, $file_metadata->file_name_without_extension});
+        $inconsistent_files{$consistency_value} = () unless defined($inconsistent_files{$consistency_value});
+        push(@{$inconsistent_files{$consistency_value}}, $file_metadata->file_name_without_extension);
         
         $report{num_inconsistent}++;
       }
