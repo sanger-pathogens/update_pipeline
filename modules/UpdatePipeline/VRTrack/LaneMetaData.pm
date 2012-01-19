@@ -42,8 +42,13 @@ sub _build_lane_attributes
   my $sth = $self->_vrtrack->{_dbh}->prepare($sql);
 
   my %lane_attributes;
+  my $tmp_return_value;
   if ($sth->execute()){
-     %lane_attributes = %{$sth->fetchrow_hashref};
+    $tmp_return_value = $sth->fetchrow_hashref;
+    if($tmp_return_value)
+    {
+     %lane_attributes = %{$tmp_return_value};
+    }
   }
   else{
       die(sprintf('Cannot retrieve tracking data: %s', $DBI::errstr));
