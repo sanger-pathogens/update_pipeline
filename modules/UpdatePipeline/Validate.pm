@@ -89,19 +89,24 @@ sub _compare_file_metadata_with_vrtrack_lane_metadata
 {
   my ($self, $file_metadata, $lane_metadata) = @_;
   
-  return "file_sample_name"  unless defined($file_metadata->{sample_name});
-  return "file_study_name"   unless defined($file_metadata->{study_name});
-  return "file_library_name" unless defined($file_metadata->{library_name});
-  return "file_library_ssid" unless defined($file_metadata->{library_ssid});
-  return "file_total_reads"  unless defined($file_metadata->{total_reads});
+  return "irods_missing_sample_name"  unless defined($file_metadata->{sample_name});
+  return "irods_missing_study_name"   unless defined($file_metadata->{study_name});
+  return "irods_missing_library_name" unless defined($file_metadata->{library_name});
+  return "irods_missing_library_ssid" unless defined($file_metadata->{library_ssid});
+  return "irods_missing_total_reads"  unless defined($file_metadata->{total_reads});
   
-  return "vr_sample_name"  unless defined($lane_metadata->{sample_name});
-  return "vr_study_name"   unless defined($lane_metadata->{study_name});
-  return "vr_library_name" unless defined($lane_metadata->{library_name});
-  return "vr_library_ssid" unless defined($lane_metadata->{library_ssid});
-  return "vr_total_reads"  unless defined($lane_metadata->{total_reads});
+  return "vr_undef_sample_name"  unless defined($lane_metadata->{sample_name});
+  return "vr_undef_study_name"   unless defined($lane_metadata->{study_name});
+  return "vr_undef_library_name" unless defined($lane_metadata->{library_name});
+  return "vr_undef_library_ssid" unless defined($lane_metadata->{library_ssid});
+  return "vr_undef_total_reads"  unless defined($lane_metadata->{total_reads});
   
-  if( defined($file_metadata->sample_name)    && $file_metadata->sample_name ne $lane_metadata->{sample_name})
+  my $f_sample_name = $file_metadata->sample_name;
+  $f_sample_name =~ tr/\W/_/g;
+  my $l_sample_name = $lane_metadata->{sample_name};
+  $l_sample_name =~ tr/\W/_/g;
+  
+  if( defined($f_sample_name) && $f_sample_name ne $l_sample_name)
   {
     return "vr_sample_name";
   }
@@ -117,7 +122,7 @@ sub _compare_file_metadata_with_vrtrack_lane_metadata
   {
     return "vr_library_ssid";
   }
-  elsif( defined($file_metadata->total_reads ) && $file_metadata->total_reads ne $lane_metadata->{total_reads} )
+  elsif( defined($file_metadata->total_reads ) && !($file_metadata->total_reads >= $lane_metadata->{total_reads}*0.9  && $file_metadata->total_reads <= $lane_metadata->{total_reads}*1.1 ) )
   {
     return "vr_total_reads";
   }
