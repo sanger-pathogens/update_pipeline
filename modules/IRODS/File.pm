@@ -16,6 +16,7 @@ my %file_metadata = $file->file_attributes();
 package IRODS::File;
 use Moose;
 use File::Spec;
+use File::Basename;
 extends 'IRODS::Common';
 
 has 'file_location'                 => ( is => 'rw', isa => 'Str',  required   => 1 );
@@ -30,6 +31,7 @@ sub _build_file_attributes
    my %file_attributes;
    my $irods_stream = $self->_stream_location() ;
    $file_attributes{file_name}  = $self->file_name();
+   $file_attributes{file_name_without_extension} = $self->_file_name_without_extension($self->file_name());
 
    open( my $irods, $irods_stream ) or return  \%file_attributes;
    
@@ -50,6 +52,13 @@ sub _build_file_name
   my ($volume,$directories,$file_name) = File::Spec->splitpath( $self->file_location );
   
   return $file_name;
+}
+
+sub _file_name_without_extension
+{
+   my ($self) = @_; 
+   my($filename, $directories, $suffix) = fileparse($self->_file_name);
+   return $filename;
 }
 
 sub _stream_location

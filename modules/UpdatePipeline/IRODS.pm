@@ -68,6 +68,7 @@ sub _build_files_metadata
       file_md5                => $irods_file_metadata->{md5},
       file_type               => $irods_file_metadata->{type},
       file_name               => $irods_file_metadata->{file_name},
+      file_name_without_extension => $irods_file_metadata->{file_name_without_extension},
       library_name            => $irods_file_metadata->{library},
       library_ssid            => $irods_file_metadata->{library_id},
       total_reads             => $irods_file_metadata->{total_reads},

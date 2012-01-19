@@ -25,7 +25,8 @@ has 'lane_attributes'   => ( is => 'rw', lazy_build   => 1 );
 sub _build_lane_attributes
 {
   my ($self) = @_; 
-  
+  my $search_query = $self->name;  
+
   my $sql = qq[select study.acc as study_accession_number, sample.name as sample_name,  
   project.name as study_name,
   library.name as library_name,
@@ -36,18 +37,17 @@ sub _build_lane_attributes
   left join latest_sample as sample on sample.sample_id = library.sample_id
   left join latest_project as project on project.project_id = sample.project_id
   left join study as study on project.study_id = study.study_id
-  where lane.name = "$self->name" limit 1;];
-  
+  where lane.name = "$search_query" limit 1;];
+
   my $sth = $self->_vrtrack->{_dbh}->prepare($sql);
 
-  my $tmpname;
+  my %lane_attributes;
   if ($sth->execute()){
-      $sth->bind_columns ( \$tmpname );
-      $tmpname =  $sth->fetchrow_arrayref;
+     %lane_attributes = %{$sth->fetchrow_hashref};
   }
   else{
       die(sprintf('Cannot retrieve tracking data: %s', $DBI::errstr));
   }
-  return $tmpname;
+  return \%lane_attributes;
 }
-
+1;
