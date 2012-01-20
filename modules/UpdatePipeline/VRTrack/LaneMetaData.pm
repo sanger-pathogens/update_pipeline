@@ -15,6 +15,7 @@ my %lane_metadata = $lane_metadata->lane_attributes();
 =cut
 
 package UpdatePipeline::VRTrack::LaneMetaData;
+use UpdatePipeline::Common;
 use Moose;
 
 has 'name'       => ( is => 'rw', isa => 'Str', required   => 1 );
@@ -53,6 +54,13 @@ sub _build_lane_attributes
   else{
       die(sprintf('Cannot retrieve tracking data: %s', $DBI::errstr));
   }
+  
+  # check to see if there are any values in the returned hash
+  return undef unless(UpdatePipeline::Common::array_contains_value(values(%lane_attributes)));
+  
   return \%lane_attributes;
 }
+
+
+
 1;
