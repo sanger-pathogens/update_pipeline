@@ -64,7 +64,7 @@ if($validate_pipeline->inconsistent_files->{inconsistent_sample_name_in_tracking
 
 if($validate_pipeline->inconsistent_files->{inconsistent_number_of_reads_in_tracking} && @{$validate_pipeline->inconsistent_files->{inconsistent_number_of_reads_in_tracking}} > 0)
 {
-  print "\n\nnCritical: Total reads are inconsistent. This is a symptom of multiple different critical errors in the pipelines.\n";
+  print "\n\nCritical: Total reads are inconsistent. This is a symptom of multiple different critical errors in the pipelines.\n";
   print join("\n", @{$validate_pipeline->inconsistent_files->{inconsistent_number_of_reads_in_tracking}});
 }
 

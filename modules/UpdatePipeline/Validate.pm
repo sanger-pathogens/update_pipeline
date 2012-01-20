@@ -120,7 +120,7 @@ sub _filter_inconsistencies
    
    $self->_filter_by_run_id(3000, "inconsistent_sample_name_in_tracking");
    $self->_filter_by_run_id(4000, "inconsistent_study_name_in_tracking");
-   $self->_filter_by_run_id(3000, "inconsistent_library_name_in_tracking");
+   $self->_filter_by_run_id(6000, "inconsistent_library_name_in_tracking");
    $self->_filter_by_run_id(4000, "inconsistent_number_of_reads_in_tracking");
 }
 
