@@ -225,27 +225,6 @@ sub get_study
 }
 
 
-
-sub get_irods_metadata_for_bam {
-    my ($filename) = @_;
-
-    my $irods_dir = '/software/irods/icommands/bin/';
-    my $command   = $irods_dir . 'imeta ls -d ' . $filename;
-
-    my %file_attribute;
-    open( my $irods, "$command |" );
-
-    my $attribute = '';
-    while (<$irods>) {
-        if (/^attribute: (.+)$/) { $attribute                    = $1; }
-        if (/^value: (.+)$/)     { $file_attribute{$attribute} = $1; }
-    }
-    close $irods;
-
-    return \%file_attribute;
-}
-
-
 sub get_study_names
 {
   my ($study_file) = @_;
