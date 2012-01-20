@@ -55,8 +55,9 @@ sub _stream_location
     # Used for testing, pass a file with output from IRODS
     return $self->file_containing_irods_output;
   }
-  
-  return $self->bin_directory . "imeta qu -z seq -d study = '".$self->name."' and target = 1 and total_reads != 0 |";
+  # and total_reads != 0
+
+  return $self->bin_directory . "imeta qu -z seq -d study = '".$self->name."' and target = 1 |";
 }
 
 1;

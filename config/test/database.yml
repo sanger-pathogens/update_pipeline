@@ -1,0 +1,5 @@
+warehouse:
+  database: warehouse_two_production
+  host:     mcs7
+  port:     3306
+  user:     pathpipe_ro
