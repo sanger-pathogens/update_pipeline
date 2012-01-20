@@ -20,6 +20,7 @@ has '_files_metadata'  => ( is => 'rw',  isa => 'ArrayRef', lazy_build => 1 );
 has '_lanes_metadata'  => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
 
 has 'report'  => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
+has 'inconsistent_files'  => ( is => 'rw', isa => 'HashRef' );
 
 sub _build__files_metadata
 {
@@ -54,6 +55,7 @@ sub _build_report
   $report{files_missing_from_tracking} = 0;
   $report{total_files_in_irods} = 0;
   $report{num_inconsistent} = 0;
+  $inconsistent_files{files_missing_from_tracking} = ();
   
   for my $file_metadata (@{$self->_files_metadata})
   {
@@ -85,15 +87,59 @@ sub _build_report
     else
     {
       # file missing from tracking database
+      if($file_metadata->total_reads > 10000)
+      {
+        push(@{$inconsistent_files{files_missing_from_tracking}}, $file_metadata->file_name_without_extension);
+      }
       $report{files_missing_from_tracking}++;
     }
     $report{total_files_in_irods}++;
   }
   
-  use Data::Dumper;
-  print Dumper %inconsistent_files;
+  $self->inconsistent_files = \%inconsistent_files;
+  $self->_filter_inconsistencies();
   
   return \%report;
+}
+
+sub _filter_inconsistencies
+{
+   my ($self) = @_;
+   
+   $self->_filter_by_run_id(6000, "files_missing_from_tracking");
+   
+   $self->_filter_by_run_id(6000, "irods_missing_sample_name");
+   $self->_filter_by_run_id(6000, "irods_missing_study_name");
+   $self->_filter_by_run_id(6000, "irods_missing_library_name");
+   $self->_filter_by_run_id(6000, "irods_missing_total_reads");
+   
+   $self->_filter_by_run_id(6000, "missing_sample_name_in_tracking");
+   $self->_filter_by_run_id(6000, "missing_study_name_in_tracking");
+   $self->_filter_by_run_id(6000, "missing_library_name_in_tracking");
+   $self->_filter_by_run_id(6000, "missing_total_reads_in_tracking");
+   
+   $self->_filter_by_run_id(2000, "inconsistent_sample_name_in_tracking");
+   $self->_filter_by_run_id(4000, "inconsistent_study_name_in_tracking");
+   $self->_filter_by_run_id(2000, "inconsistent_library_name_in_tracking");
+   $self->_filter_by_run_id(4000, "inconsistent_number_of_reads_in_tracking");
+}
+
+sub _filter_by_run_id
+{
+  my ($self, $run_id_threshold, $key) = @_;
+  
+  my @files_missing ;
+  return unless defined($self->inconsistent_files->{$key});
+  for my $filename (@{$self->inconsistent_files->{$key}})
+  {
+    if( $filename =~ m/^(\d+)_/)
+    {
+      my $run_id = $1;
+      push(@files_missing, $filename) if($run_id > $run_id_threshold );
+    }
+  }
+  $self->inconsistent_files->{$key} = \@files_missing;
+  
 }
 
 sub _compare_file_metadata_with_vrtrack_lane_metadata
@@ -103,14 +149,12 @@ sub _compare_file_metadata_with_vrtrack_lane_metadata
   return "irods_missing_sample_name"  unless defined($file_metadata->{sample_name});
   return "irods_missing_study_name"   unless defined($file_metadata->{study_name});
   return "irods_missing_library_name" unless defined($file_metadata->{library_name});
-  return "irods_missing_library_ssid" unless defined($file_metadata->{library_ssid});
   return "irods_missing_total_reads"  unless defined($file_metadata->{total_reads});
   
-  return "vr_undef_sample_name"  unless defined($lane_metadata->{sample_name});
-  return "vr_undef_study_name"   unless defined($lane_metadata->{study_name});
-  return "vr_undef_library_name" unless defined($lane_metadata->{library_name});
-  return "vr_undef_library_ssid" unless defined($lane_metadata->{library_ssid});
-  return "vr_undef_total_reads"  unless defined($lane_metadata->{total_reads});
+  return "missing_sample_name_in_tracking"  unless defined($lane_metadata->{sample_name});
+  return "missing_study_name_in_tracking"   unless defined($lane_metadata->{study_name});
+  return "missing_library_name_in_tracking" unless defined($lane_metadata->{library_name});
+  return "missing_total_reads_in_tracking"  unless defined($lane_metadata->{total_reads});
   
   my $f_sample_name = $file_metadata->sample_name;
   $f_sample_name =~ s/\W/_/g;
@@ -119,23 +163,19 @@ sub _compare_file_metadata_with_vrtrack_lane_metadata
   
   if( defined($f_sample_name) && $f_sample_name ne $l_sample_name)
   {
-    return "vr_sample_name";
+    return "inconsistent_sample_name_in_tracking";
   }
   elsif( defined($file_metadata->study_name ) && $file_metadata->study_name ne $lane_metadata->{study_name} )
   {
-    return "vr_study_name";
+    return "inconsistent_study_name_in_tracking";
   } 
   elsif( defined($file_metadata->library_name ) && $file_metadata->library_name ne $lane_metadata->{library_name} )
   {
-    return "vr_library_name";
+    return "inconsistent_library_name_in_tracking";
   }
-  elsif( defined($file_metadata->library_ssid ) && $file_metadata->library_ssid ne $lane_metadata->{library_ssid} )
+  elsif( defined($file_metadata->total_reads ) && !($file_metadata->total_reads > 10000 && $file_metadata->total_reads >= $lane_metadata->{total_reads}*0.9  && $file_metadata->total_reads <= $lane_metadata->{total_reads}*1.1 ) )
   {
-    return "vr_library_ssid";
-  }
-  elsif( defined($file_metadata->total_reads ) && !($file_metadata->total_reads >= $lane_metadata->{total_reads}*0.9  && $file_metadata->total_reads <= $lane_metadata->{total_reads}*1.1 ) )
-  {
-    return "vr_total_reads";
+    return "inconsistent_number_of_reads_in_tracking";
   }
   
   return;
