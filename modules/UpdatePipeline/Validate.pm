@@ -118,9 +118,9 @@ sub _filter_inconsistencies
    $self->_filter_by_run_id(6000, "missing_library_name_in_tracking");
    $self->_filter_by_run_id(6000, "missing_total_reads_in_tracking");
    
-   $self->_filter_by_run_id(2000, "inconsistent_sample_name_in_tracking");
+   $self->_filter_by_run_id(3000, "inconsistent_sample_name_in_tracking");
    $self->_filter_by_run_id(4000, "inconsistent_study_name_in_tracking");
-   $self->_filter_by_run_id(2000, "inconsistent_library_name_in_tracking");
+   $self->_filter_by_run_id(3000, "inconsistent_library_name_in_tracking");
    $self->_filter_by_run_id(4000, "inconsistent_number_of_reads_in_tracking");
 }
 
@@ -138,7 +138,8 @@ sub _filter_by_run_id
       push(@files_missing, $filename) if($run_id > $run_id_threshold );
     }
   }
-  $self->inconsistent_files->{$key} = \@files_missing;
+  my @sorted_file_names = sort {$b cmp $a} @files_missing;
+  $self->inconsistent_files->{$key} = \@sorted_file_names;
   
 }
 
