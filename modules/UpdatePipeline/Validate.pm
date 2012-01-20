@@ -58,6 +58,10 @@ sub _build_report
   for my $file_metadata (@{$self->_files_metadata})
   {
     
+    
+    # theres a problem where lanes are in the database but havent imported at all on to disk?
+    
+    
     if($self->_lanes_metadata->{$file_metadata->file_name_without_extension})
     {
       my $consistency_value = $self->_compare_file_metadata_with_vrtrack_lane_metadata($file_metadata, $self->_lanes_metadata->{$file_metadata->file_name_without_extension} );

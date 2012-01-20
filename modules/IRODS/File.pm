@@ -58,6 +58,7 @@ sub _file_name_without_extension
 {
    my ($self) = @_; 
    my($filename, $directories, $suffix) = fileparse($self->file_name, qr/\.[^.]*/);
+   $filename =~ s!_nonhuman!!;
    return $filename;
 }
 
