@@ -55,7 +55,7 @@ my $validate_pipeline = UpdatePipeline::Validate->new(study_names => @study_name
 my $pipeline_report  = $validate_pipeline->report();
 
 print Dumper $pipeline_report;
-print "Lanes needing action";
+print "Lanes needing action\n";
 print Dumper $validate_pipeline->inconsistent_files();
 
 

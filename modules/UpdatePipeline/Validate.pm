@@ -95,8 +95,8 @@ sub _build_report
     }
     $report{total_files_in_irods}++;
   }
-  
-  $self->inconsistent_files = \%inconsistent_files;
+
+  $self->inconsistent_files(\%inconsistent_files);
   $self->_filter_inconsistencies();
   
   return \%report;
@@ -128,7 +128,7 @@ sub _filter_by_run_id
 {
   my ($self, $run_id_threshold, $key) = @_;
   
-  my @files_missing ;
+  my @files_missing =();
   return unless defined($self->inconsistent_files->{$key});
   for my $filename (@{$self->inconsistent_files->{$key}})
   {
@@ -173,7 +173,7 @@ sub _compare_file_metadata_with_vrtrack_lane_metadata
   {
     return "inconsistent_library_name_in_tracking";
   }
-  elsif( defined($file_metadata->total_reads ) && !($file_metadata->total_reads > 10000 && $file_metadata->total_reads >= $lane_metadata->{total_reads}*0.9  && $file_metadata->total_reads <= $lane_metadata->{total_reads}*1.1 ) )
+  elsif( defined($file_metadata->total_reads ) && $file_metadata->total_reads > 10000 && !( $file_metadata->total_reads >= $lane_metadata->{total_reads}*0.9  && $file_metadata->total_reads <= $lane_metadata->{total_reads}*1.1 ) )
   {
     return "inconsistent_number_of_reads_in_tracking";
   }
