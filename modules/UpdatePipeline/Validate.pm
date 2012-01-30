@@ -106,22 +106,22 @@ sub _filter_inconsistencies
 {
    my ($self) = @_;
    
-   $self->_filter_by_run_id(6000, "files_missing_from_tracking");
+   $self->_filter_by_run_id(6500, "files_missing_from_tracking");
    
-   $self->_filter_by_run_id(6000, "irods_missing_sample_name");
-   $self->_filter_by_run_id(6000, "irods_missing_study_name");
-   $self->_filter_by_run_id(6000, "irods_missing_library_name");
-   $self->_filter_by_run_id(6000, "irods_missing_total_reads");
+   $self->_filter_by_run_id(6500, "irods_missing_sample_name");
+   $self->_filter_by_run_id(6500, "irods_missing_study_name");
+   $self->_filter_by_run_id(6500, "irods_missing_library_name");
+   $self->_filter_by_run_id(6500, "irods_missing_total_reads");
    
-   $self->_filter_by_run_id(6000, "missing_sample_name_in_tracking");
-   $self->_filter_by_run_id(6000, "missing_study_name_in_tracking");
-   $self->_filter_by_run_id(6000, "missing_library_name_in_tracking");
-   $self->_filter_by_run_id(6000, "missing_total_reads_in_tracking");
+   $self->_filter_by_run_id(6500, "missing_sample_name_in_tracking");
+   $self->_filter_by_run_id(6500, "missing_study_name_in_tracking");
+   $self->_filter_by_run_id(6500, "missing_library_name_in_tracking");
+   $self->_filter_by_run_id(6500, "missing_total_reads_in_tracking");
    
-   $self->_filter_by_run_id(3000, "inconsistent_sample_name_in_tracking");
-   $self->_filter_by_run_id(4000, "inconsistent_study_name_in_tracking");
-   $self->_filter_by_run_id(6000, "inconsistent_library_name_in_tracking");
-   $self->_filter_by_run_id(4000, "inconsistent_number_of_reads_in_tracking");
+   $self->_filter_by_run_id(6500, "inconsistent_sample_name_in_tracking");
+   $self->_filter_by_run_id(6500, "inconsistent_study_name_in_tracking");
+   $self->_filter_by_run_id(6500, "inconsistent_library_name_in_tracking");
+   $self->_filter_by_run_id(6500, "inconsistent_number_of_reads_in_tracking");
 }
 
 sub _filter_by_run_id
