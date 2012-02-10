@@ -7,6 +7,7 @@ Sample.pm   - Link between the input meta data for a sample and the VRTracking t
 use UpdatePipeline::VRTrack::Sample;
 my $sample = UpdatePipeline::VRTrack::Sample->new(
   name         => 'My name',
+  common_name  => 'SomeBacteria',
   _vrtrack     => $vrtrack_dbh,
   _vr_project  => $_vrproject
   );
@@ -18,26 +19,30 @@ my $vr_sample = $sample->vr_sample();
 
 package UpdatePipeline::VRTrack::Sample;
 use VRTrack::Sample;
-use UpdatePipeline::VRTrack::Individual;
 use Moose;
 
 has 'name'        => ( is => 'rw', isa => 'Str', required   => 1 );
 has 'common_name' => ( is => 'rw', isa => 'Str', required   => 1 );
 has '_vrtrack'    => ( is => 'rw',               required   => 1 );
-has '_vrproject'  => ( is => 'rw',               required   => 1 );
+has '_vr_project' => ( is => 'rw',               required   => 1 );
 
 has 'vr_sample'   => ( is => 'rw',               lazy_build => 1 );
 
 sub _build_vr_sample
 {
   my ($self) = @_;
-  my $vsample = VRTrack::Sample->new_by_name_project( $self->_vrtrack, $self->name, $self->_vrproject->id );
+  my $vsample = VRTrack::Sample->new_by_name_project( $self->_vrtrack, $self->name, $self->_vr_project->id );
   unless(defined($vsample))
   {
-    $vsample = $self->_vrproject->add_sample($self->name);
+    $vsample = $self->_vr_project->add_sample($self->name);
   }
   
-  UpdatePipeline::VRTrack::Individual->new(name => $self->name, _vrtrack => $self->_vrtrack, common_name => $self->common_name)->vr_individual;
+  # an individual links a sample to a species
+  my $vr_individual = VRTrack::Individual->new_by_name( $self->_vrtrack, $self->name );
+  if ( not defined $vr_individual ) {
+    $vr_individual = $vsample->add_individual($self->name);
+  }
+  $vr_individual->species($self->common_name);
   
   return $vsample;
 }

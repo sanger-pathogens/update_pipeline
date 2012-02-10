@@ -28,7 +28,7 @@ has '_vrtrack'    => ( is => 'rw',               required   => 1 );
 has '_vr_lane'    => ( is => 'rw',               required   => 1 );
 has 'file_type'   => ( is => 'rw', isa => 'Int', default    => 4 );
 
-has 'vr_file'   => ( is => 'rw',               lazy_build => 1 );
+has 'vr_file'     => ( is => 'rw',               lazy_build => 1 );
 
 sub _build_vr_file
 {
