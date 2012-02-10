@@ -20,8 +20,8 @@ use VRTrack::Project;
 use Moose;
 
 has 'name'       => ( is => 'rw', isa => 'Str', required   => 1 );
-has '_vrtrack'   => ( is => 'rw', required   => 1 );
-has 'vr_project' => ( is => 'rw', lazy_build => 1 );
+has '_vrtrack'   => ( is => 'rw',               required   => 1 );
+has 'vr_project' => ( is => 'rw',               lazy_build => 1 );
 
 sub _build_vr_project
 {
@@ -31,7 +31,7 @@ sub _build_vr_project
   
   unless(defined($vproject))
   {
-    $vproject = $vrtrack->add_project($self->name);
+    $vproject = $self->_vrtrack->add_project($self->name);
   }
   return $vproject;
 }
