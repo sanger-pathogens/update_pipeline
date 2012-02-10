@@ -41,8 +41,13 @@ sub _build_vr_sample
   my $vr_individual = VRTrack::Individual->new_by_name( $self->_vrtrack, $self->name );
   if ( not defined $vr_individual ) {
     $vr_individual = $vsample->add_individual($self->name);
+    $vsample->update;
   }
-  $vr_individual->species($self->common_name);
+  if(not defined $vr_individual->species)
+  {
+    $vr_individual->add_species($self->common_name);
+    $vr_individual->update;
+  }
   
   return $vsample;
 }
