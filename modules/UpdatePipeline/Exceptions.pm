@@ -6,6 +6,7 @@ use Exception::Class (
     UpdatePipeline::Exceptions::CouldntCreateLibrary  => { description => 'Couldnt create a row in VRTrack for library' },
     UpdatePipeline::Exceptions::CouldntCreateSample   => { description => 'Couldnt create a row in VRTrack for sample' },
     UpdatePipeline::Exceptions::CouldntCreateStudy    => { description => 'Couldnt create a row in VRTrack for study' },
+    UpdatePipeline::Exceptions::CouldntCreateLane     => { description => 'Couldnt create a row in VRTrack for lane' },
 );
 
 1;

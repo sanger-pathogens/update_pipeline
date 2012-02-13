@@ -5,14 +5,14 @@ Lane.pm   - Link between the input meta data for a lane and the VRTracking table
 =head1 SYNOPSIS
 
 use UpdatePipeline::VRTrack::Lane;
-my $sample = UpdatePipeline::VRTrack::Lane->new(
+my $lane = UpdatePipeline::VRTrack::Lane->new(
   name         => '1234_5#6',
   total_reads  => 1000,
   _vrtrack     => $vrtrack_dbh,
   _vr_library  => $_vr_library
   );
 
-my $vr_lane = $sample->vr_lane();
+my $vr_lane = $lane->vr_lane();
 
 =cut
 
@@ -26,7 +26,7 @@ has 'total_reads' => ( is => 'rw', isa => 'Int', default    => 0 );
 has '_vrtrack'    => ( is => 'rw',               required   => 1 );
 has '_vr_library' => ( is => 'rw',               required   => 1 );
 
-has 'vr_lane'   => ( is => 'rw',               lazy_build => 1 );
+has 'vr_lane'     => ( is => 'rw',               lazy_build => 1 );
 
 sub _build_vr_lane
 {
@@ -36,6 +36,13 @@ sub _build_vr_lane
   unless(defined($vlane))
   {
     $vlane = $self->_vr_library->add_lane($self->name);
+  }
+  UpdatePipeline::Exceptions::CouldntCreateLane->throw( error => "Couldnt create lane with name ".$self->name."\n" ) if(not defined($vlane));
+  
+  # check to see if the library has been updated
+  if($vlane->library_id != $self->_vr_library->id)
+  {
+    $vlane->library_id($self->_vr_library->id);
   }
   
   $vlane->raw_reads( $self->total_reads );
