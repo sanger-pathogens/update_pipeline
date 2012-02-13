@@ -19,9 +19,9 @@ package UpdatePipeline::VRTrack::Study;
 use VRTrack::Study;
 use Moose;
 
-has 'accession'  => ( is => 'rw', isa => 'Str', required   => 1 );
-has '_vr_project'  => ( is => 'rw',               required   => 1 );
-has 'vr_study'   => ( is => 'rw',               lazy_build => 1 );
+has 'accession'   => ( is => 'rw', isa => 'Str', required   => 1 );
+has '_vr_project' => ( is => 'rw',               required   => 1 );
+has 'vr_study'    => ( is => 'rw',               lazy_build => 1 );
 
 sub _build_vr_study
 {
@@ -31,6 +31,8 @@ sub _build_vr_study
   unless ($vstudy) {
     $vstudy = $self->_vr_project->add_study($self->accession);
   }
+  UpdatePipeline::Exceptions::CouldntCreateStudy->throw( error => "Couldnt create study with name ".$self->name."\n" ) if(not defined($vstudy));
+  
   return $vstudy;
 }
 

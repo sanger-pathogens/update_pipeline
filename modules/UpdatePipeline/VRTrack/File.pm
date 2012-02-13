@@ -19,7 +19,6 @@ my $vr_file = $file->vr_file();
 
 package UpdatePipeline::VRTrack::File;
 use VRTrack::File;
-use UpdatePipeline::VRTrack::Individual;
 use Moose;
 
 has 'name'        => ( is => 'rw', isa => 'Str', required   => 1 );

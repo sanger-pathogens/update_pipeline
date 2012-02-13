@@ -4,7 +4,7 @@ use warnings;
 
 BEGIN { unshift(@INC, './modules') }
 BEGIN {
-    use Test::Most tests => 1;
+    use Test::Most tests => 11;
     use_ok('UpdatePipeline::VRTrack::Study');
     use VRTrack::VRTrack;
     use UpdatePipeline::VRTrack::Project;

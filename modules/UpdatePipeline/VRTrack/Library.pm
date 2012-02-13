@@ -7,6 +7,7 @@ Library.pm   - Link between the input meta data for a library and the VRTracking
 use UpdatePipeline::VRTrack::Library;
 my $library = UpdatePipeline::VRTrack::Library->new(
   name         => 'My name',
+  external_id  => 123,
   _vrtrack     => $vrtrack_dbh,
   _vr_sample  => $_vrsample
   );
@@ -20,12 +21,15 @@ package UpdatePipeline::VRTrack::Library;
 use VRTrack::Library;
 use Moose;
 
-has 'name'                  => ( is => 'rw', isa => 'Str', required   => 1 );
-has 'sequencing_technology' => ( is => 'rw', isa => 'Str', default    => "SLX" );
-has '_vrtrack'              => ( is => 'rw',               required   => 1 );
-has '_vr_sample'            => ( is => 'rw',               required   => 1 );
+has 'name'                  => ( is => 'ro', isa => 'Str', required   => 1 );
+has 'external_id'           => ( is => 'ro', isa => 'Int' );
 
-has 'vr_library'            => ( is => 'rw',               lazy_build => 1 );
+has 'sequencing_technology' => ( is => 'ro', isa => 'Str', default    => "SLX" );
+has 'sequencing_centre'     => ( is => 'ro', isa => 'Str', default    => "SC" );
+has '_vrtrack'              => ( is => 'ro',               required   => 1 );
+has '_vr_sample'            => ( is => 'ro',               required   => 1 );
+
+has 'vr_library'            => ( is => 'ro',               lazy_build => 1 );
 
 sub _build_vr_library
 {
@@ -35,11 +39,23 @@ sub _build_vr_library
   {
     $vlibrary = $self->_vr_sample->add_library($self->name);
   }
+  UpdatePipeline::Exceptions::CouldntCreateLibrary->throw( error => "Couldnt create library with name ".$self->name."\n" ) if(not defined($vlibrary));
   
-  my $seq_tech = $vlibrary->seq_tech($self->sequencing_technology);
-  unless ($seq_tech) {
-        $vlibrary->add_seq_tech($self->sequencing_technology);
+  # check to see if the sample has been updated
+  if($vlibrary->sample_id != $self->_vr_sample->id)
+  {
+    $vlibrary->sample_id($self->_vr_sample->id);
+    $vlibrary->update();
   }
+  
+  if(defined $self->external_id)
+  {
+    $vlibrary->ssid($self->external_id);
+    $vlibrary->update();
+  }
+  
+  unless ($vlibrary->seq_tech($self->sequencing_technology)) { $vlibrary->add_seq_tech($self->sequencing_technology); }
+  unless ($vlibrary->seq_centre($self->sequencing_centre))   { $vlibrary->add_seq_centre($self->sequencing_centre); }
   
   return $vlibrary;
 }

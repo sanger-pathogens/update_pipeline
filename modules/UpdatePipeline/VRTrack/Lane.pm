@@ -19,7 +19,6 @@ my $vr_lane = $sample->vr_lane();
 
 package UpdatePipeline::VRTrack::Lane;
 use VRTrack::Lane;
-use UpdatePipeline::VRTrack::Individual;
 use Moose;
 
 has 'name'        => ( is => 'rw', isa => 'Str', required   => 1 );

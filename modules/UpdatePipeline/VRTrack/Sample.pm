@@ -19,23 +19,31 @@ my $vr_sample = $sample->vr_sample();
 
 package UpdatePipeline::VRTrack::Sample;
 use VRTrack::Sample;
+use UpdatePipeline::Exceptions;
 use Moose;
 
-has 'name'        => ( is => 'rw', isa => 'Str', required   => 1 );
-has 'common_name' => ( is => 'rw', isa => 'Str', required   => 1 );
-has '_vrtrack'    => ( is => 'rw',               required   => 1 );
-has '_vr_project' => ( is => 'rw',               required   => 1 );
+has 'name'        => ( is => 'ro', isa => 'Str', required   => 1 );
+has 'common_name' => ( is => 'ro', isa => 'Str', required   => 1 );
+has '_vrtrack'    => ( is => 'ro',               required   => 1 );
+has '_vr_project' => ( is => 'ro',               required   => 1 );
 
-has 'vr_sample'   => ( is => 'rw',               lazy_build => 1 );
+# external variable
+has 'vr_sample'   => ( is => 'ro',               lazy_build => 1 );
+#internal variable
+has '_vr_species' => ( is => 'ro',               lazy_build => 1 );
 
 sub _build_vr_sample
 {
   my ($self) = @_;
+  # trigger the species to be checked against the common name before building the sample
+  $self->_vr_species();
+  
   my $vsample = VRTrack::Sample->new_by_name_project( $self->_vrtrack, $self->name, $self->_vr_project->id );
   unless(defined($vsample))
   {
     $vsample = $self->_vr_project->add_sample($self->name);
   }
+  UpdatePipeline::Exceptions::CouldntCreateSample->throw( error => "Couldnt create sample with name ".$self->name."\n" ) if(not defined($vsample));
   
   # an individual links a sample to a species
   my $vr_individual = VRTrack::Individual->new_by_name( $self->_vrtrack, $self->name );
@@ -43,13 +51,28 @@ sub _build_vr_sample
     $vr_individual = $vsample->add_individual($self->name);
     $vsample->update;
   }
+  elsif(not defined ($vsample->individual) ||  (defined ($vsample->individual) && $vr_individual->id() != $vsample->individual_id() ))  
+  {
+    $vsample->individual_id($vr_individual->id);
+    $vsample->update;
+  }
+  
+  # if there is no species defined, only attach one thats already defined, dont create one.
   if(not defined $vr_individual->species)
   {
-    $vr_individual->add_species($self->common_name);
+    $vr_individual->species_id($self->_vr_species->id);
     $vr_individual->update;
   }
   
   return $vsample;
+}
+
+# the species exists or throw an error and stop adding the sample
+sub _build__vr_species
+{
+  my ($self) = @_;
+  my $vr_species = VRTrack::Species->new_by_name( $self->_vrtrack, $self->common_name) || UpdatePipeline::Exceptions::UnknownCommonName->throw( error => "Common name ".$self->common_name." doesnt exist in VRTrack for sample ".$self->name."\n" );
+  return $vr_species;
 }
 
 

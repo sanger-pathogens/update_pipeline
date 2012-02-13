@@ -33,6 +33,8 @@ sub _build_vr_project
   {
     $vproject = $self->_vrtrack->add_project($self->name);
   }
+  UpdatePipeline::Exceptions::CouldntCreateProject->throw( error => "Couldnt create project with name ".$self->name."\n" ) if(not defined($vproject));
+  
   return $vproject;
 }
 
