@@ -7,6 +7,8 @@ use Exception::Class (
     UpdatePipeline::Exceptions::CouldntCreateSample   => { description => 'Couldnt create a row in VRTrack for sample' },
     UpdatePipeline::Exceptions::CouldntCreateStudy    => { description => 'Couldnt create a row in VRTrack for study' },
     UpdatePipeline::Exceptions::CouldntCreateLane     => { description => 'Couldnt create a row in VRTrack for lane' },
+    UpdatePipeline::Exceptions::CouldntCreateFile     => { description => 'Couldnt create a row in VRTrack for file' },
+    UpdatePipeline::Exceptions::FileMD5Changed        => { description => 'MD5 of file has changed, need to reimport and reprocess' },
 );
 
 1;

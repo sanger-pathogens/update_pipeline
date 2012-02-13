@@ -40,10 +40,21 @@ sub _build_vr_file
   unless(defined($vfile))
   {
     $vfile = $self->_vr_lane->add_file($self->name);
-    $vfile->md5($self->md5);
-    $vfile->type($self->file_type);
-    $vfile->update;
   }
+  UpdatePipeline::Exceptions::CouldntCreateFile->throw( error => "Couldnt create file with name ".$self->name."\n" ) if(not defined($vfile));
+  
+  if(defined($vfile->md5) && $vfile->md5 ne "")
+  {
+    UpdatePipeline::Exceptions::FileMD5Changed->throw( error => "File ".$self->name." MD5 changed from ".$vfile->md5." to ".$self->md5." so need to reimport\n" ) if($self->md5 ne $vfile->md5);
+  }
+  else
+  {
+     $vfile->md5($self->md5);
+  }
+  
+  $vfile->type($self->file_type);
+  $vfile->update;
+  
   return $vfile;
 }
 
