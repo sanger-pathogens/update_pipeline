@@ -27,7 +27,7 @@ has 'common_name' => ( is => 'ro', isa => 'Str', required   => 1 );
 has '_vrtrack'    => ( is => 'ro',               required   => 1 );
 has '_vr_project' => ( is => 'ro',               required   => 1 );
 
-has 'accession'   => ( is => 'ro', isa => 'Str' );
+has 'accession'   => ( is => 'ro', isa => 'Maybe[Str]' );
 
 # external variable
 has 'vr_sample'   => ( is => 'ro',               lazy_build => 1 );
