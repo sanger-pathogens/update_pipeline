@@ -5,7 +5,7 @@ use Data::Dumper;
 
 BEGIN { unshift(@INC, './modules') }
 BEGIN {
-    use Test::Most tests => 27;
+    use Test::Most tests => 29;
     use_ok('UpdatePipeline::UpdateLaneMetaData');
     use VRTrack::VRTrack;
     use UpdatePipeline::VRTrack::Project;
@@ -218,6 +218,24 @@ ok my $file_missing_sample_name = UpdatePipeline::FileMetaData->new(
 ), 'file meta data missing sample name';
 
 throws_ok {UpdatePipeline::UpdateLaneMetaData->new(lane_meta_data => $lane_metadata, file_meta_data => $file_missing_sample_name )->update_required } qr/Missing/, 'missing sample name';
+
+
+# missing  sample common name
+ok my $file_missing_sample_common_name = UpdatePipeline::FileMetaData->new(
+  study_name              => 'My project',
+  file_md5                => 'abc1231343432432432',
+  file_name               => 'myfile.bam',
+  file_name_without_extension  => 'myfile',
+  library_name            => 'My library name',
+  library_ssid            => 123,
+  total_reads             => 1000,
+  sample_accession_number => "ABC123",
+  study_accession_number  => "EFG456",
+  sample_name             => 'My name',
+), 'file meta data missing sample name';
+
+throws_ok {UpdatePipeline::UpdateLaneMetaData->new(lane_meta_data => $lane_metadata, file_meta_data => $file_missing_sample_common_name )->update_required } qr/Missing/, 'missing sample common name';
+
 
 
 # lane has been previously imported so ignore file md5 etc...

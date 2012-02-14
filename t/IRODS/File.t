@@ -29,6 +29,7 @@ my %expected_output = (
   file_name_without_extension => '2442_6#123',
   is_paired_read => 1,
   manual_qc => 'passed',
+  sample_common_name => 'Shigella flexneri',
 );
 is_deeply $file->file_attributes(), \%expected_output, "parsed valid irods file";
 
@@ -61,6 +62,7 @@ ok  $file = IRODS::File->new( file_location => "/seq/2442/2442_6_nonhuman#123.ba
   file_name_without_extension => '2442_6#123',
   is_paired_read => 1,
   manual_qc => 'passed',
+  sample_common_name => 'Shigella flexneri',
 );
 is_deeply $file->file_attributes(), \%expected_output, "parsed valid irods file with non human";
 
