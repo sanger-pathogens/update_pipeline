@@ -29,6 +29,13 @@ sub update_required
 sub _differences_between_file_and_lane_meta_data
 {
   my ($self) = @_;
+  
+  my @minimum_required_fields = ("sample_name", "study_name","library_name", "sample_common_name");
+  for my $required_field (@minimum_required_fields)
+  {
+     UpdatePipeline::Exceptions::EssentialFileMetaDataMissing->throw( error => "Missing $required_field for ".$self->file_meta_data->file_name."\n") if(not defined($self->file_meta_data->$required_field));
+  }
+
 
   my @required_keys = ("sample_name", "study_name","library_name", "total_reads","sample_accession_number","study_accession_number", "sample_common_name");
   for my $required_key (@required_keys)

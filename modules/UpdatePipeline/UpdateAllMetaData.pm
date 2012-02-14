@@ -13,6 +13,13 @@ use Moose;
 use UpdatePipeline::IRODS;
 use UpdatePipeline::VRTrack::LaneMetaData;
 use UpdatePipeline::UpdateLaneMetaData;
+use UpdatePipeline::VRTrack::Project;
+use UpdatePipeline::VRTrack::Sample;
+use UpdatePipeline::VRTrack::Library;
+use UpdatePipeline::VRTrack::Lane;
+use UpdatePipeline::VRTrack::File;
+use UpdatePipeline::VRTrack::Study;
+
 use Data::Dumper;
 extends 'UpdatePipeline::CommonMetaDataManipulation';
 
@@ -26,18 +33,16 @@ sub update
   for my $file_metadata (@{$self->_files_metadata})
   {
     eval {
-    if(UpdatePipeline::UpdateLaneMetaData->new(
-        lane_meta_data => $self->_lanes_metadata->{$file_metadata->file_name_without_extension},
-        file_meta_data => $file_metadata)->update_required
-      )
-    {
-        $self->_update_lane($file_metadata);
-    }
-  };
+      if(UpdatePipeline::UpdateLaneMetaData->new(
+          lane_meta_data => $self->_lanes_metadata->{$file_metadata->file_name_without_extension},
+          file_meta_data => $file_metadata)->update_required
+        )
+      {
+          $self->_update_lane($file_metadata);
+      }
+    };
     if ($@){
-      print $@;
-      print Dumper $file_metadata;
-      print Dumper $self->_lanes_metadata->{$file_metadata->file_name_without_extension};
+      print $@;      
     }
   }
 }
@@ -65,8 +70,6 @@ sub _update_lane
   };
   if ($@){
     print $@;
-    print Dumper $file_metadata;
-    print Dumper $self->_lanes_metadata->{$file_metadata->file_name_without_extension};
   }
 }
 

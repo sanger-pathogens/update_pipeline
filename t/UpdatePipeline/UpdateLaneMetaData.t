@@ -5,7 +5,7 @@ use Data::Dumper;
 
 BEGIN { unshift(@INC, './modules') }
 BEGIN {
-    use Test::Most tests => 25;
+    use Test::Most tests => 27;
     use_ok('UpdatePipeline::UpdateLaneMetaData');
     use VRTrack::VRTrack;
     use UpdatePipeline::VRTrack::Project;
@@ -201,6 +201,23 @@ ok my $file_metadata_paired_changed = UpdatePipeline::FileMetaData->new(
   lane_is_paired_read     => 0
 ), 'file meta data with changed paired flag';
 is 1, UpdatePipeline::UpdateLaneMetaData->new(lane_meta_data => $lane_metadata, file_meta_data => $file_metadata_paired_changed )->update_required(), 'paired flag changed';
+
+
+# missing essential data
+ok my $file_missing_sample_name = UpdatePipeline::FileMetaData->new(
+  study_name              => 'My project',
+  file_md5                => 'abc1231343432432432',
+  file_name               => 'myfile.bam',
+  file_name_without_extension  => 'myfile',
+  library_name            => 'My library name',
+  library_ssid            => 123,
+  total_reads             => 1000,
+  sample_accession_number => "ABC123",
+  study_accession_number  => "EFG456",
+  sample_common_name      => "SomeBacteria",
+), 'file meta data missing sample name';
+
+throws_ok {UpdatePipeline::UpdateLaneMetaData->new(lane_meta_data => $lane_metadata, file_meta_data => $file_missing_sample_name )->update_required } qr/Missing/, 'missing sample name';
 
 
 # lane has been previously imported so ignore file md5 etc...
