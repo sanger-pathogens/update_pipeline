@@ -21,23 +21,25 @@ use Data::Dumper;
 use UpdatePipeline::UpdateAllMetaData;
 use UpdatePipeline::Studies;
 
-my ( $studyfile, $help, $database );
+my ( $studyfile, $help, $number_of_files_to_return, $database );
 
 GetOptions(
-    'p|studies=s'  => \$studyfile,
-    'd|database=s' => \$database,
-    'h|help'       => \$help,
+    's|studies=s'              => \$studyfile,
+    'd|database=s'             => \$database,
+    'f|max_files_to_return=s'  => \$number_of_files_to_return,
+    'h|help'                   => \$help,
 );
 
 my $db = $database ;
 
 ( $studyfile &&  $db && !$help ) or die <<USAGE;
-    Usage: $0   
-                --studies   <study name or file of SequenceScape study names>
-                [--database <vrtrack database name>]
-                --help      <this message>
+Usage: $0   
+  -s|--studies   <study name or file of SequenceScape study names>
+  -d|--database <vrtrack database name>
+  -f|--max_files_to_return <optional limit on the number of files to check, sorted in desc order by filename>
+  -h|--help      <this message>
 
-Check to see if the pipeline is valid compared to the data stored in IRODS
+Update the tracking database from IRODs and the warehouse
 
 USAGE
 
@@ -51,6 +53,6 @@ unless ($vrtrack) {
 }
 
 my @study_names = UpdatePipeline::Studies->new(filename => $studyfile)->study_names;
-my $update_pipeline = UpdatePipeline::UpdateAllMetaData->new(study_names => @study_names, _vrtrack => $vrtrack);
+my $update_pipeline = UpdatePipeline::UpdateAllMetaData->new(study_names => @study_names, _vrtrack => $vrtrack, number_of_files_to_return =>$number_of_files_to_return );
 $update_pipeline->update();
 

@@ -23,11 +23,12 @@ use Warehouse::Database;
 use UpdatePipeline::FileMetaData;
 extends 'UpdatePipeline::CommonSettings';
 
-has 'study_names'      => ( is => 'rw', isa => 'ArrayRef[Str]', required   => 1 );
-has 'files_metadata'   => ( is => 'rw', isa => 'ArrayRef', lazy_build => 1 );
+has 'study_names'               => ( is => 'rw', isa => 'ArrayRef[Str]', required   => 1 );
+has 'files_metadata'            => ( is => 'rw', isa => 'ArrayRef',      lazy_build => 1 );
+has 'number_of_files_to_return' => ( is => 'rw', isa => 'Int');
 
-has '_irods_studies'   => ( is => 'rw', isa => 'ArrayRef', lazy_build => 1 );
-has '_warehouse_dbh'   => ( is => 'rw', lazy_build => 1 );
+has '_irods_studies'            => ( is => 'rw', isa => 'ArrayRef',      lazy_build => 1 );
+has '_warehouse_dbh'            => ( is => 'rw',                         lazy_build => 1 );
 
 sub _build__warehouse_dbh
 {
@@ -82,7 +83,10 @@ sub _build_files_metadata
     push(@files_metadata, $file_metadata);
   }
   
-  return \@files_metadata;
+  my @sorted_files_metadata = (sort (sort_by_file_name @files_metadata));
+  $self->_limit_returned_results(\@sorted_files_metadata);
+  
+  return \@sorted_files_metadata;
 }
 
 sub _get_irods_file_metadata_for_studies
@@ -118,6 +122,25 @@ sub print_file_metadata
     print( ($file_metadata->sample_name             ? $file_metadata->sample_name             : '')  .', ');
     print( ($file_metadata->sample_accession_number ? $file_metadata->sample_accession_number : '')  ."\n");
   }
+}
+
+sub _limit_returned_results
+{
+   my ($self,$files_metadata) = @_;
+   if(defined($self->number_of_files_to_return) && $self->number_of_files_to_return > 0)
+   {
+     splice @{$files_metadata}, $self->number_of_files_to_return;
+   }
+   1;  
+}
+
+
+sub sort_by_file_name
+{
+    my @a = split(/\_|\#/,$a->file_name_without_extension());
+    my @b = split(/\_|\#/,$b->file_name_without_extension());
+
+    $a[0]<=>$b[0] || $a[1]<=>$b[1] || $a[2]<=>$b[2];
 }
 
 

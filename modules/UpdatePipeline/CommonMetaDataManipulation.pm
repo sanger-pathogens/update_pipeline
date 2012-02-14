@@ -8,15 +8,17 @@ package UpdatePipeline::CommonMetaDataManipulation;
 use Moose;
 
 
-has '_files_metadata'  => ( is => 'rw', isa => 'ArrayRef', lazy_build => 1 );
-has '_lanes_metadata'  => ( is => 'rw', isa => 'HashRef',  lazy_build => 1 );
+has '_files_metadata'           => ( is => 'rw', isa => 'ArrayRef', lazy_build => 1 );
+has '_lanes_metadata'           => ( is => 'rw', isa => 'HashRef',  lazy_build => 1 );
+has 'number_of_files_to_return' => ( is => 'rw', isa => 'Int');
 
 
 sub _build__files_metadata
 {
   my ($self) = @_;
   my $irods_files_metadata = UpdatePipeline::IRODS->new(
-    study_names => $self->study_names
+    study_names               => $self->study_names,
+    number_of_files_to_return => $self->number_of_files_to_return
     )->files_metadata();
   return $irods_files_metadata;
 }
