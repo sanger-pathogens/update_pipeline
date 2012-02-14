@@ -29,7 +29,7 @@ my $vr_library = UpdatePipeline::VRTrack::Library->new(name => 'My library name'
 my $vr_lane = UpdatePipeline::VRTrack::Lane->new(name  => '1234_5#6', total_reads => 1000 ,_vrtrack => $vrtrack,_vr_library => $vr_library)->vr_lane();
 my $vr_file = UpdatePipeline::VRTrack::File->new(name => 'myfile.bam',md5 => 'abc1231343432432432',_vrtrack => $vrtrack,_vr_lane => $vr_lane)->vr_file();
 
-ok my $lane_metadata = UpdatePipeline::VRTrack::LaneMetaData->new(name => '1234_5#6',_vrtrack => $vrtrack), 'create lane metadata object';
+ok my $lane_metadata = UpdatePipeline::VRTrack::LaneMetaData->new(name => '1234_5#6',_vrtrack => $vrtrack)->lane_attributes, 'create lane metadata object';
 
 ok my $file_meta_data_which_doesnt_need_changing = UpdatePipeline::FileMetaData->new(
   study_name              => 'My project',

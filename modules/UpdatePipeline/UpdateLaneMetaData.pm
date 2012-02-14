@@ -16,7 +16,7 @@ use Moose;
 use UpdatePipeline::VRTrack::LaneMetaData;
 use UpdatePipeline::FileMetaData;
 
-has 'lane_meta_data'  => ( is => 'ro', isa => 'Maybe[UpdatePipeline::VRTrack::LaneMetaData]' );
+has 'lane_meta_data'  => ( is => 'ro', isa => "Maybe[HashRef]");
 has 'file_meta_data'  => ( is => 'ro', isa => 'UpdatePipeline::FileMetaData',                required => 1 );
 
 sub update_required
@@ -36,61 +36,60 @@ sub _differences_between_file_and_lane_meta_data
      UpdatePipeline::Exceptions::EssentialFileMetaDataMissing->throw( error => "Missing $required_field for ".$self->file_meta_data->file_name."\n") if(not defined($self->file_meta_data->$required_field));
   }
 
-
   my @required_keys = ("sample_name", "study_name","library_name", "total_reads","sample_accession_number","study_accession_number", "sample_common_name");
   for my $required_key (@required_keys)
   {
-    return 1 unless defined($self->lane_meta_data->lane_attributes->{$required_key});
+    return 1 unless defined($self->lane_meta_data->{$required_key});
   }
 
   my $f_sample_name = $self->_normalise_sample_name($self->file_meta_data->sample_name);
-  my $l_sample_name = $self->_normalise_sample_name($self->lane_meta_data->lane_attributes->{sample_name});
+  my $l_sample_name = $self->_normalise_sample_name($self->lane_meta_data->{sample_name});
 
   if( $self->_file_defined_and_not_equal($f_sample_name, $l_sample_name))
   {
     return 1;
   }
-  elsif( $self->_file_defined_and_not_equal($self->file_meta_data->study_name, $self->lane_meta_data->lane_attributes->{study_name}) )
+  elsif( $self->_file_defined_and_not_equal($self->file_meta_data->study_name, $self->lane_meta_data->{study_name}) )
   {
     return 1;
   } 
-  elsif($self->_file_defined_and_not_equal($self->file_meta_data->library_name, $self->lane_meta_data->lane_attributes->{library_name}) )
+  elsif($self->_file_defined_and_not_equal($self->file_meta_data->library_name, $self->lane_meta_data->{library_name}) )
   {
     return 1;
   }
-  elsif($self->_file_defined_and_not_equal($self->file_meta_data->sample_common_name, $self->lane_meta_data->lane_attributes->{sample_common_name}) )
+  elsif($self->_file_defined_and_not_equal($self->file_meta_data->sample_common_name, $self->lane_meta_data->{sample_common_name}) )
   {
     return 1;
   }
-  elsif($self->_file_defined_and_not_equal($self->file_meta_data->study_accession_number, $self->lane_meta_data->lane_attributes->{study_accession_number}) )
+  elsif($self->_file_defined_and_not_equal($self->file_meta_data->study_accession_number, $self->lane_meta_data->{study_accession_number}) )
   {
     return 1;
   }
-  elsif($self->_file_defined_and_not_equal($self->file_meta_data->sample_accession_number, $self->lane_meta_data->lane_attributes->{sample_accession_number}) )
+  elsif($self->_file_defined_and_not_equal($self->file_meta_data->sample_accession_number, $self->lane_meta_data->{sample_accession_number}) )
   {
     return 1;
   }
-  elsif( defined($self->file_meta_data->total_reads ) && $self->file_meta_data->total_reads > 10000 && !( $self->file_meta_data->total_reads >= $self->lane_meta_data->lane_attributes->{total_reads}*0.9  && $self->file_meta_data->total_reads <= $self->lane_meta_data->lane_attributes->{total_reads}*1.1 ) )
+  elsif( defined($self->file_meta_data->total_reads ) && $self->file_meta_data->total_reads > 10000 && !( $self->file_meta_data->total_reads >= $self->lane_meta_data->{total_reads}*0.9  && $self->file_meta_data->total_reads <= $self->lane_meta_data->{total_reads}*1.1 ) )
   {
     return 1;
   }
-  elsif($self->_file_and_lane_defined_and_not_equal($self->file_meta_data->study_accession_number,$self->lane_meta_data->lane_attributes->{study_accession_number} ))
+  elsif($self->_file_and_lane_defined_and_not_equal($self->file_meta_data->study_accession_number,$self->lane_meta_data->{study_accession_number} ))
   {
     return 1;
   }
-  elsif($self->_file_and_lane_defined_and_not_equal($self->file_meta_data->library_ssid,$self->lane_meta_data->lane_attributes->{library_ssid} ))
+  elsif($self->_file_and_lane_defined_and_not_equal($self->file_meta_data->library_ssid,$self->lane_meta_data->{library_ssid} ))
   {
     return 1;
   }
-  elsif($self->_file_and_lane_defined_and_not_equal($self->file_meta_data->sample_accession_number,$self->lane_meta_data->lane_attributes->{sample_accession_number} ))
+  elsif($self->_file_and_lane_defined_and_not_equal($self->file_meta_data->sample_accession_number,$self->lane_meta_data->{sample_accession_number} ))
   {
     return 1;
   }
-  elsif($self->_file_and_lane_defined_and_not_equal($self->file_meta_data->lane_is_paired_read,$self->lane_meta_data->lane_attributes->{lane_is_paired_read} ))
+  elsif($self->_file_and_lane_defined_and_not_equal($self->file_meta_data->lane_is_paired_read,$self->lane_meta_data->{lane_is_paired_read} ))
   {
     return 1;
   }
-  elsif($self->_file_and_lane_defined_and_not_equal($self->file_meta_data->lane_manual_qc,$self->lane_meta_data->lane_attributes->{lane_manual_qc} ))
+  elsif($self->_file_and_lane_defined_and_not_equal($self->file_meta_data->lane_manual_qc,$self->lane_meta_data->{lane_manual_qc} ))
   {
     return 1;
   }
