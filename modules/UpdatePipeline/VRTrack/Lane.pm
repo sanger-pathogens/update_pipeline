@@ -8,7 +8,7 @@ use UpdatePipeline::VRTrack::Lane;
 my $lane = UpdatePipeline::VRTrack::Lane->new(
   name         => '1234_5#6',
   total_reads  => 1000,
-  npg_qc_status => 'passed',
+  npg_qc_status => 'pass',
   _vrtrack     => $vrtrack_dbh,
   _vr_library  => $_vr_library
   );

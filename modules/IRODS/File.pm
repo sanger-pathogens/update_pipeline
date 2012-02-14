@@ -74,11 +74,11 @@ sub _convert_manual_qc_values
   }
   elsif($file_attributes->{manual_qc} == 0)
   {
-     $file_attributes->{manual_qc} = 'failed';
+     $file_attributes->{manual_qc} = 'fail';
   }
   elsif($file_attributes->{manual_qc} == 1)
   {
-     $file_attributes->{manual_qc} = 'passed';
+     $file_attributes->{manual_qc} = 'pass';
   }
   else
   {
