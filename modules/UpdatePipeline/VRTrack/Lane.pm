@@ -28,7 +28,7 @@ has 'npg_qc_status' => ( is => 'rw', isa => 'Str',  default    => '-' );
 has 'paired'        => ( is => 'rw', isa => 'Bool', default    => 1 );
 has '_vrtrack'      => ( is => 'rw',                required   => 1 );
 has '_vr_library'   => ( is => 'rw',                required   => 1 );
-                                                   
+
 has 'vr_lane'       => ( is => 'rw',                lazy_build => 1 );
 
 sub _build_vr_lane
