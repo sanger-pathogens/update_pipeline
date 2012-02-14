@@ -127,7 +127,7 @@ sub print_file_metadata
 sub _limit_returned_results
 {
    my ($self,$files_metadata) = @_;
-   if(defined($self->number_of_files_to_return) && $self->number_of_files_to_return > 0)
+   if(defined($self->number_of_files_to_return) && $self->number_of_files_to_return > 0 && $self->number_of_files_to_return +1 < @{$files_metadata})
    {
      splice @{$files_metadata}, $self->number_of_files_to_return;
    }
