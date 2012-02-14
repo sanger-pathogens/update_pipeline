@@ -32,12 +32,18 @@ sub _build_lane_attributes
   project.name as study_name,
   library.name as library_name,
   library.ssid as library_ssid,
-  lane.raw_reads as total_reads
+  lane.raw_reads as total_reads,
+  individual.acc as sample_accession_number,
+  species.name as sample_common_name,
+  lane.npg_qc_status as lane_manual_qc,
+  lane.paired as lane_is_paired_read
   from latest_lane as lane
   left join latest_library as library on library.library_id = lane.library_id 
   left join latest_sample as sample on sample.sample_id = library.sample_id
   left join latest_project as project on project.project_id = sample.project_id
   left join study as study on project.study_id = study.study_id
+  left join individual as individual on individual.individual_id = sample.individual_id
+  left join species as species on species.species_id = individual.species_id
   where lane.name = "$search_query" limit 1;];
 
   my $sth = $self->_vrtrack->{_dbh}->prepare($sql);

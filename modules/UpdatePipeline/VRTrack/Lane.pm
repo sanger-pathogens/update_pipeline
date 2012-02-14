@@ -8,6 +8,7 @@ use UpdatePipeline::VRTrack::Lane;
 my $lane = UpdatePipeline::VRTrack::Lane->new(
   name         => '1234_5#6',
   total_reads  => 1000,
+  npg_qc_status => 'passed',
   _vrtrack     => $vrtrack_dbh,
   _vr_library  => $_vr_library
   );
@@ -21,12 +22,14 @@ package UpdatePipeline::VRTrack::Lane;
 use VRTrack::Lane;
 use Moose;
 
-has 'name'        => ( is => 'rw', isa => 'Str', required   => 1 );
-has 'total_reads' => ( is => 'rw', isa => 'Int', default    => 0 );
-has '_vrtrack'    => ( is => 'rw',               required   => 1 );
-has '_vr_library' => ( is => 'rw',               required   => 1 );
-
-has 'vr_lane'     => ( is => 'rw',               lazy_build => 1 );
+has 'name'          => ( is => 'rw', isa => 'Str',  required   => 1 );
+has 'total_reads'   => ( is => 'rw', isa => 'Int',  default    => 0 );
+has 'npg_qc_status' => ( is => 'rw', isa => 'Str',  default    => '-' );
+has 'paired'        => ( is => 'rw', isa => 'Bool', default    => 1 );
+has '_vrtrack'      => ( is => 'rw',                required   => 1 );
+has '_vr_library'   => ( is => 'rw',                required   => 1 );
+                                                   
+has 'vr_lane'       => ( is => 'rw',                lazy_build => 1 );
 
 sub _build_vr_lane
 {
@@ -46,6 +49,8 @@ sub _build_vr_lane
   }
   
   $vlane->raw_reads( $self->total_reads );
+  $vlane->npg_qc_status( $self->npg_qc_status );
+  $vlane->is_paired( $self->paired );
   $vlane->hierarchy_name( $self->name );
   $vlane->update;
   

@@ -74,6 +74,8 @@ sub _build_files_metadata
       total_reads             => $irods_file_metadata->{total_reads},
       sample_name             => $irods_file_metadata->{sample},
       sample_accession_number => $irods_file_metadata->{sample_accession_number},
+      lane_is_paired_read     => $irods_file_metadata->{is_paired_read},
+      lane_manual_qc          => $irods_file_metadata->{manual_qc},
     );
     # get data from warehouse
     push(@files_metadata, $file_metadata);

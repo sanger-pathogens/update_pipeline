@@ -6,7 +6,7 @@ Study.pm   - Link between the input meta data for a study and the VRTracking tab
 
 use UpdatePipeline::VRTrack::Study;
 my $study = UpdatePipeline::VRTrack::Study->new(
-  name => 'My name',
+  accession => 'My accession',
   _vr_project => $_vr_project
   );
 

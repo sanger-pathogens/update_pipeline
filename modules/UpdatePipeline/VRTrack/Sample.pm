@@ -27,6 +27,8 @@ has 'common_name' => ( is => 'ro', isa => 'Str', required   => 1 );
 has '_vrtrack'    => ( is => 'ro',               required   => 1 );
 has '_vr_project' => ( is => 'ro',               required   => 1 );
 
+has 'accession'   => ( is => 'ro', isa => 'Str' );
+
 # external variable
 has 'vr_sample'   => ( is => 'ro',               lazy_build => 1 );
 #internal variable
@@ -62,6 +64,12 @@ sub _build_vr_sample
   {
     $vr_individual->species_id($self->_vr_species->id);
     $vr_individual->update;
+  }
+  
+  if ( defined($vr_individual) && defined($self->accession)) 
+  {
+    $vr_individual->acc($self->accession);
+    $vr_individual->update();
   }
   
   return $vsample;

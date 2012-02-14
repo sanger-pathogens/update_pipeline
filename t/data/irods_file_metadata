@@ -54,3 +54,11 @@ units:
 attribute: study_accession_number
 value: ABC123
 units:
+----
+attribute: is_paired_read
+value: 1
+units:
+----
+attribute: manual_qc
+value: 1
+units:
