@@ -83,7 +83,7 @@ sub _build_files_metadata
     push(@files_metadata, $file_metadata);
   }
   
-  my @sorted_files_metadata = (sort (sort_by_file_name @files_metadata));
+  my @sorted_files_metadata = reverse((sort (sort_by_file_name @files_metadata)));
   $self->_limit_returned_results(\@sorted_files_metadata);
   
   return \@sorted_files_metadata;
