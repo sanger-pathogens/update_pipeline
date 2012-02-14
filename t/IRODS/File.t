@@ -34,7 +34,6 @@ my %expected_output = (
 is_deeply $file->file_attributes(), \%expected_output, "parsed valid irods file";
 
 
-
 # Invalid stream
 ok my $invalid_file = IRODS::File->new( file_location => "/seq/2442/2442_6.bam", file_containing_irods_output => 't/data/file_that_doesnt_exist'), 'Initialise invalid stream';
 my %expected_invalid_output = ( file_name => '2442_6.bam', file_name_without_extension => '2442_6');

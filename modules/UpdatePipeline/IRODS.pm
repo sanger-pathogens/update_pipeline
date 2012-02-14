@@ -25,7 +25,7 @@ extends 'UpdatePipeline::CommonSettings';
 
 has 'study_names'               => ( is => 'rw', isa => 'ArrayRef[Str]', required   => 1 );
 has 'files_metadata'            => ( is => 'rw', isa => 'ArrayRef',      lazy_build => 1 );
-has 'number_of_files_to_return' => ( is => 'rw', isa => 'Int');
+has 'number_of_files_to_return' => ( is => 'rw', isa => 'Maybe[Int]');
 
 has '_irods_studies'            => ( is => 'rw', isa => 'ArrayRef',      lazy_build => 1 );
 has '_warehouse_dbh'            => ( is => 'rw',                         lazy_build => 1 );
