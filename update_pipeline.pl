@@ -38,7 +38,7 @@ my $db = $database ;
 Usage: $0   
   -s|--studies             <file of study names>
   -d|--database            <vrtrack database name>
-  -f|--max_files_to_return <optional limit on the number of files to check, sorted in desc order by filename>
+  -f|--max_files_to_return <optional limit on num of file to check per process>
   -p|--parallel_processes  <optional number of processes to run in parallel, defaults to 1>
   -h|--help                <this message>
 
@@ -47,27 +47,31 @@ Update the tracking database from IRODs and the warehouse
 USAGE
 
 $parallel_processes ||= 1;
+my $study_names = UpdatePipeline::Studies->new(filename => $studyfile)->study_names;
 
-my $vrtrack = VertRes::Utils::VRTrackFactory->instantiate(
-    database => $db,
-    mode     => 'rw'
-);
-
-unless ($vrtrack) {
-    die "Can't connect to tracking database: $db \n";
-}
-
-my @study_names = UpdatePipeline::Studies->new(filename => $studyfile)->study_names;
-
-my $pm = new Parallel::ForkManager($parallel_processes); 
-foreach my $study_name (@study_names) {
-  $pm->start and next; # do the fork
-  my @split_study_names;
-  push(@split_study_names, $study_name);
-  
-  my $update_pipeline = UpdatePipeline::UpdateAllMetaData->new(study_names => @split_study_names, _vrtrack => $vrtrack, number_of_files_to_return =>$number_of_files_to_return );
+if($parallel_processes == 1)
+{
+  my $vrtrack = VertRes::Utils::VRTrackFactory->instantiate(database => $db,mode     => 'rw');
+  unless ($vrtrack) { die "Can't connect to tracking database: $db \n";}
+  my $update_pipeline = UpdatePipeline::UpdateAllMetaData->new(study_names => $study_names, _vrtrack => $vrtrack, number_of_files_to_return =>$number_of_files_to_return );
   $update_pipeline->update();
-  $pm->finish; # do the exit in the child process
 }
-$pm->wait_all_children;
+else
+{
+  my $pm = new Parallel::ForkManager($parallel_processes); 
+  foreach my $study_name (@{$study_names}) {
+    $pm->start and next; # do the fork
+    my @split_study_names;
+    push(@split_study_names, $study_name);
+    
+    my $vrtrack = VertRes::Utils::VRTrackFactory->instantiate(database => $db,mode     => 'rw');
+    unless ($vrtrack) { die "Can't connect to tracking database: $db \n";}
+    my $update_pipeline = UpdatePipeline::UpdateAllMetaData->new(study_names => \@split_study_names, _vrtrack => $vrtrack, number_of_files_to_return =>$number_of_files_to_return );
+    $update_pipeline->update();
+    $pm->finish; # do the exit in the child process
+  }
+  $pm->wait_all_children;
+}
+
+
 

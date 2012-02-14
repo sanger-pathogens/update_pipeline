@@ -58,10 +58,10 @@ sub _build_files_metadata
 
   for my $irods_file_metadata (@irods_files_metadata)
   {
-    my $warehouse_file = Warehouse::File->new(
-      input_metadata => $irods_file_metadata,
-      _dbh => $self->_warehouse_dbh
-          )->file_attributes;
+    #my $warehouse_file = Warehouse::File->new(
+    #  input_metadata => $irods_file_metadata,
+    #  _dbh => $self->_warehouse_dbh
+    #      )->file_attributes;
     
     my $file_metadata = UpdatePipeline::FileMetaData->new(
       study_name              => $irods_file_metadata->{study},
