@@ -93,13 +93,23 @@ sub _get_irods_file_metadata_for_studies
 {
   my ($self) = @_;
   my @files_metadata;
+  my @unsorted_file_locations;
+  my @sorted_file_locations;
   
   for my $irods_study (@{$self->_irods_studies})
   {
     for my $file_metadata (@{$irods_study->file_locations()})
     {
-      push(@files_metadata, IRODS::File->new(file_location => $file_metadata)->file_attributes );
+      push(@unsorted_file_locations, $file_metadata);
     }
+  }
+  
+  # Allows you to only check the latest X runs.
+  @sorted_file_locations = (sort (sort_by_id_run @unsorted_file_locations));
+  $self->_limit_returned_results(\@sorted_file_locations);
+  for my $file_location (@sorted_file_locations)
+  {
+    push(@files_metadata, IRODS::File->new(file_location => $file_location)->file_attributes );
   }
   
   return \@files_metadata;
@@ -133,6 +143,16 @@ sub _limit_returned_results
    }
    1;  
 }
+
+# Input /seq/2657/2657_1.bam
+sub sort_by_id_run
+{
+  my @a = split(/\//,$a);
+  my @b = split(/\//,$b);
+
+  $b[2]<=>$a[2] || $b[3] cmp $a[3];
+}
+
 
 
 sub sort_by_file_name

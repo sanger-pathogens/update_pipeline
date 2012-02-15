@@ -9,6 +9,7 @@ use Exception::Class (
     UpdatePipeline::Exceptions::CouldntCreateLane     => { description => 'Couldnt create a row in VRTrack for lane' },
     UpdatePipeline::Exceptions::CouldntCreateFile     => { description => 'Couldnt create a row in VRTrack for file' },
     UpdatePipeline::Exceptions::FileMD5Changed        => { description => 'MD5 of file has changed, need to reimport and reprocess' },
+    UpdatePipeline::Exceptions::TotalReadsMismatch    => { description => 'Total reads differs, usually an error in the import' },
 );
 
 1;

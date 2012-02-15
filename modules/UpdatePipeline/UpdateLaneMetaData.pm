@@ -42,71 +42,26 @@ sub _differences_between_file_and_lane_meta_data
     return 1 unless defined($self->lane_meta_data->{$required_key});
   }
 
-  my $f_sample_name = $self->_normalise_sample_name($self->file_meta_data->sample_name);
-  my $l_sample_name = $self->_normalise_sample_name($self->lane_meta_data->{sample_name});
 
-  if( $self->_file_defined_and_not_equal($f_sample_name, $l_sample_name))
+  my @fields_to_check_file_defined_and_not_equal = ("study_name", "library_name","sample_common_name", "study_accession_number","sample_accession_number","library_ssid", "lane_is_paired_read","lane_manual_qc");
+  for my $field_name (@fields_to_check_file_defined_and_not_equal)
   {
-    return 1;
-  }
-  elsif( $self->_file_defined_and_not_equal($self->file_meta_data->study_name, $self->lane_meta_data->{study_name}) )
-  {
-    return 1;
-  } 
-  elsif($self->_file_defined_and_not_equal($self->file_meta_data->library_name, $self->lane_meta_data->{library_name}) )
-  {
-    return 1;
-  }
-  elsif($self->_file_defined_and_not_equal($self->file_meta_data->sample_common_name, $self->lane_meta_data->{sample_common_name}) )
-  {
-    return 1;
-  }
-  elsif($self->_file_defined_and_not_equal($self->file_meta_data->study_accession_number, $self->lane_meta_data->{study_accession_number}) )
-  {
-    return 1;
-  }
-  elsif($self->_file_defined_and_not_equal($self->file_meta_data->sample_accession_number, $self->lane_meta_data->{sample_accession_number}) )
-  {
-    return 1;
-  }
-  elsif( defined($self->file_meta_data->total_reads ) && $self->file_meta_data->total_reads > 10000 && !( $self->file_meta_data->total_reads >= $self->lane_meta_data->{total_reads}*0.9  && $self->file_meta_data->total_reads <= $self->lane_meta_data->{total_reads}*1.1 ) )
-  {
-    return 1;
-  }
-  elsif($self->_file_and_lane_defined_and_not_equal($self->file_meta_data->study_accession_number,$self->lane_meta_data->{study_accession_number} ))
-  {
-    return 1;
-  }
-  elsif($self->_file_and_lane_defined_and_not_equal($self->file_meta_data->library_ssid,$self->lane_meta_data->{library_ssid} ))
-  {
-    return 1;
-  }
-  elsif($self->_file_and_lane_defined_and_not_equal($self->file_meta_data->sample_accession_number,$self->lane_meta_data->{sample_accession_number} ))
-  {
-    return 1;
-  }
-  elsif($self->_file_and_lane_defined_and_not_equal($self->file_meta_data->lane_is_paired_read,$self->lane_meta_data->{lane_is_paired_read} ))
-  {
-    return 1;
-  }
-  elsif($self->_file_and_lane_defined_and_not_equal($self->file_meta_data->lane_manual_qc,$self->lane_meta_data->{lane_manual_qc} ))
-  {
-    return 1;
+    if( $self->_file_defined_and_not_equal($self->file_meta_data->$field_name, $self->lane_meta_data->{$field_name}) )
+    {
+      return 1;
+    }
   }
 
-  #elsif($self->_file_defined_and_not_equal($self->file_meta_data->file_md5,$self->file_meta_data->file_md5 ))
-  #{
-  #  # only do this if the lane has not been imported previously
-  #  #UpdatePipeline::Exceptions::FileMD5Changed->throw( error => "File ".$self->file_meta_data->file_name." MD5 changed from ".$self->file_meta_data->file_md5." to ".$self->file_meta_data->file_md5." so need to reimport\n" );
-  #}
+  if( $self->_file_defined_and_not_equal($self->_normalise_sample_name($self->file_meta_data->sample_name), $self->_normalise_sample_name($self->lane_meta_data->{sample_name})))
+  {
+    return 1;
+  }
+  elsif( defined($self->file_meta_data->total_reads ) && $self->file_meta_data->total_reads > 10000 && !( $self->file_meta_data->total_reads >= $self->lane_meta_data->{total_reads}*0.98  && $self->file_meta_data->total_reads <= $self->lane_meta_data->{total_reads}*1.02 ) )
+  {
+    UpdatePipeline::Exceptions::TotalReadsMismatch->throw( error => $self->file_meta_data->file_name_without_extension." has an inconsistent number of reads\n" );
+  }
 
   return 0; 
-}
-
-sub _file_and_lane_defined_and_not_equal
-{
-  my ($self, $file_meta_data, $lane_metadata) = @_;
-  (defined($file_meta_data) && defined($lane_metadata) && $file_meta_data ne $lane_metadata) ? 1 : 0;
 }
 
 sub _file_defined_and_not_equal

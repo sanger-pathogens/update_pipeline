@@ -36,7 +36,7 @@ $irods_file->mock('file_attributes', sub{ \%irods_file_expected_output });
 
 BEGIN { unshift(@INC, './modules') }
 BEGIN {
-  use Test::Most tests => 4;
+  use Test::Most tests => 5;
   
   my $irods_study = Test::MockObject->new();
   $irods_study->fake_new( 'IRODS::Study' );
@@ -50,5 +50,22 @@ ok my $update_pipelines_irods = UpdatePipeline::IRODS->new( study_names => \@stu
 is_deeply @{$update_pipelines_irods->_irods_studies}[0]->file_locations, \@study_file_locations, 'valid get back list of file locations for study';
 
 is_deeply @{$update_pipelines_irods->_get_irods_file_metadata_for_studies}[0], \%irods_file_expected_output, 'valid file metadata returned';
+
+# check runs are sorted okay
+my @unsorted_runs = ('/seq/2009/2009_1.bam','/seq/2002/2002_6#2.bam','/seq/2002/2002_5.bam','/seq/1001/1001_1.bam');
+my @expected_sorting= ("/seq/2009/2009_1.bam","/seq/2002/2002_6#2.bam","/seq/2002/2002_5.bam","/seq/1001/1001_1.bam");
+
+my @actual_sorting = (sort sort_by_id_run @unsorted_runs);
+is_deeply \@expected_sorting,\@actual_sorting, 'sorting by id run works okay';
+
+# Fixme: shouldnt be here at all but cant get the module calling correctly
+sub sort_by_id_run
+{
+  my @a = split(/\//,$a);
+  my @b = split(/\//,$b);
+
+  $b[2]<=>$a[2] || $b[3] cmp $a[3];
+}
+
 
 
