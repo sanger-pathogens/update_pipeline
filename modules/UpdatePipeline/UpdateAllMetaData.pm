@@ -52,13 +52,13 @@ sub _update_lane
   my ($self, $file_metadata) = @_;
   eval {
           
-    my $vproject = UpdatePipeline::VRTrack::Project->new(name => $file_metadata->study_name, _vrtrack => $self->_vrtrack)->vr_project();
+    my $vproject = UpdatePipeline::VRTrack::Project->new(name => $file_metadata->study_name, external_id => $file_metadata->study_ssid, _vrtrack => $self->_vrtrack)->vr_project();
     if(defined($file_metadata->study_accession_number))
     {
       my $vstudy   = UpdatePipeline::VRTrack::Study->new(accession => $file_metadata->study_accession_number, _vr_project => $vproject)->vr_study();
       $vproject->update;
     }
-    my $vr_sample = UpdatePipeline::VRTrack::Sample->new(name => $file_metadata->sample_name, common_name => $file_metadata->sample_common_name, accession => $file_metadata->sample_accession_number, _vrtrack => $self->_vrtrack,_vr_project => $vproject)->vr_sample();
+    my $vr_sample = UpdatePipeline::VRTrack::Sample->new(name => $file_metadata->sample_name,  external_id => $file_metadata->sample_ssid, common_name => $file_metadata->sample_common_name, accession => $file_metadata->sample_accession_number, _vrtrack => $self->_vrtrack,_vr_project => $vproject)->vr_sample();
     my $vr_library = UpdatePipeline::VRTrack::Library->new(name => $file_metadata->library_name, external_id  => $file_metadata->library_ssid, _vrtrack => $self->_vrtrack,_vr_sample  => $vr_sample)->vr_library();
     
     my $vr_lane = UpdatePipeline::VRTrack::Lane->new(
