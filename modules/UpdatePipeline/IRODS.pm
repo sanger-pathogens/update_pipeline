@@ -78,6 +78,8 @@ sub _build_files_metadata
       lane_is_paired_read     => $irods_file_metadata->{is_paired_read},
       lane_manual_qc          => $irods_file_metadata->{manual_qc},
       sample_common_name      => $irods_file_metadata->{sample_common_name},
+      sample_ssid             => $irods_file_metadata->{sample_ssid},
+      study_ssid              => $irods_file_metadata->{study_ssid},
     );
     # get data from warehouse
     push(@files_metadata, $file_metadata);

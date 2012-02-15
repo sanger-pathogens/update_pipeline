@@ -31,7 +31,7 @@ sub _build_vr_study
   unless ($vstudy) {
     $vstudy = $self->_vr_project->add_study($self->accession);
   }
-  UpdatePipeline::Exceptions::CouldntCreateStudy->throw( error => "Couldnt create study with name ".$self->name."\n" ) if(not defined($vstudy));
+  UpdatePipeline::Exceptions::CouldntCreateStudy->throw( error => "Couldnt create study with name ".$self->name."\n" ) if(not defined($vstudy));  
   
   return $vstudy;
 }

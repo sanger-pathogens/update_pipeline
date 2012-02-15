@@ -52,7 +52,7 @@ is_deeply @{$update_pipelines_irods->_irods_studies}[0]->file_locations, \@study
 is_deeply @{$update_pipelines_irods->_get_irods_file_metadata_for_studies}[0], \%irods_file_expected_output, 'valid file metadata returned';
 
 # check runs are sorted okay
-my @unsorted_runs = ('/seq/2009/2009_1.bam','/seq/2002/2002_6#2.bam','/seq/2002/2002_5.bam','/seq/1001/1001_1.bam');
+my @unsorted_runs = ('/seq/2002/2002_5.bam','/seq/2002/2002_6#2.bam','/seq/2009/2009_1.bam','/seq/1001/1001_1.bam');
 my @expected_sorting= ("/seq/2009/2009_1.bam","/seq/2002/2002_6#2.bam","/seq/2002/2002_5.bam","/seq/1001/1001_1.bam");
 
 my @actual_sorting = (sort sort_by_id_run @unsorted_runs);

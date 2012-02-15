@@ -48,7 +48,9 @@ sub _build_vr_lane
     $vlane->library_id($self->_vr_library->id);
   }
   
-  $vlane->raw_reads( $self->total_reads );
+  $vlane->raw_reads( $self->total_reads ) if(not defined($vlane->raw_reads));
+  $vlane->raw_bases(0) if(not defined($vlane->raw_bases));
+  
   $vlane->npg_qc_status( $self->npg_qc_status );
   $vlane->is_paired( $self->paired );
   $vlane->hierarchy_name( $self->name );

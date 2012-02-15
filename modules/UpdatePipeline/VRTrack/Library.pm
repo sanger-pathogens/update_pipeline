@@ -56,7 +56,7 @@ sub _build_vr_library
   
   unless ($vlibrary->seq_tech($self->sequencing_technology)) { $vlibrary->add_seq_tech($self->sequencing_technology); }
   unless ($vlibrary->seq_centre($self->sequencing_centre))   { $vlibrary->add_seq_centre($self->sequencing_centre); }
-  
+  $vlibrary->update;
   return $vlibrary;
 }
 

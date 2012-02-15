@@ -23,6 +23,8 @@ has 'name'       => ( is => 'rw', isa => 'Str', required   => 1 );
 has '_vrtrack'   => ( is => 'rw',               required   => 1 );
 has 'vr_project' => ( is => 'rw',               lazy_build => 1 );
 
+has 'external_id' => ( is => 'ro', isa => 'Maybe[Int]' );
+
 sub _build_vr_project
 {
   my ($self) = @_;
@@ -34,6 +36,8 @@ sub _build_vr_project
     $vproject = $self->_vrtrack->add_project($self->name);
   }
   UpdatePipeline::Exceptions::CouldntCreateProject->throw( error => "Couldnt create project with name ".$self->name."\n" ) if(not defined($vproject));
+  $vproject->ssid($self->external_id);
+  $vproject->update;
   
   return $vproject;
 }

@@ -42,8 +42,7 @@ sub _differences_between_file_and_lane_meta_data
     return 1 unless defined($self->lane_meta_data->{$required_key});
   }
 
-
-  my @fields_to_check_file_defined_and_not_equal = ("study_name", "library_name","sample_common_name", "study_accession_number","sample_accession_number","library_ssid", "lane_is_paired_read","lane_manual_qc");
+  my @fields_to_check_file_defined_and_not_equal = ("study_name", "library_name","sample_common_name", "study_accession_number","sample_accession_number","library_ssid", "lane_is_paired_read","lane_manual_qc", "study_ssid","sample_ssid");
   for my $field_name (@fields_to_check_file_defined_and_not_equal)
   {
     if( $self->_file_defined_and_not_equal($self->file_meta_data->$field_name, $self->lane_meta_data->{$field_name}) )
@@ -51,7 +50,7 @@ sub _differences_between_file_and_lane_meta_data
       return 1;
     }
   }
-
+  
   if( $self->_file_defined_and_not_equal($self->_normalise_sample_name($self->file_meta_data->sample_name), $self->_normalise_sample_name($self->lane_meta_data->{sample_name})))
   {
     return 1;

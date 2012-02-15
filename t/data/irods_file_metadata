@@ -66,3 +66,11 @@ units:
 attribute: sample_common_name
 value: Shigella flexneri
 units:
+----
+attribute: sample_id
+value: 44444
+units:
+----
+attribute: study_id
+value: 55555
+units:
