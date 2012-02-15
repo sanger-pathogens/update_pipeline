@@ -80,7 +80,7 @@ sub _build_files_metadata
     );
     
     # fill in the blanks with data from the warehouse
-    Warehouse::FileMetaDataPopulation->new(file_meta_data => $file_metadata, _dbh => $self->_warehouse_dbh);
+    Warehouse::FileMetaDataPopulation->new(file_meta_data => $file_metadata, _dbh => $self->_warehouse_dbh)->populate();
     
     push(@files_metadata, $file_metadata);
   }
