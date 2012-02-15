@@ -82,7 +82,7 @@ sub _build_vr_sample
 sub _build__vr_species
 {
   my ($self) = @_;
-  my $vr_species = VRTrack::Species->new_by_name( $self->_vrtrack, $self->common_name) || UpdatePipeline::Exceptions::UnknownCommonName->throw( error => "Common name ".$self->common_name." doesnt exist in VRTrack for sample ".$self->name."\n" );
+  my $vr_species = VRTrack::Species->new_by_name( $self->_vrtrack, $self->common_name) || UpdatePipeline::Exceptions::UnknownCommonName->throw( error => $self->common_name );
   return $vr_species;
 }
 

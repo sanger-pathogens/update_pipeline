@@ -29,12 +29,11 @@ sub update_required
 sub _differences_between_file_and_lane_meta_data
 {
   my ($self) = @_;
-  
-  my @minimum_required_fields = ("sample_name", "study_name","library_name", "sample_common_name");
-  for my $required_field (@minimum_required_fields)
-  {
-     UpdatePipeline::Exceptions::EssentialFileMetaDataMissing->throw( error => "Missing $required_field for ".$self->file_meta_data->file_name."\n") if(not defined($self->file_meta_data->$required_field));
-  }
+
+  UpdatePipeline::Exceptions::UndefinedSampleName->throw( error => $self->file_meta_data->file_name) if(not defined($self->file_meta_data->sample_name));
+  UpdatePipeline::Exceptions::UndefinedSampleCommonName->throw( error => $self->file_meta_data->sample_name) if(not defined($self->file_meta_data->sample_common_name));
+  UpdatePipeline::Exceptions::UndefinedStudyName->throw( error => $self->file_meta_data->file_name) if(not defined($self->file_meta_data->study_name));
+  UpdatePipeline::Exceptions::UndefinedLibraryName->throw( error => $self->file_meta_data->file_name) if(not defined($self->file_meta_data->library_name));
 
   my @required_keys = ("sample_name", "study_name","library_name", "total_reads","sample_accession_number","study_accession_number", "sample_common_name");
   for my $required_key (@required_keys)
@@ -57,7 +56,7 @@ sub _differences_between_file_and_lane_meta_data
   }
   elsif( defined($self->file_meta_data->total_reads ) && $self->file_meta_data->total_reads > 10000 && !( $self->file_meta_data->total_reads >= $self->lane_meta_data->{total_reads}*0.98  && $self->file_meta_data->total_reads <= $self->lane_meta_data->{total_reads}*1.02 ) )
   {
-    UpdatePipeline::Exceptions::TotalReadsMismatch->throw( error => $self->file_meta_data->file_name_without_extension." has an inconsistent number of reads\n" );
+    UpdatePipeline::Exceptions::TotalReadsMismatch->throw( error => $self->file_meta_data->file_name_without_extension );
   }
 
   return 0; 

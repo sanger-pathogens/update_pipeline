@@ -40,7 +40,7 @@ is_deeply $vr_sample2->individual->species, $vr_sample->individual->species, 're
 
 # a species row doesnt exist for the common name so it should throw an error
 ok my $sample3 = UpdatePipeline::VRTrack::Sample->new(name => 'Another name',common_name => 'UndefinedCommonName',_vrtrack => $vrtrack,_vr_project => $vproject), 'initialise a sample';
-throws_ok { $sample3->vr_sample() } qr/doesnt exist in VRTrack for sample/, 'Throw exception if common name not defined';
+throws_ok { $sample3->vr_sample() } qr/UndefinedCommonName/, 'Throw exception if common name not defined';
 
 # individual previously exists
 my $preexisting_individual = VRTrack::Individual->create($vrtrack, 'SampleNameThatAlreadyExists');

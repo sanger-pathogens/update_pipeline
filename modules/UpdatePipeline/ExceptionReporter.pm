@@ -1,0 +1,122 @@
+=head1 NAME
+
+ExceptionReporter.pm   - Consume all exceptions, group them sensibly and output a nice report
+
+=head1 SYNOPSIS
+
+use UpdatePipeline::ExceptionReporter;
+my $exception_reporter = UpdatePipeline::ExceptionReporter->new();
+
+$exception_reporter->add_exception($exception);
+$exception_reporter->add_exception($exception);
+....
+
+$exception_reporter->print_report();
+
+=cut
+
+package UpdatePipeline::ExceptionReporter;
+use Moose;
+use UpdatePipeline::Exceptions;
+
+
+has '_exceptions'               => ( is => 'ro', isa => 'ArrayRef', default => sub { [] });
+has '_unknown_common_names'     => ( is => 'ro', isa => 'HashRef',  default => sub { {} });
+has '_undefined_common_names'   => ( is => 'ro', isa => 'ArrayRef', default => sub { [] });
+has '_inconsistent_total_reads' => ( is => 'ro', isa => 'ArrayRef', default => sub { [] });
+has '_bad_irods_records'        => ( is => 'ro', isa => 'ArrayRef', default => sub { [] });
+
+has '_unclassified_exception_counter'  => ( is => 'rw', isa => 'Int', default => 0);
+
+sub add_exception
+{
+  my($self, $exception) = @_;  
+  push(@{$self->_exceptions},$exception);
+}
+
+sub print_report
+{
+  my($self) = @_;
+  $self->_build_report;
+  
+  for my $common_name (sort keys %{$self->_unknown_common_names})
+  {
+    print "Unknown common name\t$common_name\n";
+  }
+  for my $sample_name (sort @{$self->_undefined_common_names})
+  {
+    print "Undefined common name\t$sample_name\n";
+  }
+  for my $filename (sort @{$self->_inconsistent_total_reads})
+  {
+     print "Inconsistent total reads\t$filename\n";
+  }
+  for my $filename (sort @{$self->_bad_irods_records})
+  {
+    print "Irods data missing\t$filename\n";
+  }
+  
+  if($self->_unclassified_exception_counter > 0)
+  {
+    print "Unclassified exceptions\t".$self->_unclassified_exception_counter."\n";
+  }
+  
+}
+
+sub _build_report
+{
+   my($self) = @_;
+   for my $exception (@{$self->_exceptions})
+   {
+     if($exception->isa("UpdatePipeline::Exceptions::UnknownCommonName"))
+     {
+       $self->_unknown_common_name($exception);
+     }
+     elsif($exception->isa("UpdatePipeline::Exceptions::UndefinedSampleCommonName"))
+     {
+       $self->_undefined_common_name($exception);
+     }
+     elsif($exception->isa("UpdatePipeline::Exceptions::TotalReadsMismatch"))
+     {
+       $self->_total_read_inconsistency($exception);
+     }
+     elsif($exception->isa("UpdatePipeline::Exceptions::UndefinedSampleName") || 
+           $exception->isa("UpdatePipeline::Exceptions::UndefinedStudyName")  ||
+           $exception->isa("UpdatePipeline::Exceptions::UndefinedLibraryName"))
+     {
+       $self->_bad_irods_record($exception);
+     }
+     else
+     {
+       # dont do anything with these exceptions other than count them
+       $self->_unclassified_exception_counter($self->_unclassified_exception_counter + 1 );
+     }
+   }
+   1;
+}
+
+sub _undefined_common_name
+{
+  my($self,$exception) = @_;
+  push(@{$self->_undefined_common_names}, $exception->error);
+}
+
+sub _bad_irods_record
+{
+   my($self,$exception) = @_;
+   push(@{$self->_bad_irods_records}, $exception->error);
+}
+
+sub _total_read_inconsistency
+{
+  my($self,$exception) = @_;
+  push(@{$self->_inconsistent_total_reads}, $exception->error);
+}
+
+sub _unknown_common_name
+{
+  my($self,$exception) = @_;
+  $self->_unknown_common_names->{$exception->error}++;
+}
+
+1;

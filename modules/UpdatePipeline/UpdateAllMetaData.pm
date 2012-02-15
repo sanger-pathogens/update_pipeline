@@ -19,12 +19,21 @@ use UpdatePipeline::VRTrack::Library;
 use UpdatePipeline::VRTrack::Lane;
 use UpdatePipeline::VRTrack::File;
 use UpdatePipeline::VRTrack::Study;
+use UpdatePipeline::ExceptionReporter;
 
 use Data::Dumper;
 extends 'UpdatePipeline::CommonMetaDataManipulation';
 
 has 'study_names'         => ( is => 'rw', isa => 'ArrayRef', required   => 1 );
 has '_vrtrack'            => ( is => 'rw', required => 1 );
+has '_exception_reporter' => ( is => 'rw', isa => 'UpdatePipeline::ExceptionReporter', lazy_build => 1 );
+
+sub _build__exception_reporter
+{
+  my ($self) = @_;
+  UpdatePipeline::ExceptionReporter->new(); 
+}
+
 
 sub update
 {
@@ -41,10 +50,14 @@ sub update
           $self->_update_lane($file_metadata);
       }
     };
-    if ($@){
-      print $@;      
+    if(my $exception = Exception::Class->caught())
+    { 
+      $self->_exception_reporter->add_exception($exception);
     }
   }
+  $self->_exception_reporter->print_report();
+  
+  1;
 }
 
 sub _update_lane
@@ -71,8 +84,9 @@ sub _update_lane
     
     my $vr_file = UpdatePipeline::VRTrack::File->new(name => $file_metadata->file_name ,md5 => $file_metadata->file_md5 ,_vrtrack => $self->_vrtrack,_vr_lane => $vr_lane)->vr_file();
   };
-  if ($@){
-    print $@;
+  if(my $exception = Exception::Class->caught())
+  { 
+    $self->_exception_reporter->add_exception($exception);
   }
 }
 

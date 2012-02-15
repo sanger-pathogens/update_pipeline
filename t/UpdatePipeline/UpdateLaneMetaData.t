@@ -217,7 +217,7 @@ ok my $file_missing_sample_name = UpdatePipeline::FileMetaData->new(
   sample_common_name      => "SomeBacteria",
 ), 'file meta data missing sample name';
 
-throws_ok {UpdatePipeline::UpdateLaneMetaData->new(lane_meta_data => $lane_metadata, file_meta_data => $file_missing_sample_name )->update_required } qr/Missing/, 'missing sample name';
+throws_ok {UpdatePipeline::UpdateLaneMetaData->new(lane_meta_data => $lane_metadata, file_meta_data => $file_missing_sample_name )->update_required } qr/myfile/, 'missing sample name';
 
 
 # missing  sample common name
@@ -234,7 +234,7 @@ ok my $file_missing_sample_common_name = UpdatePipeline::FileMetaData->new(
   sample_name             => 'My name',
 ), 'file meta data missing sample common name';
 
-throws_ok {UpdatePipeline::UpdateLaneMetaData->new(lane_meta_data => $lane_metadata, file_meta_data => $file_missing_sample_common_name )->update_required } qr/Missing/, 'missing sample common name';
+throws_ok {UpdatePipeline::UpdateLaneMetaData->new(lane_meta_data => $lane_metadata, file_meta_data => $file_missing_sample_common_name )->update_required } qr/My name/, 'missing sample common name';
 
 # Total reads inconsistent
 ok my $file_total_reads_problem = UpdatePipeline::FileMetaData->new(
@@ -251,7 +251,7 @@ ok my $file_total_reads_problem = UpdatePipeline::FileMetaData->new(
   sample_common_name      => "SomeBacteria",
 ), 'file meta data total reads inconsistent';
 
-throws_ok {UpdatePipeline::UpdateLaneMetaData->new(lane_meta_data => $lane_metadata, file_meta_data => $file_total_reads_problem )->update_required } qr/inconsistent number of reads/, 'Total Reads inconsistent';
+throws_ok {UpdatePipeline::UpdateLaneMetaData->new(lane_meta_data => $lane_metadata, file_meta_data => $file_total_reads_problem )->update_required } qr/myfile/, 'Total Reads inconsistent';
 
 
 # lane has been previously imported so ignore file md5 etc...
