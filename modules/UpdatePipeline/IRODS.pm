@@ -21,6 +21,7 @@ use IRODS::File;
 use Warehouse::File;
 use Warehouse::Database;
 use UpdatePipeline::FileMetaData;
+use Warehouse::FileMetaDataPopulation;
 extends 'UpdatePipeline::CommonSettings';
 
 has 'study_names'               => ( is => 'rw', isa => 'ArrayRef[Str]', required   => 1 );
@@ -58,10 +59,6 @@ sub _build_files_metadata
 
   for my $irods_file_metadata (@irods_files_metadata)
   {
-    #my $warehouse_file = Warehouse::File->new(
-    #  input_metadata => $irods_file_metadata,
-    #  _dbh => $self->_warehouse_dbh
-    #      )->file_attributes;
     
     my $file_metadata = UpdatePipeline::FileMetaData->new(
       study_name              => $irods_file_metadata->{study},
@@ -81,7 +78,10 @@ sub _build_files_metadata
       sample_ssid             => $irods_file_metadata->{sample_ssid},
       study_ssid              => $irods_file_metadata->{study_ssid},
     );
-    # get data from warehouse
+    
+    # fill in the blanks with data from the warehouse
+    Warehouse::FileMetaDataPopulation->new(file_meta_data => $file_metadata, _dbh => $self->_warehouse_dbh);
+    
     push(@files_metadata, $file_metadata);
   }
   
