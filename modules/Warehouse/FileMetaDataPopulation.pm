@@ -18,6 +18,7 @@ package Warehouse::FileMetaDataPopulation;
 use Moose;
 use Sfind::Sfind;
 use Warehouse::Library;
+use Warehouse::Study;
 
 has 'file_meta_data'   => ( is => 'rw', isa => 'UpdatePipeline::FileMetaData', required => 1 );
 has '_dbh'             => ( is => 'rw',                                        required => 1 );
@@ -26,8 +27,9 @@ sub populate
 {
   my($self) = @_;
   
-  my $warehouse_library = Warehouse::Library->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh);
-  $warehouse_library->populate();
+  Warehouse::Library->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->populate();
+  Warehouse::Study->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->populate();
+
   
 }
 

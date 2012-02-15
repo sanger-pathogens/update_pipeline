@@ -66,6 +66,7 @@ sub _differences_between_file_and_lane_meta_data
 sub _file_defined_and_not_equal
 {
   my ($self, $file_meta_data, $lane_metadata) = @_;
+  return 1 if(defined($file_meta_data) && ! defined($lane_metadata));
   (defined($file_meta_data) && $file_meta_data ne $lane_metadata) ? 1 : 0;
 }
 
