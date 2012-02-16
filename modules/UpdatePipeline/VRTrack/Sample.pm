@@ -48,8 +48,6 @@ sub _build_vr_sample
   }
   UpdatePipeline::Exceptions::CouldntCreateSample->throw( error => "Couldnt create sample with name ".$self->name."\n" ) if(not defined($vsample));
   
-  
-  
   # an individual links a sample to a species
   my $vr_individual = VRTrack::Individual->new_by_name( $self->_vrtrack, $self->name );
   if ( not defined $vr_individual ) {
@@ -62,19 +60,8 @@ sub _build_vr_sample
   $vsample->ssid($self->external_id);
   $vsample->update;
   
-  # if there is no species defined, only attach one thats already defined, dont create one.
-  if(not defined $vr_individual->species)
-  {
-    $vr_individual->species_id($self->_vr_species->id);
-    $vr_individual->update;
-  }
-  
-  if ( defined($vr_individual) && defined($self->accession)) 
-  {
-    $vr_individual->acc($self->accession);
-    $vr_individual->update();
-  }
-  
+  $self->_populate_individual($vr_individual);
+
   return $vsample;
 }
 
@@ -84,6 +71,36 @@ sub _build__vr_species
   my ($self) = @_;
   my $vr_species = VRTrack::Species->new_by_name( $self->_vrtrack, $self->common_name) || UpdatePipeline::Exceptions::UnknownCommonName->throw( error => $self->common_name );
   return $vr_species;
+}
+
+sub _populate_individual
+{
+  my($self,$vr_individual) = @_;
+  return unless defined($vr_individual);
+
+  # if there is no species defined, only attach one thats already defined, dont create one.
+  if(not defined $vr_individual->species)
+  {
+    $vr_individual->species_id($self->_vr_species->id);
+  }
+
+  if( defined($self->accession)) 
+  {
+    $vr_individual->acc($self->accession);
+  }
+
+  $self->_add_default_population($vr_individual);
+  $vr_individual->update;
+}
+
+sub _add_default_population
+{
+  my($self,$vr_individual) = @_;
+ 
+  my $population = $vr_individual->population("Population");
+  if ( not defined $population ) {
+      my $population = $vr_individual->add_population("Population");
+  } 
 }
 
 
