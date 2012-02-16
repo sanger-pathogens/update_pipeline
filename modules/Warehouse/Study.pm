@@ -35,7 +35,8 @@ sub _populate_ssid_from_name
   {
     my $study_name = $self->file_meta_data->study_name;
     my $sql = qq[select internal_id as study_ssid from current_studies where name = "$study_name" limit 1;];
-    my $sth = $self->_dbh->do($sql);
+    my $sth = $self->_dbh->prepare($sql);
+    $sth->execute;
     my @study_warehouse_details  = $sth->fetchrow_array;
     if(@study_warehouse_details > 0)
     {

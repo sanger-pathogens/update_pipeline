@@ -34,7 +34,8 @@ sub _populate_ssid_from_name
   {
     my $sample_name = $self->file_meta_data->sample_name;
     my $sql = qq[select internal_id as sample_ssid from current_samples where name = "$sample_name" limit 1;];
-    my $sth = $self->_dbh->do($sql);
+    my $sth = $self->_dbh->prepare($sql);
+    $sth->execute;
     my @sample_warehouse_details  = $sth->fetchrow_array;
     if(@sample_warehouse_details > 0)
     {

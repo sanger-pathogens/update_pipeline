@@ -35,7 +35,8 @@ sub _populate_ssid_from_name
   {
     my $library_name = $self->file_meta_data->library_name;
     my $sql = qq[select internal_id as library_ssid from current_libraries where name = "$library_name" limit 1;];
-    my $sth = $self->_dbh->do($sql);
+    my $sth = $self->_dbh->prepare($sql);
+    $sth->execute;
     my @library_warehouse_details  = $sth->fetchrow_array;
     if(@library_warehouse_details > 0)
     {

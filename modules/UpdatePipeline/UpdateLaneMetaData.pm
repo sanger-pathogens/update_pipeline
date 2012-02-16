@@ -40,6 +40,24 @@ sub _differences_between_file_and_lane_meta_data
   {
     return 1 unless defined($self->lane_meta_data->{$required_key});
   }
+  
+  # attributes used in directory structure
+  my @fields_in_path_to_lane = ("library_name","sample_common_name", "study_ssid");
+  for my $field_name  (@fields_in_path_to_lane)
+  {
+    if(defined($self->file_meta_data->$field_name) && defined($self->lane_meta_data->{$field_name})
+       && $self->file_meta_data->$field_name ne $self->lane_meta_data->{$field_name}) 
+    {
+      UpdatePipeline::Exceptions::PathToLaneChanged->throw( error => $self->file_meta_data->file_name_without_extension );
+    }
+  }
+
+  # check to see if sample name has changed
+  if(defined($self->file_meta_data->sample_name) && defined($self->lane_meta_data->{sample_name})
+     && $self->_normalise_sample_name($self->file_meta_data->sample_name) ne $self->_normalise_sample_name($self->lane_meta_data->{sample_name}) )
+  {
+    UpdatePipeline::Exceptions::PathToLaneChanged->throw( error => $self->file_meta_data->file_name_without_extension );
+  }
 
   my @fields_to_check_file_defined_and_not_equal = ("study_name", "library_name","sample_common_name", "study_accession_number","sample_accession_number","library_ssid", "lane_is_paired_read","lane_manual_qc", "study_ssid","sample_ssid");
   for my $field_name (@fields_to_check_file_defined_and_not_equal)

@@ -14,6 +14,7 @@ use Exception::Class (
     UpdatePipeline::Exceptions::UndefinedSampleCommonName => { description => "undefined sample common name in irods"},
     UpdatePipeline::Exceptions::UndefinedStudyName        => { description => "undefined study name in irods"},
     UpdatePipeline::Exceptions::UndefinedLibraryName      => { description => "undefined library name in irods"},
+    UpdatePipeline::Exceptions::PathToLaneChanged         => { description => "path has changed so need to reimport"},
 );
 
 1;
