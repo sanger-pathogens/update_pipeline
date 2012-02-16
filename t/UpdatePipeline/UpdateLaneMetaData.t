@@ -5,7 +5,7 @@ use Data::Dumper;
 
 BEGIN { unshift(@INC, './modules') }
 BEGIN {
-    use Test::Most tests => 31;
+    use Test::Most tests => 33;
     use_ok('UpdatePipeline::UpdateLaneMetaData');
     use VRTrack::VRTrack;
     use UpdatePipeline::VRTrack::Project;
@@ -249,7 +249,29 @@ ok my $file_missing_sample_common_name = UpdatePipeline::FileMetaData->new(
 
 throws_ok {UpdatePipeline::UpdateLaneMetaData->new(lane_meta_data => $lane_metadata, file_meta_data => $file_missing_sample_common_name )->update_required } qr/My name/, 'missing sample common name';
 
+
+# Total reads inconsistent but lane hasnt been flagged as imported
+ok my $file_total_reads_problem = UpdatePipeline::FileMetaData->new(
+  study_name              => 'My project',
+  file_md5                => 'abc1231343432432432',
+  file_name               => 'myfile.bam',
+  file_name_without_extension  => 'myfile',
+  library_name            => 'My library name',
+  library_ssid            => 123,
+  total_reads             => 20000,
+  sample_accession_number => "ABC123",
+  study_accession_number  => "EFG456",
+  sample_name             => 'My name',
+  study_ssid              => 1234,
+  sample_common_name      => "SomeBacteria",
+), 'skip file meta data total reads inconsistent';
+
+is 0, UpdatePipeline::UpdateLaneMetaData->new(lane_meta_data => $lane_metadata, file_meta_data => $file_total_reads_problem )->update_required  , 'skip Total Reads inconsistent';
+
+
+
 # Total reads inconsistent
+$lane_metadata->{lane_processed} = 1;
 ok my $file_total_reads_problem = UpdatePipeline::FileMetaData->new(
   study_name              => 'My project',
   file_md5                => 'abc1231343432432432',

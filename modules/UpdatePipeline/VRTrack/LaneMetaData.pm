@@ -38,7 +38,8 @@ sub _build_lane_attributes
   lane.npg_qc_status as lane_manual_qc,
   lane.paired as lane_is_paired_read,
   sample.ssid as sample_ssid,
-  project.ssid as study_ssid
+  project.ssid as study_ssid,
+  lane.processed as lane_processed
   from latest_lane as lane
   left join latest_library as library on library.library_id = lane.library_id 
   left join latest_sample as sample on sample.sample_id = library.sample_id
