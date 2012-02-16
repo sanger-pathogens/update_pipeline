@@ -99,7 +99,7 @@ sub _build_report
        $self->_total_read_inconsistency($exception);
      }
      elsif($exception->isa("UpdatePipeline::Exceptions::UndefinedSampleName") || 
-           $exception->isa("UpdatePipeline::Exceptions::UndefinedStudyName")  ||
+           $exception->isa("UpdatePipeline::Exceptions::UndefinedStudySSID")  ||
            $exception->isa("UpdatePipeline::Exceptions::UndefinedLibraryName"))
      {
        $self->_bad_irods_record($exception);

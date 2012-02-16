@@ -22,7 +22,7 @@ has 'file_meta_data'  => ( is => 'ro', isa => 'UpdatePipeline::FileMetaData',   
 sub update_required
 {
   my($self) = @_;
-  return 1 unless(defined $self->lane_meta_data);
+  
   return $self->_differences_between_file_and_lane_meta_data;
 }
 
@@ -32,8 +32,10 @@ sub _differences_between_file_and_lane_meta_data
 
   UpdatePipeline::Exceptions::UndefinedSampleName->throw( error => $self->file_meta_data->file_name) if(not defined($self->file_meta_data->sample_name));
   UpdatePipeline::Exceptions::UndefinedSampleCommonName->throw( error => $self->file_meta_data->sample_name) if(not defined($self->file_meta_data->sample_common_name));
-  UpdatePipeline::Exceptions::UndefinedStudyName->throw( error => $self->file_meta_data->file_name) if(not defined($self->file_meta_data->study_name));
+  UpdatePipeline::Exceptions::UndefinedStudySSID->throw( error => $self->file_meta_data->file_name) if(not defined($self->file_meta_data->study_ssid));
   UpdatePipeline::Exceptions::UndefinedLibraryName->throw( error => $self->file_meta_data->file_name) if(not defined($self->file_meta_data->library_name));
+
+  return 1 unless(defined $self->lane_meta_data);
 
   my @required_keys = ("sample_name", "study_name","library_name", "total_reads","sample_accession_number","study_accession_number", "sample_common_name");
   for my $required_key (@required_keys)

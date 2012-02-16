@@ -36,7 +36,9 @@ sub _build_lane_attributes
   individual.acc as sample_accession_number,
   species.name as sample_common_name,
   lane.npg_qc_status as lane_manual_qc,
-  lane.paired as lane_is_paired_read
+  lane.paired as lane_is_paired_read,
+  sample.ssid as sample_ssid,
+  project.ssid as study_ssid
   from latest_lane as lane
   left join latest_library as library on library.library_id = lane.library_id 
   left join latest_sample as sample on sample.sample_id = library.sample_id

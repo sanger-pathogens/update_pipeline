@@ -12,7 +12,7 @@ use Exception::Class (
     UpdatePipeline::Exceptions::TotalReadsMismatch        => { description => 'Total reads differs, usually an error in the import' },
     UpdatePipeline::Exceptions::UndefinedSampleName       => { description => "undefined sample name in irods"},
     UpdatePipeline::Exceptions::UndefinedSampleCommonName => { description => "undefined sample common name in irods"},
-    UpdatePipeline::Exceptions::UndefinedStudyName        => { description => "undefined study name in irods"},
+    UpdatePipeline::Exceptions::UndefinedStudySSID        => { description => "undefined study ssid in irods"},
     UpdatePipeline::Exceptions::UndefinedLibraryName      => { description => "undefined library name in irods"},
     UpdatePipeline::Exceptions::PathToLaneChanged         => { description => "path has changed so need to reimport"},
 );

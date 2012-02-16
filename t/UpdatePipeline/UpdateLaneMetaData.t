@@ -21,7 +21,7 @@ BEGIN {
 my $vrtrack = VRTrack::VRTrack->new({database => "vrtrack_test",host => "localhost",port => 3306,user => "root",password => undef});
 delete_test_data($vrtrack);
 VRTrack::Species->create($vrtrack, 'SomeBacteria' );
-my $vproject = UpdatePipeline::VRTrack::Project->new(name => 'My project', _vrtrack => $vrtrack)->vr_project();
+my $vproject = UpdatePipeline::VRTrack::Project->new(name => 'My project', external_id => 1234, _vrtrack => $vrtrack)->vr_project();
 my $vstudy = UpdatePipeline::VRTrack::Study->new(accession => 'EFG456',_vr_project => $vproject)->vr_study();
 $vproject->update;
 my $vr_sample = UpdatePipeline::VRTrack::Sample->new(name => 'My name',common_name => 'SomeBacteria',accession => "ABC123", _vrtrack => $vrtrack,_vr_project => $vproject)->vr_sample();
@@ -42,6 +42,7 @@ ok my $file_meta_data_which_doesnt_need_changing = UpdatePipeline::FileMetaData-
   sample_name             => 'My name',
   sample_accession_number => "ABC123",
   study_accession_number  => "EFG456",
+  study_ssid              => 1234,
   sample_common_name      => "SomeBacteria",
 ), 'file meta data which should be the same as the lane metadata';
 
@@ -59,6 +60,7 @@ ok my $file_metadata_sample_name_with_underscore_nochange = UpdatePipeline::File
   sample_name             => 'My_name',
   sample_accession_number => "ABC123",
   study_accession_number  => "EFG456",
+  study_ssid              => 1234,
   sample_common_name      => "SomeBacteria",
 ), 'file meta data which should be the same as the lane metadata';
 is 0, UpdatePipeline::UpdateLaneMetaData->new(lane_meta_data => $lane_metadata, file_meta_data => $file_metadata_sample_name_with_underscore_nochange )->update_required(), 'sample name with underscores should not trigger change';
@@ -72,6 +74,7 @@ ok my $file_metadata_with_sample_name_change = UpdatePipeline::FileMetaData->new
   library_ssid            => 123,
   total_reads             => 0,
   sample_name             => 'changed sample name',
+  study_ssid              => 1234,
   sample_common_name      => "SomeBacteria",
 ), 'sample name changed';
 throws_ok {UpdatePipeline::UpdateLaneMetaData->new(lane_meta_data => $lane_metadata, file_meta_data => $file_metadata_with_sample_name_change )->update_required()} qr /myfile/,'update required since sample name changed';
@@ -85,6 +88,7 @@ ok my $file_metadata_with_library_name_change = UpdatePipeline::FileMetaData->ne
   library_ssid            => 123,
   total_reads             => 0,
   sample_name             => 'My name',
+  study_ssid              => 1234,
   sample_common_name      => "SomeBacteria",
 ), 'library name changed';
 throws_ok {UpdatePipeline::UpdateLaneMetaData->new(lane_meta_data => $lane_metadata, file_meta_data => $file_metadata_with_library_name_change )->update_required()} qr /myfile/, 'update required since library name changed';
@@ -97,6 +101,7 @@ ok my $file_metadata_with_library_ssid_change = UpdatePipeline::FileMetaData->ne
   library_name            => 'My library name',
   library_ssid            => 9999999,
   total_reads             => 0,
+  study_ssid              => 1234,
   sample_name             => 'My name',
   sample_common_name      => "SomeBacteria",
 ), 'library ssid changed';
@@ -110,6 +115,7 @@ ok my $file_metadata_with_study_name_change = UpdatePipeline::FileMetaData->new(
   library_name            => 'My library name',
   library_ssid            => 123,
   total_reads             => 0,
+  study_ssid              => 1234,
   sample_name             => 'My name',
   sample_common_name      => "SomeBacteria",
 ), 'study name changed';
@@ -127,6 +133,7 @@ ok my $file_metadata_study_accession_changed = UpdatePipeline::FileMetaData->new
   total_reads             => 0,
   sample_name             => 'My name',
   sample_accession_number => "ABC123",
+  study_ssid              => 1234,
   study_accession_number  => "study_accession_changed",
   sample_common_name      => "SomeBacteria",
 ), 'file meta data with a chagned study accession';
@@ -145,6 +152,7 @@ ok my $file_metadata_sample_accession_changed = UpdatePipeline::FileMetaData->ne
   sample_name             => 'My name',
   sample_accession_number => "Changed_sample_accession",
   study_accession_number  => "EFG456",
+  study_ssid              => 1234,
   sample_common_name      => "SomeBacteria",
 ), 'file meta data with a changed sample accession';
 is 1, UpdatePipeline::UpdateLaneMetaData->new(lane_meta_data => $lane_metadata, file_meta_data => $file_metadata_sample_accession_changed )->update_required(), 'sample accession changed';
@@ -160,6 +168,7 @@ ok my $file_metadata_common_name_changed = UpdatePipeline::FileMetaData->new(
   library_ssid            => 123,
   total_reads             => 0,
   sample_name             => 'My name',
+  study_ssid              => 1234,
   sample_accession_number => "ABC123",
   study_accession_number  => "EFG456",
   sample_common_name      => "CommonNameChanged",
@@ -177,6 +186,7 @@ ok my $file_metadata_manual_qc_status_changed = UpdatePipeline::FileMetaData->ne
   library_ssid            => 123,
   total_reads             => 0,
   sample_name             => 'My name',
+  study_ssid              => 1234,
   sample_accession_number => "ABC123",
   study_accession_number  => "EFG456",
   sample_common_name      => "SomeBacteria",
@@ -196,6 +206,7 @@ ok my $file_metadata_paired_changed = UpdatePipeline::FileMetaData->new(
   total_reads             => 0,
   sample_name             => 'My name',
   sample_accession_number => "ABC123",
+  study_ssid              => 1234,
   study_accession_number  => "EFG456",
   sample_common_name      => "SomeBacteria",
   lane_is_paired_read     => 0
@@ -212,6 +223,7 @@ ok my $file_missing_sample_name = UpdatePipeline::FileMetaData->new(
   library_name            => 'My library name',
   library_ssid            => 123,
   total_reads             => 0,
+  study_ssid              => 1234,
   sample_accession_number => "ABC123",
   study_accession_number  => "EFG456",
   sample_common_name      => "SomeBacteria",
@@ -230,6 +242,7 @@ ok my $file_missing_sample_common_name = UpdatePipeline::FileMetaData->new(
   library_ssid            => 123,
   total_reads             => 0,
   sample_accession_number => "ABC123",
+  study_ssid              => 1234,
   study_accession_number  => "EFG456",
   sample_name             => 'My name',
 ), 'file meta data missing sample common name';
@@ -248,6 +261,7 @@ ok my $file_total_reads_problem = UpdatePipeline::FileMetaData->new(
   sample_accession_number => "ABC123",
   study_accession_number  => "EFG456",
   sample_name             => 'My name',
+  study_ssid              => 1234,
   sample_common_name      => "SomeBacteria",
 ), 'file meta data total reads inconsistent';
 

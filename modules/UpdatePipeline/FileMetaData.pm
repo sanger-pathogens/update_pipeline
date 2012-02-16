@@ -19,7 +19,7 @@ has 'file_md5'                    => ( is => 'rw', isa => 'Maybe[Str]');
 has 'file_type'                   => ( is => 'rw', isa => 'Str',         default    => 'bam' );
 has 'file_name'                   => ( is => 'rw', isa => 'Str',         required   => 1 );
 has 'file_name_without_extension' => ( is => 'rw', isa => 'Str',         required   => 1 );
-has 'library_name'                => ( is => 'ro', isa => 'Maybe[Str]');
+has 'library_name'                => ( is => 'rw', isa => 'Maybe[Str]');
 has 'library_ssid'                => ( is => 'rw', isa => 'Maybe[Str]');
 has 'total_reads'                 => ( is => 'rw', isa => 'Maybe[Int]');
 has 'sample_name'                 => ( is => 'rw', isa => 'Maybe[Str]');
