@@ -31,9 +31,9 @@ sub populate
   $self->_populate_ssid_from_pulldown_multiplexed_library_tube_name;
   
   # library ssid exists, library name missing
-  $self->_populate_name_from_library_tube_ssid
-  $self->_populate_name_from_multiplexed_library_tube_ssid
-  $self->_populate_name_from_pulldown_multiplexed_library_tube_ssid
+  $self->_populate_name_from_library_tube_ssid;
+  $self->_populate_name_from_multiplexed_library_tube_ssid;
+  $self->_populate_name_from_pulldown_multiplexed_library_tube_ssid;
   
   # both name and ssid are missing
 }
