@@ -60,17 +60,4 @@ sub _build_vr_library
   return $vlibrary;
 }
 
-# fragment size
-#my ( $f_from, $f_to ) = @{ $lib->fragment_size };
-#
-## strip off nonnumeric bits
-#$f_from =~ s/[^0-9]//g;
-#$f_to   =~ s/[^0-9]//g;
-#
-#if ( $f_from && $f_to ) {
-#    $vlib->fragment_size_from($f_from);
-#    $vlib->fragment_size_to($f_to);
-#}
-
-
 1;
