@@ -29,6 +29,9 @@ sub update_required
 sub _differences_between_file_and_lane_meta_data
 {
   my ($self) = @_;
+  
+  # ignore files where there are only a few reads, its usually bad data
+  return 0 if (defined($self->file_meta_data->total_reads ) && $self->file_meta_data->total_reads < 10000);
 
   UpdatePipeline::Exceptions::UndefinedSampleName->throw( error => $self->file_meta_data->file_name) if(not defined($self->file_meta_data->sample_name));
   UpdatePipeline::Exceptions::UndefinedSampleCommonName->throw( error => $self->file_meta_data->sample_name) if(not defined($self->file_meta_data->sample_common_name));
