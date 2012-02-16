@@ -25,6 +25,7 @@ has '_unknown_common_names'     => ( is => 'ro', isa => 'HashRef',  default => s
 has '_undefined_common_names'   => ( is => 'ro', isa => 'ArrayRef', default => sub { [] });
 has '_inconsistent_total_reads' => ( is => 'ro', isa => 'ArrayRef', default => sub { [] });
 has '_bad_irods_records'        => ( is => 'ro', isa => 'ArrayRef', default => sub { [] });
+has '_path_changed_to_lanes'    => ( is => 'ro', isa => 'ArrayRef', default => sub { [] });
 
 has '_unclassified_exception_counter'  => ( is => 'rw', isa => 'Int', default => 0);
 
@@ -55,12 +56,15 @@ sub print_report
   {
     print "Irods data missing\t$filename\n";
   }
-  
+  for my $filename (sort @{$self->_path_changed_to_lanes})
+  {
+    print "Lanes reimported\t$filename\n";
+  }
+
   if($self->_unclassified_exception_counter > 0)
   {
     print "Unclassified exceptions\t".$self->_unclassified_exception_counter."\n";
   }
-  
 }
 
 sub _build_report
@@ -86,6 +90,10 @@ sub _build_report
      {
        $self->_bad_irods_record($exception);
      }
+     elsif($exception->isa("UpdatePipeline::Exceptions::PathToLaneChanged"))
+     {
+       $self->_path_changed_to_lane($exception);
+     }
      else
      {
        # dont do anything with these exceptions other than count them
@@ -93,6 +101,12 @@ sub _build_report
      }
    }
    1;
+}
+
+sub _path_changed_to_lane
+{
+  my($self,$exception) = @_;
+  push(@{$self->_path_changed_to_lanes}, $exception->error);
 }
 
 sub _undefined_common_name
