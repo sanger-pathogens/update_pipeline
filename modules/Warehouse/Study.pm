@@ -26,6 +26,7 @@ sub populate
 {
   my($self) = @_;
   $self->_populate_ssid_from_name;
+  $self->_populate_name_from_ssid;
 }
 
 sub _populate_ssid_from_name
@@ -44,6 +45,24 @@ sub _populate_ssid_from_name
     }
   }
 }
+
+sub _populate_name_from_ssid
+{
+  my($self) = @_;
+  if(! defined($self->file_meta_data->study_name) && defined($self->file_meta_data->study_ssid)  )
+  {
+    my $study_ssid = $self->file_meta_data->study_ssid;
+    my $sql = qq[select name  from current_studies where internal_id = "$study_ssid" limit 1;];
+    my $sth = $self->_dbh->prepare($sql);
+    $sth->execute;
+    my @study_warehouse_details  = $sth->fetchrow_array;
+    if(@study_warehouse_details > 0)
+    {
+      $self->file_meta_data->study_name($study_warehouse_details[0]);
+    }
+  }
+}
+
 
 
 1;
