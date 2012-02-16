@@ -12,39 +12,13 @@ package UpdatePipeline::Validate;
 use Moose;
 use UpdatePipeline::IRODS;
 use UpdatePipeline::VRTrack::LaneMetaData;
+extends 'UpdatePipeline::CommonMetaDataManipulation';
 
-has 'study_names'  => ( is => 'rw', isa => 'ArrayRef', required   => 1 );
-has '_vrtrack'     => ( is => 'rw', required => 1 );
+has 'study_names'         => ( is => 'rw', isa => 'ArrayRef', required   => 1 );
+has '_vrtrack'            => ( is => 'rw', required => 1 );
 
-has '_files_metadata'  => ( is => 'rw',  isa => 'ArrayRef', lazy_build => 1 );
-has '_lanes_metadata'  => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
-
-has 'report'  => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
+has 'report'              => ( is => 'rw', isa => 'HashRef',  lazy_build => 1 );
 has 'inconsistent_files'  => ( is => 'rw', isa => 'HashRef' );
-
-sub _build__files_metadata
-{
-  my ($self) = @_;
-  my $irods_files_metadata = UpdatePipeline::IRODS->new(
-    study_names => $self->study_names
-    )->files_metadata();
-  return $irods_files_metadata;
-}
-
-sub _build__lanes_metadata
-{
-  my ($self) = @_;
-  my %lanes_metadata;
-  for my $file_metadata (@{$self->_files_metadata})
-  {
-    $lanes_metadata{$file_metadata->file_name_without_extension} = UpdatePipeline::VRTrack::LaneMetaData->new(
-      name => $file_metadata->file_name_without_extension, 
-      _vrtrack => $self->_vrtrack
-    )->lane_attributes();
-  }
-  return \%lanes_metadata;
-}
-
 
 sub _build_report
 {

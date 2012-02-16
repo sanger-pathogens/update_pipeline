@@ -41,6 +41,7 @@ sub _build_file_attributes
        if (/^value: (.+)$/)     { $file_attributes{$attribute} = $1; }
    }
    close $irods;
+   $self->_convert_manual_qc_values(\%file_attributes);
    
    return \%file_attributes;
 }
@@ -61,6 +62,30 @@ sub _file_name_without_extension
    $filename =~ s!_nonhuman!!;
    return $filename;
 }
+
+
+
+sub _convert_manual_qc_values
+{
+  my ($self,$file_attributes) = @_;
+  if(! defined($file_attributes->{manual_qc}))
+  {
+    $file_attributes->{manual_qc} = 'pending';
+  }
+  elsif($file_attributes->{manual_qc} == 0)
+  {
+     $file_attributes->{manual_qc} = 'fail';
+  }
+  elsif($file_attributes->{manual_qc} == 1)
+  {
+     $file_attributes->{manual_qc} = 'pass';
+  }
+  else
+  {
+     $file_attributes->{manual_qc} = '-';
+  }
+}
+
 
 sub _stream_location
 {

@@ -9,8 +9,6 @@ my @study_names = UpdatePipeline::Studies->new(filename => $studyfile);
 =cut
 package UpdatePipeline::Studies;
 use Moose;
-use UpdatePipeline::IRODS;
-use UpdatePipeline::VRTrack::LaneMetaData;
 
 has 'filename'    => ( is => 'rw', required => 1 );
 has 'study_names' => ( is => 'rw', isa => 'ArrayRef[Str]', lazy_build => 1 );

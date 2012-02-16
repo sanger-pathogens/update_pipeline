@@ -26,10 +26,14 @@ my %expected_output = (
   library => 'AB_CD_EF 1',
   study_accession_number => 'ABC123',
   file_name => '2442_6#123.bam',
-  file_name_without_extension => '2442_6#123'
+  file_name_without_extension => '2442_6#123',
+  is_paired_read => 1,
+  manual_qc => 'pass',
+  sample_common_name => 'Shigella flexneri',
+  study_id   => 55555,
+  sample_id => 44444,
 );
 is_deeply $file->file_attributes(), \%expected_output, "parsed valid irods file";
-
 
 
 # Invalid stream
@@ -56,7 +60,12 @@ ok  $file = IRODS::File->new( file_location => "/seq/2442/2442_6_nonhuman#123.ba
   library => 'AB_CD_EF 1',
   study_accession_number => 'ABC123',
   file_name => '2442_6_nonhuman#123.bam',
-  file_name_without_extension => '2442_6#123'
+  file_name_without_extension => '2442_6#123',
+  is_paired_read => 1,
+  manual_qc => 'pass',
+  sample_common_name => 'Shigella flexneri',
+  study_id   => 55555,
+  sample_id => 44444,
 );
 is_deeply $file->file_attributes(), \%expected_output, "parsed valid irods file with non human";
 
