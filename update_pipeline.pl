@@ -52,7 +52,7 @@ USAGE
 
 $parallel_processes ||= 1;
 $verbose_output ||= 0;
-$errors_min_run_id || 5000;
+$errors_min_run_id ||= 5000;
 
 my $study_names = UpdatePipeline::Studies->new(filename => $studyfile)->study_names;
 
