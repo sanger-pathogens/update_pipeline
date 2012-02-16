@@ -26,8 +26,9 @@ has '_undefined_common_names'   => ( is => 'ro', isa => 'ArrayRef', default => s
 has '_inconsistent_total_reads' => ( is => 'ro', isa => 'ArrayRef', default => sub { [] });
 has '_bad_irods_records'        => ( is => 'ro', isa => 'ArrayRef', default => sub { [] });
 has '_path_changed_to_lanes'    => ( is => 'ro', isa => 'ArrayRef', default => sub { [] });
+has '_unclassified_exceptions'  => ( is => 'ro', isa => 'ArrayRef', default => sub { [] });
 
-has '_unclassified_exception_counter'  => ( is => 'rw', isa => 'Int', default => 0);
+has 'print_unclassified'        => ( is => 'rw', isa => 'Bool', default => 0);
 
 sub add_exception
 {
@@ -37,7 +38,9 @@ sub add_exception
 
 sub print_report
 {
-  my($self) = @_;
+  my($self,$print_unclassified) = @_;
+  $self->print_unclassified($print_unclassified);
+  
   $self->_build_report;
   
   for my $common_name (sort keys %{$self->_unknown_common_names})
@@ -60,11 +63,22 @@ sub print_report
   {
     print "Lanes reimported\t$filename\n";
   }
-
-  if($self->_unclassified_exception_counter > 0)
+  
+  if(@{$self->_unclassified_exceptions} > 0)
   {
-    print "Unclassified exceptions\t".$self->_unclassified_exception_counter."\n";
+    if($self->print_unclassified == 0)
+    {
+      print "Unclassified exceptions\t".@{$self->_unclassified_exceptions}."\n";
+    }
+    else
+    {
+      for my $exception_detail (@{$self->_unclassified_exceptions})
+      {
+        print "Unclassified exception\t$exception_detail\n";
+      }
+    }
   }
+
 }
 
 sub _build_report
@@ -97,10 +111,16 @@ sub _build_report
      else
      {
        # dont do anything with these exceptions other than count them
-       $self->_unclassified_exception_counter($self->_unclassified_exception_counter + 1 );
+       $self->_unclassified_exception;
      }
    }
    1;
+}
+
+sub _unclassified_exception
+{
+  my($self,$exception) = @_;
+  push(@{$self->_unclassified_exceptions}, $exception);
 }
 
 sub _path_changed_to_lane

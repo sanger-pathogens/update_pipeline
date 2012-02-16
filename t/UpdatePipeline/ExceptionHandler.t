@@ -46,7 +46,7 @@ is_deeply $exception_handler->_exception_reporter->_unknown_common_names, \%expe
 my @expected_inconsistent_total_reads = ("1234_5#6","2222_5#6");
 is_deeply $exception_handler->_exception_reporter->_inconsistent_total_reads, \@expected_inconsistent_total_reads, 'list of inconsistent file names';
 
-is $exception_handler->_exception_reporter->_unclassified_exception_counter, 2, 'unclassified exception count';
+is @{$exception_handler->_exception_reporter->_unclassified_exceptions}, 2, 'unclassified exception count';
 
 my @expected_undef_common_names = ("sample_123");
 is_deeply $exception_handler->_exception_reporter->_undefined_common_names, \@expected_undef_common_names, 'undefined common names';

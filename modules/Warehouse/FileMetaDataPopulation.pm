@@ -29,6 +29,7 @@ sub populate
   
   Warehouse::Library->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->populate();
   Warehouse::Study->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->populate();
+  Warehouse::Sample->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->populate();
 
   
 }

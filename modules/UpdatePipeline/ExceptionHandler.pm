@@ -44,8 +44,8 @@ sub add_exception
 
 sub print_report
 {
-  my($self) = @_;
-  $self->_exception_reporter->print_report
+  my($self, $print_unclassified) = @_;
+  $self->_exception_reporter->print_report($print_unclassified);
 }
 
 # the path to a lane has changed so delete the lane so that it will be reimported in the next run of the importer

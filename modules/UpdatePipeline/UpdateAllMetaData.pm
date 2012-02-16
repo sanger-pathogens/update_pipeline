@@ -26,7 +26,9 @@ extends 'UpdatePipeline::CommonMetaDataManipulation';
 
 has 'study_names'         => ( is => 'rw', isa => 'ArrayRef', required   => 1 );
 has '_vrtrack'            => ( is => 'rw', required => 1 );
-has '_exception_handler' => ( is => 'rw', isa => 'UpdatePipeline::ExceptionHandler', lazy_build => 1 );
+has '_exception_handler'  => ( is => 'rw', isa => 'UpdatePipeline::ExceptionHandler', lazy_build => 1 );
+has 'verbose_output'      => ( is => 'rw', isa => 'Bool', default => 0);
+
 
 sub _build__exception_handler
 {
@@ -55,7 +57,7 @@ sub update
       $self->_exception_handler->add_exception($exception);
     }
   }
-  $self->_exception_handler->print_report();
+  $self->_exception_handler->print_report($self->verbose_output);
   
   1;
 }
