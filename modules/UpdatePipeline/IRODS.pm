@@ -21,13 +21,15 @@ use IRODS::File;
 use Warehouse::File;
 use Warehouse::Database;
 use UpdatePipeline::FileMetaData;
+use Warehouse::FileMetaDataPopulation;
 extends 'UpdatePipeline::CommonSettings';
 
-has 'study_names'      => ( is => 'rw', isa => 'ArrayRef[Str]', required   => 1 );
-has 'files_metadata'   => ( is => 'rw', isa => 'ArrayRef', lazy_build => 1 );
+has 'study_names'               => ( is => 'rw', isa => 'ArrayRef[Str]', required   => 1 );
+has 'files_metadata'            => ( is => 'rw', isa => 'ArrayRef',      lazy_build => 1 );
+has 'number_of_files_to_return' => ( is => 'rw', isa => 'Maybe[Int]');
 
-has '_irods_studies'   => ( is => 'rw', isa => 'ArrayRef', lazy_build => 1 );
-has '_warehouse_dbh'   => ( is => 'rw', lazy_build => 1 );
+has '_irods_studies'            => ( is => 'rw', isa => 'ArrayRef',      lazy_build => 1 );
+has '_warehouse_dbh'            => ( is => 'rw',                         lazy_build => 1 );
 
 sub _build__warehouse_dbh
 {
@@ -57,10 +59,6 @@ sub _build_files_metadata
 
   for my $irods_file_metadata (@irods_files_metadata)
   {
-    my $warehouse_file = Warehouse::File->new(
-      input_metadata => $irods_file_metadata,
-      _dbh => $self->_warehouse_dbh
-          )->file_attributes;
     
     my $file_metadata = UpdatePipeline::FileMetaData->new(
       study_name              => $irods_file_metadata->{study},
@@ -74,25 +72,46 @@ sub _build_files_metadata
       total_reads             => $irods_file_metadata->{total_reads},
       sample_name             => $irods_file_metadata->{sample},
       sample_accession_number => $irods_file_metadata->{sample_accession_number},
+      lane_is_paired_read     => $irods_file_metadata->{is_paired_read},
+      lane_manual_qc          => $irods_file_metadata->{manual_qc},
+      sample_common_name      => $irods_file_metadata->{sample_common_name},
+      sample_ssid             => $irods_file_metadata->{sample_id},
+      study_ssid              => $irods_file_metadata->{study_id},
     );
-    # get data from warehouse
+    
+    # fill in the blanks with data from the warehouse
+    Warehouse::FileMetaDataPopulation->new(file_meta_data => $file_metadata, _dbh => $self->_warehouse_dbh)->populate();
+    
     push(@files_metadata, $file_metadata);
   }
   
-  return \@files_metadata;
+  my @sorted_files_metadata = reverse((sort (sort_by_file_name @files_metadata)));
+  $self->_limit_returned_results(\@sorted_files_metadata);
+  
+  return \@sorted_files_metadata;
 }
 
 sub _get_irods_file_metadata_for_studies
 {
   my ($self) = @_;
   my @files_metadata;
+  my @unsorted_file_locations;
+  my @sorted_file_locations;
   
   for my $irods_study (@{$self->_irods_studies})
   {
     for my $file_metadata (@{$irods_study->file_locations()})
     {
-      push(@files_metadata, IRODS::File->new(file_location => $file_metadata)->file_attributes );
+      push(@unsorted_file_locations, $file_metadata);
     }
+  }
+  
+  # Allows you to only check the latest X runs.
+  @sorted_file_locations = (sort (sort_by_id_run @unsorted_file_locations));
+  $self->_limit_returned_results(\@sorted_file_locations);
+  for my $file_location (@sorted_file_locations)
+  {
+    push(@files_metadata, IRODS::File->new(file_location => $file_location)->file_attributes );
   }
   
   return \@files_metadata;
@@ -115,6 +134,35 @@ sub print_file_metadata
     print( ($file_metadata->sample_name             ? $file_metadata->sample_name             : '')  .', ');
     print( ($file_metadata->sample_accession_number ? $file_metadata->sample_accession_number : '')  ."\n");
   }
+}
+
+sub _limit_returned_results
+{
+   my ($self,$files_metadata) = @_;
+   if(defined($self->number_of_files_to_return) && $self->number_of_files_to_return > 0 && $self->number_of_files_to_return +1 < @{$files_metadata})
+   {
+     splice @{$files_metadata}, $self->number_of_files_to_return;
+   }
+   1;  
+}
+
+# Input /seq/2657/2657_1.bam
+sub sort_by_id_run
+{
+  my @a = split(/\//,$a);
+  my @b = split(/\//,$b);
+
+  $b[2]<=>$a[2] || $b[3] cmp $a[3];
+}
+
+
+
+sub sort_by_file_name
+{
+    my @a = split(/\_|\#/,$a->file_name_without_extension());
+    my @b = split(/\_|\#/,$b->file_name_without_extension());
+
+    $a[0]<=>$b[0] || $a[1]<=>$b[1] || $a[2]<=>$b[2];
 }
 
 
