@@ -29,11 +29,12 @@ has '_vrtrack'            => ( is => 'rw', required => 1 );
 has '_exception_handler'  => ( is => 'rw', isa => 'UpdatePipeline::ExceptionHandler', lazy_build => 1 );
 has 'verbose_output'      => ( is => 'rw', isa => 'Bool', default => 0);
 
+has 'minimum_run_id'      => ( is => 'rw', isa => "Int");
 
 sub _build__exception_handler
 {
   my ($self) = @_;
-  UpdatePipeline::ExceptionHandler->new( _vrtrack => $self->_vrtrack); 
+  UpdatePipeline::ExceptionHandler->new( _vrtrack => $self->_vrtrack, minimum_run_id => $self->minimum_run_id); 
 }
 
 
@@ -54,7 +55,7 @@ sub update
     };
     if(my $exception = Exception::Class->caught())
     { 
-      $self->_exception_handler->add_exception($exception);
+      $self->_exception_handler->add_exception($exception,$file_metadata->file_name_without_extension);
     }
   }
   $self->_exception_handler->print_report($self->verbose_output);
@@ -87,7 +88,7 @@ sub _update_lane
   };
   if(my $exception = Exception::Class->caught())
   { 
-    $self->_exception_handler->add_exception($exception);
+    $self->_exception_handler->add_exception($exception, $file_metadata->file_name_without_extension);
   }
 }
 

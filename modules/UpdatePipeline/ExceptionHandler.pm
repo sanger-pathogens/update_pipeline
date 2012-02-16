@@ -23,6 +23,7 @@ use UpdatePipeline::VRTrack::ExceptionHandling::Lane;
 
 has '_exception_reporter' => ( is => 'rw', isa => 'UpdatePipeline::ExceptionReporter', lazy_build => 1 );
 has '_vrtrack'            => ( is => 'rw', required => 1 );
+has 'minimum_run_id'      => ( is => 'rw', isa => 'Int');
 
 sub _build__exception_reporter
 {
@@ -32,7 +33,14 @@ sub _build__exception_reporter
 
 sub add_exception
 {
-  my($self, $exception) = @_;
+  my($self, $exception, $filename) = @_;
+  if(defined($self->minimum_run_id))
+  {
+    if( $filename =~ m/^(\d+)_/)
+    {
+      return if( $1 < $self->minimum_run_id);
+    }
+  }
   $self->_exception_reporter->add_exception($exception);
 
   if($exception->isa("UpdatePipeline::Exceptions::PathToLaneChanged"))

@@ -22,7 +22,7 @@ use Parallel::ForkManager;
 use UpdatePipeline::UpdateAllMetaData;
 use UpdatePipeline::Studies;
 
-my ( $studyfile, $help, $number_of_files_to_return, $parallel_processes, $verbose_output, $database );
+my ( $studyfile, $help, $number_of_files_to_return, $parallel_processes, $verbose_output, $errors_min_run_id, $database );
 
 GetOptions(
     's|studies=s'              => \$studyfile,
@@ -30,6 +30,7 @@ GetOptions(
     'f|max_files_to_return=s'  => \$number_of_files_to_return,
     'p|parallel_processes=s'   => \$parallel_processes,
     'v|verbose'                => \$verbose_output,
+    'r|min_run_id'             => \$errors_min_run_id,
     'h|help'                   => \$help,
 );
 
@@ -42,6 +43,7 @@ Usage: $0
   -f|--max_files_to_return <optional limit on num of file to check per process>
   -p|--parallel_processes  <optional number of processes to run in parallel, defaults to 1>
   -v|--verbose             <print out debugging information>
+  -r|--min_run_id          <optionally filter out errors below this run_id>
   -h|--help                <this message>
 
 Update the tracking database from IRODs and the warehouse
@@ -50,13 +52,15 @@ USAGE
 
 $parallel_processes ||= 1;
 $verbose_output ||= 0;
+$errors_min_run_id || 5000;
+
 my $study_names = UpdatePipeline::Studies->new(filename => $studyfile)->study_names;
 
 if($parallel_processes == 1)
 {
   my $vrtrack = VertRes::Utils::VRTrackFactory->instantiate(database => $db,mode     => 'rw');
   unless ($vrtrack) { die "Can't connect to tracking database: $db \n";}
-  my $update_pipeline = UpdatePipeline::UpdateAllMetaData->new(study_names => $study_names, _vrtrack => $vrtrack, number_of_files_to_return =>$number_of_files_to_return, verbose_output => $verbose_output );
+  my $update_pipeline = UpdatePipeline::UpdateAllMetaData->new(study_names => $study_names, _vrtrack => $vrtrack, number_of_files_to_return =>$number_of_files_to_return, verbose_output => $verbose_output, minimum_run_id => $errors_min_run_id  );
   $update_pipeline->update();
 }
 else
@@ -69,7 +73,7 @@ else
     
     my $vrtrack = VertRes::Utils::VRTrackFactory->instantiate(database => $db,mode     => 'rw');
     unless ($vrtrack) { die "Can't connect to tracking database: $db \n";}
-    my $update_pipeline = UpdatePipeline::UpdateAllMetaData->new(study_names => \@split_study_names, _vrtrack => $vrtrack, number_of_files_to_return =>$number_of_files_to_return, verbose_output => $verbose_output );
+    my $update_pipeline = UpdatePipeline::UpdateAllMetaData->new(study_names => \@split_study_names, _vrtrack => $vrtrack, number_of_files_to_return =>$number_of_files_to_return, verbose_output => $verbose_output, minimum_run_id => $errors_min_run_id  );
     $update_pipeline->update();
     $pm->finish; # do the exit in the child process
   }
