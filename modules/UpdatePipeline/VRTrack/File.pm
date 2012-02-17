@@ -40,7 +40,7 @@ sub _build_vr_file
   unless(defined($vfile))
   {
     # see if the file exists but with a different lane_id
-    $existing_vfile  = VRTrack::File->new_by_name( $self->_vrtrack, $self->name);
+    my $existing_vfile  = VRTrack::File->new_by_name( $self->_vrtrack, $self->name);
     if(defined($existing_vfile))
     {
       $vfile = $existing_vfile;
