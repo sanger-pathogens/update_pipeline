@@ -25,8 +25,11 @@ sub delete_lane
 {
   my($self)= @_;
   my $search_query = $self->name;  
-  my $sql = qq[update latest_lane set latest = 0 where name="$search_query" or hierarchy_name="$search_query" limit 1];
-  $self->_vrtrack->{_dbh}->do($sql);
+  my $lane_sql = qq[update latest_lane set latest = 0 where name="$search_query" or hierarchy_name="$search_query" limit 1];
+  $self->_vrtrack->{_dbh}->do($lane_sql);
+  
+  my $file_sql = qq[update latest_file set latest = 0 where name="$search_query%" or hierarchy_name="$search_query%" limit 1];
+  $self->_vrtrack->{_dbh}->do($file_sql);
 }
 
 
