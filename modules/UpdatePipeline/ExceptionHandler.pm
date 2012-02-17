@@ -38,7 +38,7 @@ sub add_exception
   {
     if( $filename =~ m/^(\d+)_/)
     {
-      return if( $1 < $self->minimum_run_id);
+      return 1 if( $1 < $self->minimum_run_id);
     }
   }
   $self->_exception_reporter->add_exception($exception);
