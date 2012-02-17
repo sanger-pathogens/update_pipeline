@@ -37,7 +37,13 @@ sub _build_vr_library
   my $vlibrary = VRTrack::Library->new_by_name( $self->_vrtrack, $self->name);
   unless(defined($vlibrary))
   {
-    $vlibrary = $self->_vr_sample->add_library($self->name);
+    eval{
+      $vlibrary = $self->_vr_sample->add_library($self->name);
+    };
+    if($@)
+    {
+       UpdatePipeline::Exceptions::DuplicateLibraryName->throw( error => $self->name );
+    }
   }
   UpdatePipeline::Exceptions::CouldntCreateLibrary->throw( error => "Couldnt create library with name ".$self->name."\n" ) if(not defined($vlibrary));
   
