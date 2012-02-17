@@ -30,7 +30,7 @@ GetOptions(
     'f|max_files_to_return=s'  => \$number_of_files_to_return,
     'p|parallel_processes=s'   => \$parallel_processes,
     'v|verbose'                => \$verbose_output,
-    'r|min_run_id'             => \$errors_min_run_id,
+    'r|min_run_id=s'             => \$errors_min_run_id,
     'h|help'                   => \$help,
 );
 
