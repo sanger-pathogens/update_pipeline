@@ -39,7 +39,17 @@ sub _build_vr_file
   $vfile = $self->_vr_lane->get_file_by_name($self->name);
   unless(defined($vfile))
   {
-    $vfile = $self->_vr_lane->add_file($self->name);
+    # see if the file exists but with a different lane_id
+    my $existing_vfile  = VRTrack::File->new_by_name( $self->_vrtrack, $self->name);
+    if(defined($existing_vfile))
+    {
+      $vfile = $existing_vfile;
+      $vfile->lane_id($self->_vr_lane->id);
+    }
+    else
+    {
+      $vfile = $self->_vr_lane->add_file($self->name);
+    }
   }
   UpdatePipeline::Exceptions::CouldntCreateFile->throw( error => "Couldnt create file with name ".$self->name."\n" ) if(not defined($vfile));
   

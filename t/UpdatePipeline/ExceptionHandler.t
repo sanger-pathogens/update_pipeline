@@ -5,7 +5,7 @@ use Data::Dumper;
 
 BEGIN { unshift(@INC, './modules') }
 BEGIN {
-    use Test::Most tests => 19;
+    use Test::Most;
     use_ok('UpdatePipeline::ExceptionHandler');
     use UpdatePipeline::Exceptions;
     use VRTrack::VRTrack;
@@ -55,6 +55,18 @@ my @expected_bad_irods_records = ("9999_8");
 is_deeply $exception_handler->_exception_reporter->_bad_irods_records, \@expected_bad_irods_records, 'bad irods records';
 
 
+# set min run Id to be 6000 and see if exception gets added.
+ok my $exception_handler_min_run_id = UpdatePipeline::ExceptionHandler->new(_vrtrack => $vrtrack, minimum_run_id => 6000), 'initialise the exception reporter with min run id';
+eval { UpdatePipeline::Exceptions::TotalReadsMismatch->throw(error => "some_error_message"); };
+if(my $exception = Exception::Class->caught()){ ok $exception_handler_min_run_id->add_exception($exception,"4123_1#1"), 'exception added with min run id';}
+eval { UpdatePipeline::Exceptions::TotalReadsMismatch->throw(error => "some_other_error_message"); };
+if(my $exception = Exception::Class->caught()){ ok $exception_handler_min_run_id->add_exception($exception,"7000_1#3"), 'exception added with min run id';}
+@expected_inconsistent_total_reads = ("some_other_error_message");
+ok $exception_handler_min_run_id->_exception_reporter->_build_report(), 'build the report';
+is_deeply $exception_handler_min_run_id->_exception_reporter->_inconsistent_total_reads, \@expected_inconsistent_total_reads, 'list of inconsistent file names should be empty';
+
+
+
 # check to see if a lane gets unset properly
 $vrtrack->{_dbh}->do('insert into lane (name,latest) values("test_lane_for_deletion",1)');
 
@@ -69,6 +81,7 @@ is $lane_details[0], 0, 'lane has been reset';
 
 
 delete_test_data($vrtrack);
+done_testing();
 
 sub delete_test_data
 {

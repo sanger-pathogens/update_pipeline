@@ -59,25 +59,32 @@ sub _build_files_metadata
 
   for my $irods_file_metadata (@irods_files_metadata)
   {
-    
-    my $file_metadata = UpdatePipeline::FileMetaData->new(
-      study_name              => $irods_file_metadata->{study},
-      study_accession_number  => $irods_file_metadata->{study_accession_number},
-      file_md5                => $irods_file_metadata->{md5},
-      file_type               => $irods_file_metadata->{type},
-      file_name               => $irods_file_metadata->{file_name},
-      file_name_without_extension => $irods_file_metadata->{file_name_without_extension},
-      library_name            => $irods_file_metadata->{library},
-      library_ssid            => $irods_file_metadata->{library_id},
-      total_reads             => $irods_file_metadata->{total_reads},
-      sample_name             => $irods_file_metadata->{sample},
-      sample_accession_number => $irods_file_metadata->{sample_accession_number},
-      lane_is_paired_read     => $irods_file_metadata->{is_paired_read},
-      lane_manual_qc          => $irods_file_metadata->{manual_qc},
-      sample_common_name      => $irods_file_metadata->{sample_common_name},
-      sample_ssid             => $irods_file_metadata->{sample_id},
-      study_ssid              => $irods_file_metadata->{study_id},
-    );
+    my $file_metadata; 
+    eval{
+      $file_metadata = UpdatePipeline::FileMetaData->new(
+        study_name              => $irods_file_metadata->{study},
+        study_accession_number  => $irods_file_metadata->{study_accession_number},
+        file_md5                => $irods_file_metadata->{md5},
+        file_type               => $irods_file_metadata->{type},
+        file_name               => $irods_file_metadata->{file_name},
+        file_name_without_extension => $irods_file_metadata->{file_name_without_extension},
+        library_name            => $irods_file_metadata->{library},
+        library_ssid            => $irods_file_metadata->{library_id},
+        total_reads             => $irods_file_metadata->{total_reads},
+        sample_name             => $irods_file_metadata->{sample},
+        sample_accession_number => $irods_file_metadata->{sample_accession_number},
+        lane_is_paired_read     => $irods_file_metadata->{is_paired_read},
+        lane_manual_qc          => $irods_file_metadata->{manual_qc},
+        sample_common_name      => $irods_file_metadata->{sample_common_name},
+        sample_ssid             => $irods_file_metadata->{sample_id},
+        study_ssid              => $irods_file_metadata->{study_id},
+      );
+    };
+    if($@)
+    {
+      # An error occured while trying to get data from IRODs, usually a transient error which will probably be fixed next time its run
+      next;
+    }
     
     # fill in the blanks with data from the warehouse
     Warehouse::FileMetaDataPopulation->new(file_meta_data => $file_metadata, _dbh => $self->_warehouse_dbh)->populate();
@@ -111,7 +118,7 @@ sub _get_irods_file_metadata_for_studies
   $self->_limit_returned_results(\@sorted_file_locations);
   for my $file_location (@sorted_file_locations)
   {
-    push(@files_metadata, IRODS::File->new(file_location => $file_location)->file_attributes );
+      push(@files_metadata, IRODS::File->new(file_location => $file_location)->file_attributes );
   }
   
   return \@files_metadata;

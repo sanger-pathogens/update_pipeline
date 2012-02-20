@@ -66,17 +66,7 @@ sub print_report
   
   if(@{$self->_unclassified_exceptions} > 0)
   {
-    if($self->print_unclassified == 0)
-    {
-      print "Unclassified exceptions\t".@{$self->_unclassified_exceptions}."\n";
-    }
-    else
-    {
-      for my $exception_detail (@{$self->_unclassified_exceptions})
-      {
-        print "Unclassified exception\t$exception_detail\n";
-      }
-    }
+    print "Unclassified exceptions\t".@{$self->_unclassified_exceptions}."\n";
   }
 
 }

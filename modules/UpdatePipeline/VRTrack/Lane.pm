@@ -37,7 +37,7 @@ sub _build_vr_lane
   my $vlane = VRTrack::Lane->new_by_name( $self->_vrtrack, $self->name);
   unless(defined($vlane))
   {
-    $vlane = $self->_vr_library->add_lane($self->name);
+      $vlane = $self->_vr_library->add_lane($self->name); 
   }
   UpdatePipeline::Exceptions::CouldntCreateLane->throw( error => "Couldnt create lane with name ".$self->name."\n" ) if(not defined($vlane));
   
