@@ -15,6 +15,7 @@ use Exception::Class (
     UpdatePipeline::Exceptions::UndefinedStudySSID        => { description => "undefined study ssid in irods"},
     UpdatePipeline::Exceptions::UndefinedLibraryName      => { description => "undefined library name in irods"},
     UpdatePipeline::Exceptions::PathToLaneChanged         => { description => "path has changed so need to reimport"},
-);
+    UpdatePipeline::Exceptions::DuplicateLibraryName      => { description => "Dupicate library name, only happens in old samples"},
+);  
 
 1;

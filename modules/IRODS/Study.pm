@@ -57,7 +57,7 @@ sub _stream_location
   }
   # and total_reads != 0
 
-  return $self->bin_directory . "imeta qu -z seq -d study = '".$self->name."' and target = 1 |";
+  return $self->bin_directory . "imeta qu -z seq -d study = '".$self->name."' and target = 1 and total_reads != 0 |";
 }
 
 1;

@@ -20,6 +20,7 @@ use Moose;
 use UpdatePipeline::Exceptions;
 use UpdatePipeline::ExceptionReporter;
 use UpdatePipeline::VRTrack::ExceptionHandling::Lane;
+use UpdatePipeline::VRTrack::ExceptionHandling::File;
 
 has '_exception_reporter' => ( is => 'rw', isa => 'UpdatePipeline::ExceptionReporter', lazy_build => 1 );
 has '_vrtrack'            => ( is => 'rw', required => 1 );
@@ -38,7 +39,7 @@ sub add_exception
   {
     if( $filename =~ m/^(\d+)_/)
     {
-      return if( $1 < $self->minimum_run_id);
+      return 1 if( $1 < $self->minimum_run_id);
     }
   }
   $self->_exception_reporter->add_exception($exception);
@@ -46,6 +47,7 @@ sub add_exception
   if($exception->isa("UpdatePipeline::Exceptions::PathToLaneChanged"))
   {
     $self->_delete_lane($exception);
+    $self->_delete_files($exception);
   }
   1;
 }
@@ -62,6 +64,13 @@ sub _delete_lane
   my($self,$exception) = @_;
   my $lane_exception_handler =  UpdatePipeline::VRTrack::ExceptionHandling::Lane->new(_vrtrack  => $self->_vrtrack, name => $exception->error);
   $lane_exception_handler->delete_lane();
+}
+
+sub _delete_files
+{
+  my($self,$exception) = @_;
+  my $lane_exception_handler =  UpdatePipeline::VRTrack::ExceptionHandling::File->new(_vrtrack  => $self->_vrtrack, name => $exception->error);
+  $lane_exception_handler->delete_files();
 }
 
 1;
