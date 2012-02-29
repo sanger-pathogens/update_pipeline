@@ -22,10 +22,12 @@ use Warehouse::Study;
 use Warehouse::Sample;
 use Warehouse::NPGInformation;
 use Warehouse::NPGPlexInformation;
+use Warehouse::Request;
 
 has 'file_meta_data'   => ( is => 'rw', isa => 'UpdatePipeline::FileMetaData', required => 1 );
 has '_dbh'             => ( is => 'rw',                                        required => 1 );
 
+# this is for data that should normally be in IRODs but isnt so it needs to be looked up (MySQL intensive)
 sub populate
 {
   my($self) = @_;
@@ -37,5 +39,19 @@ sub populate
   Warehouse::Sample->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->populate();
 }
 
+# this is for nonessential data which needs to be populated if its missing. Since its very DB intensive and its non critical information that we just use as a guideline
+# we just look it up if the object has been updated (or is new) for some reason to reduce the number of queries
+sub post_populate
+{
+  my($self) = @_;
+  # the order here is very important. Its in decending order of accuracy.
+  # get the median insert size (if NPG have aligned it)
+  Warehouse::NPGPlexInformation->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->post_populate();
+  Warehouse::NPGInformation->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->post_populate();
+  # Get requested size for a non multiplexed library
+  Warehouse::Library->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->post_populate();
+  # Get requested size for a multiplexed library
+  Warehouse::Request->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->post_populate();
+}
 
 1;

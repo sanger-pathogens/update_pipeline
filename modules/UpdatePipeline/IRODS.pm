@@ -22,20 +22,16 @@ use Warehouse::File;
 use Warehouse::Database;
 use UpdatePipeline::FileMetaData;
 use Warehouse::FileMetaDataPopulation;
-extends 'UpdatePipeline::CommonSettings';
+
 
 has 'study_names'               => ( is => 'rw', isa => 'ArrayRef[Str]', required   => 1 );
 has 'files_metadata'            => ( is => 'rw', isa => 'ArrayRef',      lazy_build => 1 );
 has 'number_of_files_to_return' => ( is => 'rw', isa => 'Maybe[Int]');
 
 has '_irods_studies'            => ( is => 'rw', isa => 'ArrayRef',      lazy_build => 1 );
-has '_warehouse_dbh'            => ( is => 'rw',                         lazy_build => 1 );
+has '_warehouse_dbh'            => ( is => 'rw',                         required => 1 );
 
-sub _build__warehouse_dbh
-{
-  my ($self) = @_;
-  Warehouse::Database->new(settings => $self->_database_settings->{warehouse})->connect;
-}
+
 
 sub _build__irods_studies
 {

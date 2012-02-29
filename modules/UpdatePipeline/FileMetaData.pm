@@ -29,5 +29,7 @@ has 'lane_is_paired_read'         => ( is => 'rw', isa => 'Bool',        default
 has 'lane_manual_qc'              => ( is => 'rw', isa => 'Str',         default    => '-');
 has 'study_ssid'                  => ( is => 'rw', isa => 'Maybe[Int]');
 has 'sample_ssid'                 => ( is => 'rw', isa => 'Maybe[Int]');
+has 'fragment_size_from'          => ( is => 'rw', isa => 'Maybe[Int]' );
+has 'fragment_size_to'            => ( is => 'rw', isa => 'Maybe[Int]' );
 
 1;

@@ -20,16 +20,24 @@ use UpdatePipeline::VRTrack::Lane;
 use UpdatePipeline::VRTrack::File;
 use UpdatePipeline::VRTrack::Study;
 use UpdatePipeline::ExceptionHandler;
-
 use Data::Dumper;
+
 extends 'UpdatePipeline::CommonMetaDataManipulation';
+extends 'UpdatePipeline::CommonSettings';
 
 has 'study_names'         => ( is => 'rw', isa => 'ArrayRef', required   => 1 );
 has '_vrtrack'            => ( is => 'rw', required => 1 );
 has '_exception_handler'  => ( is => 'rw', isa => 'UpdatePipeline::ExceptionHandler', lazy_build => 1 );
-has 'verbose_output'      => ( is => 'rw', isa => 'Bool', default => 0);
-
+has 'verbose_output'      => ( is => 'rw', isa => 'Bool', default    => 0);
+has '_warehouse_dbh'      => ( is => 'rw',                lazy_build => 1 );
 has 'minimum_run_id'      => ( is => 'rw', isa => "Int");
+
+
+sub _build__warehouse_dbh
+{
+  my ($self) = @_;
+  Warehouse::Database->new(settings => $self->_database_settings->{warehouse})->connect;
+}
 
 sub _build__exception_handler
 {
@@ -50,6 +58,7 @@ sub update
           file_meta_data => $file_metadata)->update_required
         )
       {
+          $self->_post_populate_file_metadata($file_metadata);
           $self->_update_lane($file_metadata);
       }
     };
@@ -90,6 +99,12 @@ sub _update_lane
   { 
     $self->_exception_handler->add_exception($exception, $file_metadata->file_name_without_extension);
   }
+}
+
+sub _post_populate_file_metadata
+{
+  my ($self, $file_metadata) = @_;
+  Warehouse::FileMetaDataPopulation->new(file_meta_data => $file_metadata, _dbh => $self->_warehouse_dbh)->post_populate();
 }
 
 

@@ -46,7 +46,7 @@ BEGIN {
 }
 
 my @study_names = ("MyStudy");
-ok my $update_pipelines_irods = UpdatePipeline::IRODS->new( study_names => \@study_names), 'Initialise valid irods study names';
+ok my $update_pipelines_irods = UpdatePipeline::IRODS->new( study_names => \@study_names, _warehouse_dbh => "abc"), 'Initialise valid irods study names';
 is_deeply @{$update_pipelines_irods->_irods_studies}[0]->file_locations, \@study_file_locations, 'valid get back list of file locations for study';
 
 is_deeply @{$update_pipelines_irods->_get_irods_file_metadata_for_studies}[0], \%irods_file_expected_output, 'valid file metadata returned';

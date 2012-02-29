@@ -40,7 +40,7 @@ sub _differences_between_file_and_lane_meta_data
 
   return 1 unless(defined $self->lane_meta_data);
 
-  my @required_keys = ("sample_name", "study_name","library_name", "total_reads","sample_accession_number","study_accession_number", "sample_common_name");
+  my @required_keys = ("sample_name", "study_name","library_name", "total_reads","sample_accession_number","study_accession_number", "sample_common_name", "fragment_size_from","fragment_size_to");
   for my $required_key (@required_keys)
   {
     return 1 unless defined($self->lane_meta_data->{$required_key});
@@ -81,6 +81,7 @@ sub _differences_between_file_and_lane_meta_data
   {
     UpdatePipeline::Exceptions::TotalReadsMismatch->throw( error => $self->file_meta_data->file_name_without_extension );
   }
+
 
   return 0; 
 }

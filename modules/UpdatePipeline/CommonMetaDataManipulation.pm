@@ -18,7 +18,8 @@ sub _build__files_metadata
   my ($self) = @_;
   my $irods_files_metadata = UpdatePipeline::IRODS->new(
     study_names               => $self->study_names,
-    number_of_files_to_return => $self->number_of_files_to_return
+    number_of_files_to_return => $self->number_of_files_to_return,
+    _warehouse_dbh            => $self->_warehouse_dbh
     )->files_metadata();
   return $irods_files_metadata;
 }

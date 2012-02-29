@@ -38,6 +38,36 @@ sub populate
   # both name and ssid are missing
 }
 
+sub post_populate
+{
+  my($self) = @_;
+  return unless(defined($self->file_meta_data->library_ssid));
+  return unless((!defined($self->file_meta_data->fragment_size_from))   ||  (!defined($self->file_meta_data->fragment_size_to)));
+  
+  # only available on a library tube
+  $self->_populate_fragment_size_from_library_tube_ssid;
+  
+}
+
+sub _populate_fragment_size_from_library_tube_ssid
+{
+  my($self) = @_;
+  if((!defined($self->file_meta_data->fragment_size_from))   ||  (!defined($self->file_meta_data->fragment_size_to)))
+  {
+    my $library_ssid = $self->file_meta_data->library_ssid;
+    
+    my $sql = qq[select fragment_size_required_from,fragment_size_required_to from current_library_tubes where internal_id = "$library_ssid" AND fragment_size_required_from is not NULL AND fragment_size_required_to is not NULL limit 1;];
+    my $sth = $self->_dbh->prepare($sql);
+    $sth->execute;
+    my @library_warehouse_details  = $sth->fetchrow_array;
+    if(@library_warehouse_details > 0)
+    {
+      $self->file_meta_data->fragment_size_from($library_warehouse_details[0]);
+      $self->file_meta_data->fragment_size_to($library_warehouse_details[0]);
+    }
+  }
+}
+
 sub _populate_ssid_from_library_tube_name
 {
   my($self) = @_;
@@ -97,7 +127,7 @@ sub _populate_name_from_library_tube_ssid
   if(defined($self->file_meta_data->library_ssid) && ! defined($self->file_meta_data->library_name)  )
   {
     my $library_ssid = $self->file_meta_data->library_ssid;
-    my $sql = qq[select name as library_name from current_library_tubes where name = "$library_ssid" limit 1;];
+    my $sql = qq[select name as library_name from current_library_tubes where internal_id = "$library_ssid" limit 1;];
     my $sth = $self->_dbh->prepare($sql);
     $sth->execute;
     my @library_warehouse_details  = $sth->fetchrow_array;
@@ -114,7 +144,7 @@ sub _populate_name_from_multiplexed_library_tube_ssid
   if(defined($self->file_meta_data->library_ssid) && ! defined($self->file_meta_data->library_name)  )
   {
     my $library_ssid = $self->file_meta_data->library_ssid;
-    my $sql = qq[select name as library_name from current_multiplexed_library_tubes where name = "$library_ssid" limit 1;];
+    my $sql = qq[select name as library_name from current_multiplexed_library_tubes where internal_id = "$library_ssid" limit 1;];
     my $sth = $self->_dbh->prepare($sql);
     $sth->execute;
     my @library_warehouse_details  = $sth->fetchrow_array;
@@ -131,7 +161,7 @@ sub _populate_name_from_pulldown_multiplexed_library_tube_ssid
   if(defined($self->file_meta_data->library_ssid) && ! defined($self->file_meta_data->library_name)  )
   {
     my $library_ssid = $self->file_meta_data->library_ssid;
-    my $sql = qq[select name as library_name from current_pulldown_multiplexed_library_tubes where name = "$library_ssid" limit 1;];
+    my $sql = qq[select name as library_name from current_pulldown_multiplexed_library_tubes where internal_id = "$library_ssid" limit 1;];
     my $sth = $self->_dbh->prepare($sql);
     $sth->execute;
     my @library_warehouse_details  = $sth->fetchrow_array;
