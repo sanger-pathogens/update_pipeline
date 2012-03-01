@@ -16,7 +16,6 @@ $file->populate();
 
 package Warehouse::FileMetaDataPopulation;
 use Moose;
-use Sfind::Sfind;
 use Warehouse::Library;
 use Warehouse::Study;
 use Warehouse::Sample;

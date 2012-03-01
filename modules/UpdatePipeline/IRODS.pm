@@ -18,7 +18,6 @@ package UpdatePipeline::IRODS;
 use Moose;
 use IRODS::Study;
 use IRODS::File;
-use Warehouse::File;
 use Warehouse::Database;
 use UpdatePipeline::FileMetaData;
 use Warehouse::FileMetaDataPopulation;

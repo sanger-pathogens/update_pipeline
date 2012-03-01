@@ -16,7 +16,6 @@ $file->post_populate();
 
 package Warehouse::Request;
 use Moose;
-use Sfind::Sfind;
 
 has 'file_meta_data'   => ( is => 'rw', isa => 'UpdatePipeline::FileMetaData', required => 1 );
 has '_dbh'             => ( is => 'rw',                                        required => 1 );
@@ -24,8 +23,9 @@ has '_dbh'             => ( is => 'rw',                                        r
 sub post_populate
 {
   my($self) = @_;
-  return unless(defined($self->file_meta_data->library_ssid));
+  return 0 unless(defined($self->file_meta_data->library_ssid));
   $self->_populate_fragment_size_from_library_ssid;
+  1;
 }
 
 sub _populate_fragment_size_from_library_ssid

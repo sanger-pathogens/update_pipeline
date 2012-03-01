@@ -16,7 +16,6 @@ $file->populate();
 
 package Warehouse::Library;
 use Moose;
-use Sfind::Sfind;
 
 has 'file_meta_data'   => ( is => 'rw', isa => 'UpdatePipeline::FileMetaData', required => 1 );
 has '_dbh'             => ( is => 'rw',                                        required => 1 );
