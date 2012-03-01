@@ -16,7 +16,6 @@ $file->populate();
 
 package Warehouse::Study;
 use Moose;
-use Sfind::Sfind;
 
 has 'file_meta_data'   => ( is => 'rw', isa => 'UpdatePipeline::FileMetaData', required => 1 );
 has '_dbh'             => ( is => 'rw',                                        required => 1 );
@@ -27,6 +26,7 @@ sub populate
   my($self) = @_;
   $self->_populate_ssid_from_name;
   $self->_populate_name_from_ssid;
+  1;
 }
 
 sub _populate_ssid_from_name

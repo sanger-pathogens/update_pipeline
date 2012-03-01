@@ -1,5 +1,5 @@
 warehouse:
-  database: warehouse_two_production
-  host:     mcs7
+  database: warehouse_two_test
+  host:     localhost
   port:     3306
-  user:     pathpipe_ro
+  user:     root

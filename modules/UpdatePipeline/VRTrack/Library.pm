@@ -26,6 +26,9 @@ has 'external_id'           => ( is => 'ro', isa => 'Int' );
 
 has 'sequencing_technology' => ( is => 'ro', isa => 'Str', default    => "SLX" );
 has 'sequencing_centre'     => ( is => 'ro', isa => 'Str', default    => "SC" );
+has 'fragment_size_from'    => ( is => 'rw', isa => 'Maybe[Int]' );
+has 'fragment_size_to'      => ( is => 'rw', isa => 'Maybe[Int]' );
+
 has '_vrtrack'              => ( is => 'ro',               required   => 1 );
 has '_vr_sample'            => ( is => 'ro',               required   => 1 );
 
@@ -59,11 +62,35 @@ sub _build_vr_library
     $vlibrary->ssid($self->external_id);
     $vlibrary->update();
   }
+  $self->add_fragment_sizes_if_not_previously_set($vlibrary);
   
   unless ($vlibrary->seq_tech($self->sequencing_technology)) { $vlibrary->add_seq_tech($self->sequencing_technology); }
   unless ($vlibrary->seq_centre($self->sequencing_centre))   { $vlibrary->add_seq_centre($self->sequencing_centre); }
   $vlibrary->update;
   return $vlibrary;
+}
+
+sub add_fragment_sizes_if_not_previously_set
+{
+  my ($self,$vlibrary) = @_;
+  return unless(defined($self->fragment_size_from) && defined($self->fragment_size_to));
+  $self->swap_fragment_sizes_if_to_less_than_from();
+
+  return if(defined($vlibrary->fragment_size_from) && defined($vlibrary->fragment_size_to));
+  $vlibrary->fragment_size_from($self->fragment_size_from);
+  $vlibrary->fragment_size_to($self->fragment_size_to);
+}
+
+sub swap_fragment_sizes_if_to_less_than_from
+{
+   my ($self) = @_;
+   if($self->fragment_size_from > $self->fragment_size_to)
+   {
+     my $swap_fragement_value = $self->fragment_size_from;
+     $self->fragment_size_from($self->fragment_size_to);
+     $self->fragment_size_to($swap_fragement_value);
+   }
+   
 }
 
 1;

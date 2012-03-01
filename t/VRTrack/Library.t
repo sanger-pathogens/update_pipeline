@@ -4,7 +4,7 @@ use warnings;
 
 BEGIN { unshift(@INC, './modules') }
 BEGIN {
-    use Test::Most tests => 20;
+    use Test::Most;
     use_ok('UpdatePipeline::VRTrack::Library');
     use VRTrack::VRTrack;
     use UpdatePipeline::VRTrack::Project;
@@ -48,11 +48,33 @@ is $vr_library4->seq_centre->name, 'US', 'new sequencing centre';
 is $vr_library4->seq_tech->name, 'NextNextGen', 'new sequencing technology';
 
 
+# an insert size is passed in so save it with the library
+ok my $library_insert_size = UpdatePipeline::VRTrack::Library->new(name => 'My library name3', external_id  => 123, fragment_size_from => 250,fragment_size_to => 250,  _vrtrack => $vrtrack,_vr_sample  => $vr_sample)->vr_library(), 'create a library with an insert size';
+is $library_insert_size->fragment_size_from(), 250, 'fragment size from set to insert size';
+is $library_insert_size->fragment_size_to(), 250, 'fragment size from set to insert size';
+
+# If the insert size was previously set, dont change it
+ok my $library_exists_update_insert_size = UpdatePipeline::VRTrack::Library->new(name => 'My library name3', external_id  => 123, fragment_size_from => 123,fragment_size_to => 999, _vrtrack => $vrtrack,_vr_sample  => $vr_sample)->vr_library(), 'find and update a library with an insert size';
+is $library_exists_update_insert_size->fragment_size_from(), 250, 'frag size from shouldnt change if previously set';
+is $library_exists_update_insert_size->fragment_size_to(), 250, 'frag size to shouldnt change if previously set';
+
+# the fragement size from is smaller than the fragement size to
+ok my $fragment_sizes_reversed = UpdatePipeline::VRTrack::Library->new(name => 'My library name4', external_id  => 123, fragment_size_from => 150,fragment_size_to => 50, _vrtrack => $vrtrack,_vr_sample  => $vr_sample)->vr_library(), 'find and update a library with an insert size';
+is $fragment_sizes_reversed->fragment_size_from(), 50, 'frag sizes swapped for from';
+is $fragment_sizes_reversed->fragment_size_to(), 150, 'frag sizes swapped for to';
+
+
+# Library already exists but the fragment size wasnt set, so set it now
+ok my $library_exists_with_no_frag_size_set = UpdatePipeline::VRTrack::Library->new(name => 'My library name', external_id  => 123,fragment_size_from => 123,fragment_size_to => 999, _vrtrack => $vrtrack,_vr_sample  => $vr_sample)->vr_library(), 'initialise valid creation';
+is $library_exists_with_no_frag_size_set->fragment_size_from(), 123, 'frag size from set ';
+is $library_exists_with_no_frag_size_set->fragment_size_to(), 999, 'frag sizes to set';
+
 # TODO
 # library exists by ssid but the library name has changed
 # delete original library row with ssid??
 
 delete_test_data($vrtrack);
+done_testing();
 
 sub delete_test_data
 {
@@ -61,7 +83,7 @@ sub delete_test_data
   $vrtrack->{_dbh}->do('delete from sample where name in ("My name","Another name")');
   $vrtrack->{_dbh}->do('delete from individual where name in ("My name","Another name")');
   $vrtrack->{_dbh}->do('delete from species where name="SomeBacteria"');
-  $vrtrack->{_dbh}->do('delete from library where name in ("My library name","My library name2")');
+  $vrtrack->{_dbh}->do('delete from library where name in ("My library name","My library name2","My library name3","My library name4")');
   $vrtrack->{_dbh}->do('delete from seq_centre where name in ("SC","US")');
   $vrtrack->{_dbh}->do('delete from seq_tech where name in ("SLX","NextNextGen")');
 }
