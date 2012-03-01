@@ -22,10 +22,11 @@ use Parallel::ForkManager;
 use UpdatePipeline::UpdateAllMetaData;
 use UpdatePipeline::Studies;
 
-my ( $studyfile, $help, $number_of_files_to_return, $parallel_processes, $verbose_output, $errors_min_run_id, $database );
+my ( $studyfile, $help, $number_of_files_to_return, $parallel_processes, $verbose_output, $errors_min_run_id, $database,$input_study_name );
 
 GetOptions(
     's|studies=s'              => \$studyfile,
+    'n|study_name=s'           => \$input_study_name,
     'd|database=s'             => \$database,
     'f|max_files_to_return=s'  => \$number_of_files_to_return,
     'p|parallel_processes=s'   => \$parallel_processes,
@@ -36,9 +37,10 @@ GetOptions(
 
 my $db = $database ;
 
-( $studyfile &&  $db && !$help ) or die <<USAGE;
+( ($studyfile || $input_study_name) &&  $db && !$help ) or die <<USAGE;
 Usage: $0   
   -s|--studies             <file of study names>
+  -n|--study_name          <a single study name to update>
   -d|--database            <vrtrack database name>
   -f|--max_files_to_return <optional limit on num of file to check per process>
   -p|--parallel_processes  <optional number of processes to run in parallel, defaults to 1>
@@ -46,15 +48,36 @@ Usage: $0
   -r|--min_run_id          <optionally filter out errors below this run_id, defaults to 6000>
   -h|--help                <this message>
 
-Update the tracking database from IRODs and the warehouse
+Update the tracking database from IRODs and the warehouse.
+
+# update all studies listed in the file in the given database
+$0 -s my_study_file -d pathogen_abc_track
+
+# update only the given study
+$0 -n "My Study" -d pathogen_abc_track
+
+# Lookup all studies listed in the file, but only update the 500 latest files in IRODs
+$0 -s my_study_file -d pathogen_abc_track -f 500
+
+# perform the update using 10 processes
+$0 -s my_study_file -d pathogen_abc_track -p 10
 
 USAGE
 
 $parallel_processes ||= 1;
 $verbose_output ||= 0;
 $errors_min_run_id ||= 6000;
+my $study_names;
 
-my $study_names = UpdatePipeline::Studies->new(filename => $studyfile)->study_names;
+if(defined($studyfile))
+{
+  $study_names = UpdatePipeline::Studies->new(filename => $studyfile)->study_names;
+}
+else
+{
+  my @studyname = ($input_study_name);
+  $study_names = \@studyname;
+}
 
 if($parallel_processes == 1)
 {
