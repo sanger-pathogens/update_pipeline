@@ -33,8 +33,7 @@ sub populate
   $self->_populate_name_from_library_tube_ssid;
   $self->_populate_name_from_multiplexed_library_tube_ssid;
   $self->_populate_name_from_pulldown_multiplexed_library_tube_ssid;
-  
-  # both name and ssid are missing
+  1;
 }
 
 sub post_populate
@@ -45,7 +44,7 @@ sub post_populate
   
   # only available on a library tube
   $self->_populate_fragment_size_from_library_tube_ssid;
-  
+  1;
 }
 
 sub _populate_fragment_size_from_library_tube_ssid
@@ -62,7 +61,7 @@ sub _populate_fragment_size_from_library_tube_ssid
     if(@library_warehouse_details > 0)
     {
       $self->file_meta_data->fragment_size_from($library_warehouse_details[0]);
-      $self->file_meta_data->fragment_size_to($library_warehouse_details[0]);
+      $self->file_meta_data->fragment_size_to($library_warehouse_details[1]);
     }
   }
 }
@@ -132,7 +131,7 @@ sub _populate_name_from_library_tube_ssid
     my @library_warehouse_details  = $sth->fetchrow_array;
     if(@library_warehouse_details > 0)
     {
-      $self->file_meta_data->library_ssid($library_warehouse_details[0]);
+      $self->file_meta_data->library_name($library_warehouse_details[0]);
     }
   }
 }
@@ -149,7 +148,7 @@ sub _populate_name_from_multiplexed_library_tube_ssid
     my @library_warehouse_details  = $sth->fetchrow_array;
     if(@library_warehouse_details > 0)
     {
-      $self->file_meta_data->library_ssid($library_warehouse_details[0]);
+      $self->file_meta_data->library_name($library_warehouse_details[0]);
     }
   }
 }
@@ -166,7 +165,7 @@ sub _populate_name_from_pulldown_multiplexed_library_tube_ssid
     my @library_warehouse_details  = $sth->fetchrow_array;
     if(@library_warehouse_details > 0)
     {
-      $self->file_meta_data->library_ssid($library_warehouse_details[0]);
+      $self->file_meta_data->library_name($library_warehouse_details[0]);
     }
   }
 }

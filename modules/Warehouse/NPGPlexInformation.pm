@@ -27,33 +27,34 @@ has '_tag'             => ( is => 'rw', isa => 'Int');
 sub post_populate
 {
   my($self) = @_;
-  return if(! ($self->file_meta_data->file_name_without_extension =~ /#/));
+  return 0 if(! ($self->file_meta_data->file_name_without_extension =~ /#/));
   
   unless ((!defined($self->file_meta_data->fragment_size_from))   ||
   (!defined($self->file_meta_data->fragment_size_to)))
   {
-   return; 
+   return 1; 
   }
   $self->_split_file_name;
   $self->_populate_median_insert_size_from_npg_plex_information_table;
-  
+  1;
 }
 
 sub populate
 {
   my($self) = @_;
-  return if(! ($self->file_meta_data->file_name_without_extension =~ /#/));
+  return 0 if(! ($self->file_meta_data->file_name_without_extension =~ /#/));
   
   unless ((!defined($self->file_meta_data->study_ssid))   ||
   (!defined($self->file_meta_data->sample_ssid))  ||
   (!defined($self->file_meta_data->library_ssid)) ||
   (!defined($self->file_meta_data->library_name)))
   {
-   return; 
+   return 1; 
   }
   
   $self->_split_file_name;
   $self->_populate_from_npg_information_table;
+  1;
 }
 
 
@@ -66,7 +67,7 @@ sub _populate_median_insert_size_from_npg_plex_information_table
     my $position = $self->_position;
     my $tag = $self->_tag;
     
-    my $sql = qq[select insert_size_median from npg_plex_information where id_run = "$id_run" AND position = $position AND tag_index = $tag AND median_insert_size is not NULL limit 1;];
+    my $sql = qq[select insert_size_median from npg_plex_information where id_run = "$id_run" AND position = $position AND tag_index = $tag AND insert_size_median is not NULL limit 1;];
     my $sth = $self->_dbh->prepare($sql);
     $sth->execute;
     my @study_warehouse_details  = $sth->fetchrow_array;

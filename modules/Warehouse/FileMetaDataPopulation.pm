@@ -44,13 +44,13 @@ sub post_populate
 {
   my($self) = @_;
   # the order here is very important. Its in decending order of accuracy.
-  # get the median insert size (if NPG have aligned it)
-  Warehouse::NPGPlexInformation->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->post_populate();
-  Warehouse::NPGInformation->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->post_populate();
   # Get requested size for a non multiplexed library
   Warehouse::Library->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->post_populate();
   # Get requested size for a multiplexed library
   Warehouse::Request->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->post_populate();
+  # get the median insert size (if NPG have aligned it)
+  Warehouse::NPGPlexInformation->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->post_populate();
+  Warehouse::NPGInformation->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->post_populate();
 }
 
 1;

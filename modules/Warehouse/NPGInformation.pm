@@ -48,11 +48,12 @@ sub populate
   (!defined($self->file_meta_data->library_ssid)) ||
   (!defined($self->file_meta_data->library_name)))
   {
-   return; 
+   return 1 ; 
   }
 
   $self->_split_file_name;
   $self->_populate_from_npg_information_table;
+  1;
 }
 
 sub _populate_from_npg_information_table
@@ -88,9 +89,8 @@ sub _populate_median_insert_size_from_npg_information_table
   {
     my $id_run = $self->_id_run;
     my $position = $self->_position;
-    my $tag = $self->_tag;
     
-    my $sql = qq[select insert_size_median from npg_information where id_run = "$id_run" AND position = $position AND tag_index = $tag AND median_insert_size is not NULL limit 1;];
+    my $sql = qq[select insert_size_median from npg_information where id_run = "$id_run" AND position = $position AND insert_size_median is not NULL limit 1;];
     my $sth = $self->_dbh->prepare($sql);
     $sth->execute;
     my @study_warehouse_details  = $sth->fetchrow_array;
