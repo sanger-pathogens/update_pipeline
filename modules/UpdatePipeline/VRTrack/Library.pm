@@ -26,8 +26,8 @@ has 'external_id'           => ( is => 'ro', isa => 'Int' );
 
 has 'sequencing_technology' => ( is => 'ro', isa => 'Str', default    => "SLX" );
 has 'sequencing_centre'     => ( is => 'ro', isa => 'Str', default    => "SC" );
-has 'fragment_size_from'    => ( is => 'rw', isa => 'Int' );
-has 'fragment_size_to'      => ( is => 'rw', isa => 'Int' );
+has 'fragment_size_from'    => ( is => 'rw', isa => 'Maybe[Int]' );
+has 'fragment_size_to'      => ( is => 'rw', isa => 'Maybe[Int]' );
 
 has '_vrtrack'              => ( is => 'ro',               required   => 1 );
 has '_vr_sample'            => ( is => 'ro',               required   => 1 );

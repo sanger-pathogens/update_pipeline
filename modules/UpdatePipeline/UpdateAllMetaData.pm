@@ -100,7 +100,13 @@ sub _update_lane
       $vproject->update;
     }
     my $vr_sample = UpdatePipeline::VRTrack::Sample->new(name => $file_metadata->sample_name,  external_id => $file_metadata->sample_ssid, common_name => $file_metadata->sample_common_name, accession => $file_metadata->sample_accession_number, _vrtrack => $self->_vrtrack,_vr_project => $vproject)->vr_sample();
-    my $vr_library = UpdatePipeline::VRTrack::Library->new(name => $file_metadata->library_name, external_id  => $file_metadata->library_ssid, _vrtrack => $self->_vrtrack,_vr_sample  => $vr_sample)->vr_library();
+    my $vr_library = UpdatePipeline::VRTrack::Library->new(
+      name => $file_metadata->library_name, 
+      external_id        => $file_metadata->library_ssid, 
+      fragment_size_from => $file_metadata->fragment_size_from,
+      fragment_size_to   => $file_metadata->fragment_size_to,
+      _vrtrack           => $self->_vrtrack,
+      _vr_sample         => $vr_sample)->vr_library();
     
     my $vr_lane = UpdatePipeline::VRTrack::Lane->new(
       name          => $file_metadata->file_name_without_extension,
