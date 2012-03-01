@@ -20,10 +20,9 @@ use UpdatePipeline::VRTrack::Lane;
 use UpdatePipeline::VRTrack::File;
 use UpdatePipeline::VRTrack::Study;
 use UpdatePipeline::ExceptionHandler;
-use Data::Dumper;
+use Pathogens::ConfigSettings;
 
 extends 'UpdatePipeline::CommonMetaDataManipulation';
-
 
 has 'study_names'         => ( is => 'rw', isa => 'ArrayRef', required   => 1 );
 has '_vrtrack'            => ( is => 'rw', required => 1 );
