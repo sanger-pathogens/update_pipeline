@@ -23,7 +23,7 @@ use UpdatePipeline::ExceptionHandler;
 use Data::Dumper;
 
 extends 'UpdatePipeline::CommonMetaDataManipulation';
-extends 'UpdatePipeline::CommonSettings';
+
 
 has 'study_names'         => ( is => 'rw', isa => 'ArrayRef', required   => 1 );
 has '_vrtrack'            => ( is => 'rw', required => 1 );
@@ -31,6 +31,23 @@ has '_exception_handler'  => ( is => 'rw', isa => 'UpdatePipeline::ExceptionHand
 has 'verbose_output'      => ( is => 'rw', isa => 'Bool', default    => 0);
 has '_warehouse_dbh'      => ( is => 'rw',                lazy_build => 1 );
 has 'minimum_run_id'      => ( is => 'rw', isa => "Int");
+has 'environment'                   => ( is => 'rw', isa => 'Str', default => 'production');
+
+has '_config_settings'              => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
+has '_database_settings'            => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
+
+
+sub _build__config_settings
+{
+   my ($self) = @_;
+   \%{Pathogens::ConfigSettings->new(environment => $self->environment, filename => 'config.yml')->settings()};
+}
+
+sub _build__database_settings
+{
+  my ($self) = @_;
+  \%{Pathogens::ConfigSettings->new(environment => $self->environment, filename => 'database.yml')->settings()};
+}
 
 
 sub _build__warehouse_dbh
