@@ -12,13 +12,38 @@ package UpdatePipeline::Validate;
 use Moose;
 use UpdatePipeline::IRODS;
 use UpdatePipeline::VRTrack::LaneMetaData;
+use Pathogens::ConfigSettings;
 extends 'UpdatePipeline::CommonMetaDataManipulation';
 
 has 'study_names'         => ( is => 'rw', isa => 'ArrayRef', required   => 1 );
 has '_vrtrack'            => ( is => 'rw', required => 1 );
+has '_warehouse_dbh'      => ( is => 'rw',                lazy_build => 1 );
 
 has 'report'              => ( is => 'rw', isa => 'HashRef',  lazy_build => 1 );
 has 'inconsistent_files'  => ( is => 'rw', isa => 'HashRef' );
+has 'environment'                   => ( is => 'rw', isa => 'Str', default => 'production');
+
+has '_config_settings'              => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
+has '_database_settings'            => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
+
+sub _build__config_settings
+{
+   my ($self) = @_;
+   \%{Pathogens::ConfigSettings->new(environment => $self->environment, filename => 'config.yml')->settings()};
+}
+
+sub _build__database_settings
+{
+  my ($self) = @_;
+  \%{Pathogens::ConfigSettings->new(environment => $self->environment, filename => 'database.yml')->settings()};
+}
+
+
+sub _build__warehouse_dbh
+{
+  my ($self) = @_;
+  Warehouse::Database->new(settings => $self->_database_settings->{warehouse})->connect;
+}
 
 sub _build_report
 {
