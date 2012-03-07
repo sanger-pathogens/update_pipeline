@@ -30,12 +30,17 @@ has '_dbh'             => ( is => 'rw',                                        r
 sub populate
 {
   my($self) = @_;
-  Warehouse::NPGInformation->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->populate();
+  # do this check twice because its more likely to be correct than the NPG table.
+  Warehouse::Library->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->populate();
+  Warehouse::Study->new(  file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->populate();
+  Warehouse::Sample->new( file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->populate();
+  
+  Warehouse::NPGInformation->new(    file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->populate();
   Warehouse::NPGPlexInformation->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->populate();
 
   Warehouse::Library->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->populate();
-  Warehouse::Study->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->populate();
-  Warehouse::Sample->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->populate();
+  Warehouse::Study->new(  file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->populate();
+  Warehouse::Sample->new( file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->populate();
 }
 
 # this is for nonessential data which needs to be populated if its missing. Since its very DB intensive and its non critical information that we just use as a guideline
