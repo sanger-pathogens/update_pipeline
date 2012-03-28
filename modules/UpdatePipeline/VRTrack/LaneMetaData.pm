@@ -26,9 +26,10 @@ has 'lane_attributes'   => ( is => 'rw', lazy_build   => 1 );
 sub _build_lane_attributes
 {
   my ($self) = @_; 
-  my $search_query = $self->name;  
-
-  my $sql = qq[select study.acc as study_accession_number, sample.name as sample_name,  
+  my $search_query = $self->name;
+  my $sql = qq[select 
+  study.acc as study_accession_number, 
+  sample.name as sample_name,  
   project.name as study_name,
   library.name as library_name,
   library.ssid as library_ssid,
@@ -37,6 +38,7 @@ sub _build_lane_attributes
   species.name as sample_common_name,
   lane.npg_qc_status as lane_manual_qc,
   lane.paired as lane_is_paired_read,
+  lane.changed as lane_date_changed,
   sample.ssid as sample_ssid,
   project.ssid as study_ssid,
   lane.processed as lane_processed,

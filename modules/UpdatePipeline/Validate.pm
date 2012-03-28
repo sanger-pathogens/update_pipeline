@@ -145,7 +145,16 @@ sub _filter_by_run_id
 sub _compare_file_metadata_with_vrtrack_lane_metadata
 {
   my ($self, $file_metadata, $lane_metadata) = @_;
-  
+
+
+  #1) 'processed' flag of the lane must be '0' to be considered 'new'.
+  #2) 'too recent' is defined by 'minimum_hours_since_lane_date_changed'.
+  return if $self->_lane_changed_date_is_too_recent_to_compare({
+                                                                  lane_metadata_hashref => $lane_metadata
+                                                                , minimum_hours_since_lane_date_changed => 48
+                                                               }
+                                                              );
+
   return "irods_missing_sample_name"  unless defined($file_metadata->{sample_name});
   return "irods_missing_study_name"   unless defined($file_metadata->{study_name});
   return "irods_missing_library_name" unless defined($file_metadata->{library_name});
@@ -181,6 +190,32 @@ sub _compare_file_metadata_with_vrtrack_lane_metadata
   return;
 }
 
+=head2 _lane_changed_date_is_too_recent_to_compare
+
+ Usage     : $self->_lane_changed_date_is_too_recent_to_compare({
+                                                                   lane_metadata_hashref => $lane_metadata
+                                                                 , minimum_hours_since_lane_date_changed => 48
+                                                                }
+                                                               );
+ Purpose   : This method should skip comparisons for new lanes (processed == 0) 
+             with recent change (lane_changed date < minimum_hours_since_lane_date_changed) 
+ Returns   : (int) 1 for true or 0 for false.
+ Argument  : a lane_metadata hashref where "processed" and the date fields are present
+ Throws    : Nothing
+ Comment   : This method has been created to avoid comparing premature VRTrack 
+             lane datasets to their iRODS counterparts. A lane's 'processed' flag must be "0" 
+             to be considered "new".
+
+=cut
+
+sub _lane_changed_date_is_too_recent_to_compare
+{
+    my ($self, $args) = @_;
+    #$args->{lane_metadata_hashref};
+    #$args->{minimum_hours_since_lane_changed_date};
+
+
+}
 1;
 
 
