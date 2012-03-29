@@ -13,6 +13,9 @@ use Moose;
 use UpdatePipeline::IRODS;
 use UpdatePipeline::VRTrack::LaneMetaData;
 use Pathogens::ConfigSettings;
+use Carp qw(croak);
+use UpdatePipeline::Exceptions;
+
 extends 'UpdatePipeline::CommonMetaDataManipulation';
 
 has 'study_names'         => ( is => 'rw', isa => 'ArrayRef', required   => 1 );
@@ -147,13 +150,12 @@ sub _compare_file_metadata_with_vrtrack_lane_metadata
   my ($self, $file_metadata, $lane_metadata) = @_;
 
 
-  #1) 'processed' flag of the lane must be '0' to be considered 'new'.
-  #2) 'too recent' is defined by 'minimum_hours_since_lane_date_changed'.
-  return if $self->_lane_changed_date_is_too_recent_to_compare({
-                                                                  lane_metadata_hashref => $lane_metadata
-                                                                , minimum_hours_since_lane_date_changed => 48
-                                                               }
-                                                              );
+  #for new lanes that were recently changed, we do no comparison
+  return if $self->_new_lane_changed_too_recently_to_compare({
+                                                                 lane_metadata => $lane_metadata
+                                                               , minimum_hours => 48
+                                                             }
+                                                            );
 
   return "irods_missing_sample_name"  unless defined($file_metadata->{sample_name});
   return "irods_missing_study_name"   unless defined($file_metadata->{study_name});
@@ -190,32 +192,43 @@ sub _compare_file_metadata_with_vrtrack_lane_metadata
   return;
 }
 
-=head2 _lane_changed_date_is_too_recent_to_compare
+=head2 _new_lane_changed_too_recently_to_compare
 
- Usage     : $self->_lane_changed_date_is_too_recent_to_compare({
-                                                                   lane_metadata_hashref => $lane_metadata
-                                                                 , minimum_hours_since_lane_date_changed => 48
-                                                                }
-                                                               );
+ Usage     : $self->_new_lane_changed_too_recently_to_compare({
+                                                                  lane_metadata  => $lane_metadata
+                                                                , hour_threshold => 48
+                                                              }
+                                                             );
  Purpose   : This method should skip comparisons for new lanes (processed == 0) 
-             with recent change (lane_changed date < minimum_hours_since_lane_date_changed) 
+             with recent change (lane_changed date < hour_threshold).
  Returns   : (int) 1 for true or 0 for false.
- Argument  : a lane_metadata hashref where "processed" and the date fields are present
- Throws    : Nothing
- Comment   : This method has been created to avoid comparing premature VRTrack 
-             lane datasets to their iRODS counterparts. A lane's 'processed' flag must be "0" 
-             to be considered "new".
+ Argument  : Two named arguments: 
+             1) (hash reference) lane_metadata: a lane metadata.
+             2) (int) hour_threshold: a defines minimum timediff upon which to consider a lane as "non recent".
+ Throws    : Nothing.
+ Comment   : This method has been created to avoid comparing premature VRTrack lanes to their iRODS counterparts.
+             lane datasets to their iRODS counterparts. A new lane is defined by a 'processed' value of 0.
 
 =cut
 
-sub _lane_changed_date_is_too_recent_to_compare
+sub _new_lane_changed_too_recently_to_compare
 {
     my ($self, $args) = @_;
-    #$args->{lane_metadata_hashref};
-    #$args->{minimum_hours_since_lane_changed_date};
+    my $lane_metadata = $args->{'lane_metadata'}  || croak 'no lane_metadata hashref provided';
+    my $minimum_hours = $args->{'hour_threshold'} || croak 'no hour_threshold provided';
 
-
+    if ( $lane_metadata->{'hours_since_lane_date_changed'} < 0 ) {
+        UpdatePipeline::Exceptions::InvalidTimeDiff->throw(error=> 'an error');
+    } 
+    elsif ( $lane_metadata->{'hours_since_lane_date_changed'} >= $minimum_hours) {
+        return 0; 
+    } 
+    elsif ( $lane_metadata->{'hours_since_lane_date_changed'} < $minimum_hours ) {
+        return 1;
+    } 
 }
+
+
 1;
 
 

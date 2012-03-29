@@ -16,6 +16,7 @@ use Exception::Class (
     UpdatePipeline::Exceptions::UndefinedLibraryName      => { description => "undefined library name in irods"},
     UpdatePipeline::Exceptions::PathToLaneChanged         => { description => "path has changed so need to reimport"},
     UpdatePipeline::Exceptions::DuplicateLibraryName      => { description => "Dupicate library name, only happens in old samples"},
+    UpdatePipeline::Exceptions::InvalidTimeDiff           => { description => "Time difference value may only be positive"},
 );  
 
 1;

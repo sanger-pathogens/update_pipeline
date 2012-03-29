@@ -5,8 +5,10 @@ use Data::Dumper;
 
 BEGIN { unshift(@INC, './modules') }
 BEGIN {
-    use Test::Most tests => 3;
+    use Test::Most tests => 6;
     use_ok('UpdatePipeline::Validate');
+    use DateTime;
+    use DateTime::Format::MySQL;
     use UpdatePipeline::VRTrack::LaneMetaData;
     use UpdatePipeline::Validate;
     use VRTrack::VRTrack;
@@ -17,6 +19,7 @@ BEGIN {
     use UpdatePipeline::VRTrack::File;
     use UpdatePipeline::VRTrack::LaneMetaData;
     use UpdatePipeline::VRTrack::Study;
+    use UpdatePipeline::Exceptions;
 }
 
 #create a vrtrack object
@@ -35,13 +38,35 @@ my $vr_lane = UpdatePipeline::VRTrack::Lane->new(name  => '1234_5#6', total_read
 my $vr_file = UpdatePipeline::VRTrack::File->new(name => 'myfile.bam',md5 => 'abc1231343432432432',_vrtrack => $vrtrack,_vr_lane => $vr_lane)->vr_file();
 my $lane_metadata = UpdatePipeline::VRTrack::LaneMetaData->new(name => '1234_5#6',_vrtrack => $vrtrack)->lane_attributes;
 
-#UpdatePipeline::Validate related core tests:
+#############################################
+#Core tests for UpdatePipeline::Validate.pm 
+#############################################
 my @studies = ('EFG456');
 my $validator = UpdatePipeline::Validate->new(study_names => \@studies, _vrtrack => $vrtrack);
 isa_ok( $validator, 'UpdatePipeline::Validate' );
-can_ok($validator, '_lane_changed_date_is_too_recent_to_compare');
+can_ok($validator, '_new_lane_changed_too_recently_to_compare');
 
+#testing the method: '_new_lane_changed_too_recently_to_compare'
 
+#last change date new lane >=48
+$lane_metadata->{'hours_since_lane_date_changed'} = 120;
+ok( $validator->_new_lane_changed_too_recently_to_compare( {lane_metadata => $lane_metadata, hour_threshold => 48} ) == 0, 
+    'handling of new lane with lane_date_changed >= 48h from now'
+  ); 
+
+#last change date new lane < 48hours
+$lane_metadata->{'hours_since_lane_date_changed'} = 17;
+ok( $validator->_new_lane_changed_too_recently_to_compare( {lane_metadata => $lane_metadata, hour_threshold => 48} ) == 1, 
+    'Handling of new lane with lane_date_changed < 48h from now'
+  ); 
+
+#last change date has a negative value
+$lane_metadata->{'hours_since_lane_date_changed'} = -5;
+eval {
+    $validator->_new_lane_changed_too_recently_to_compare( {lane_metadata => $lane_metadata, hour_threshold => 48} );
+}; if (my $e = Exception::Class->caught('UpdatePipeline::Exceptions::InvalidTimeDiff')) {
+    pass('Caught the correct exception class following a negative timediff');
+}
 
 
 delete_test_data($vrtrack);
