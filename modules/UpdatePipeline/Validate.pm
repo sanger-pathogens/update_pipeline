@@ -216,16 +216,19 @@ sub _new_lane_changed_too_recently_to_compare
     my ($self, $args) = @_;
     my $lane_metadata = $args->{'lane_metadata'}  || croak 'no lane_metadata hashref provided';
     my $minimum_hours = $args->{'hour_threshold'} || croak 'no hour_threshold provided';
-
-    if ( $lane_metadata->{'hours_since_lane_date_changed'} < 0 ) {
-        UpdatePipeline::Exceptions::InvalidTimeDiff->throw(error=> 'an error');
-    } 
-    elsif ( $lane_metadata->{'hours_since_lane_date_changed'} >= $minimum_hours) {
-        return 0; 
-    } 
-    elsif ( $lane_metadata->{'hours_since_lane_date_changed'} < $minimum_hours ) {
-        return 1;
-    } 
+    if ($lane_metadata->{'lane_processed'} == 0) {
+        if ( $lane_metadata->{'hours_since_lane_date_changed'} < 0 ) {
+            UpdatePipeline::Exceptions::InvalidTimeDiff->throw(error=> 'an error');
+        } 
+        elsif ( $lane_metadata->{'hours_since_lane_date_changed'} >= $minimum_hours) {
+            return 0; 
+        } 
+        elsif ( $lane_metadata->{'hours_since_lane_date_changed'} < $minimum_hours ) {
+            return 1;
+        } 
+    } else {
+        return 0;
+    }
 }
 
 

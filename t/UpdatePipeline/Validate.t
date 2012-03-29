@@ -5,7 +5,7 @@ use Data::Dumper;
 
 BEGIN { unshift(@INC, './modules') }
 BEGIN {
-    use Test::Most tests => 6;
+    use Test::Most tests => 7;
     use_ok('UpdatePipeline::Validate');
     use DateTime;
     use DateTime::Format::MySQL;
@@ -48,6 +48,7 @@ can_ok($validator, '_new_lane_changed_too_recently_to_compare');
 
 #testing the method: '_new_lane_changed_too_recently_to_compare'
 
+
 #last change date new lane >=48
 $lane_metadata->{'hours_since_lane_date_changed'} = 120;
 ok( $validator->_new_lane_changed_too_recently_to_compare( {lane_metadata => $lane_metadata, hour_threshold => 48} ) == 0, 
@@ -60,12 +61,23 @@ ok( $validator->_new_lane_changed_too_recently_to_compare( {lane_metadata => $la
     'Handling of new lane with lane_date_changed < 48h from now'
   ); 
 
+#a lane with processed flag not 0
+$lane_metadata->{'lane_processed'} = 1; 
+$lane_metadata->{'hours_since_lane_date_changed'} = 17;
+ok( $validator->_new_lane_changed_too_recently_to_compare( {lane_metadata => $lane_metadata, hour_threshold => 48} ) == 0, 
+    'A processed lane should return 0 no matter what the lane_date_changed value is'
+  ); 
+
 #last change date has a negative value
+$lane_metadata->{'lane_processed'} = 0; 
 $lane_metadata->{'hours_since_lane_date_changed'} = -5;
 eval {
     $validator->_new_lane_changed_too_recently_to_compare( {lane_metadata => $lane_metadata, hour_threshold => 48} );
-}; if (my $e = Exception::Class->caught('UpdatePipeline::Exceptions::InvalidTimeDiff')) {
+}; 
+if (my $e = Exception::Class->caught('UpdatePipeline::Exceptions::InvalidTimeDiff')) {
     pass('Caught the correct exception class following a negative timediff');
+} else {
+    fail('Caught the correct exception class following a negative timediff');
 }
 
 

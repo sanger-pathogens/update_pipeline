@@ -5,7 +5,7 @@ use Data::Dumper;
 
 BEGIN { unshift(@INC, './modules') }
 BEGIN {
-    use Test::Most tests => 35;
+    use Test::Most tests => 36;
     use_ok('UpdatePipeline::UpdateLaneMetaData');
     use VRTrack::VRTrack;
     use UpdatePipeline::VRTrack::Project;
@@ -32,8 +32,9 @@ my $vr_file = UpdatePipeline::VRTrack::File->new(name => 'myfile.bam',md5 => 'ab
 ok my $lane_metadata = UpdatePipeline::VRTrack::LaneMetaData->new(name => '1234_5#6',_vrtrack => $vrtrack)->lane_attributes, 'create lane metadata object';
 #We need these two keys to be present in order to use the 
 #UpdatePipeline::Validate class properly
-ok exists $$lane_metadata{'lane_processed'},        'lane_processed key exists';
-ok exists $$lane_metadata{'lane_processed'},        'lane_processed key exists';
+ok exists $$lane_metadata{'lane_processed'},                       'lane_processed key exists';
+ok exists $$lane_metadata{'lane_date_changed'},                    'lane_date_changed key exists';
+ok exists $$lane_metadata{'hours_since_lane_date_changed'},        'hours_since_lane_date_changed key exists';
 
 ok my $file_meta_data_which_doesnt_need_changing = UpdatePipeline::FileMetaData->new(
   study_name              => 'My project',
