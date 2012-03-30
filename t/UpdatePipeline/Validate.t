@@ -50,27 +50,27 @@ can_ok($validator, '_new_lane_changed_too_recently_to_compare');
 
 
 #last change date new lane >=48
-$lane_metadata->{'hours_since_lane_date_changed'} = 120;
+$lane_metadata->{'hours_since_lane_changed'} = 120;
 ok( $validator->_new_lane_changed_too_recently_to_compare( {lane_metadata => $lane_metadata, hour_threshold => 48} ) == 0, 
-    'handling of new lane with lane_date_changed >= 48h from now'
+    'handling of new lane with lane_changed >= 48h from now'
   ); 
 
 #last change date new lane < 48hours
-$lane_metadata->{'hours_since_lane_date_changed'} = 17;
+$lane_metadata->{'hours_since_lane_changed'} = 17;
 ok( $validator->_new_lane_changed_too_recently_to_compare( {lane_metadata => $lane_metadata, hour_threshold => 48} ) == 1, 
-    'Handling of new lane with lane_date_changed < 48h from now'
+    'Handling of new lane with lane_changed < 48h from now'
   ); 
 
 #a lane with processed flag not 0
 $lane_metadata->{'lane_processed'} = 1; 
-$lane_metadata->{'hours_since_lane_date_changed'} = 17;
+$lane_metadata->{'hours_since_lane_changed'} = 17;
 ok( $validator->_new_lane_changed_too_recently_to_compare( {lane_metadata => $lane_metadata, hour_threshold => 48} ) == 0, 
-    'A processed lane should return 0 no matter what the lane_date_changed value is'
+    'A processed lane should return 0 no matter what the lane_changed value is'
   ); 
 
 #last change date has a negative value
 $lane_metadata->{'lane_processed'} = 0; 
-$lane_metadata->{'hours_since_lane_date_changed'} = -5;
+$lane_metadata->{'hours_since_lane_changed'} = -5;
 eval {
     $validator->_new_lane_changed_too_recently_to_compare( {lane_metadata => $lane_metadata, hour_threshold => 48} );
 }; 

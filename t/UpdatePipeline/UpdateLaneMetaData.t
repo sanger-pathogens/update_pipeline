@@ -33,8 +33,8 @@ ok my $lane_metadata = UpdatePipeline::VRTrack::LaneMetaData->new(name => '1234_
 #We need these two keys to be present in order to use the 
 #UpdatePipeline::Validate class properly
 ok exists $$lane_metadata{'lane_processed'},                       'lane_processed key exists';
-ok exists $$lane_metadata{'lane_date_changed'},                    'lane_date_changed key exists';
-ok exists $$lane_metadata{'hours_since_lane_date_changed'},        'hours_since_lane_date_changed key exists';
+ok exists $$lane_metadata{'lane_changed'},                    'lane_changed key exists';
+ok exists $$lane_metadata{'hours_since_lane_changed'},        'hours_since_lane_changed key exists';
 
 ok my $file_meta_data_which_doesnt_need_changing = UpdatePipeline::FileMetaData->new(
   study_name              => 'My project',
