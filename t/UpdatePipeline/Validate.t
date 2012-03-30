@@ -37,17 +37,14 @@ my $vr_library = UpdatePipeline::VRTrack::Library->new(name => 'My library name'
 my $vr_lane = UpdatePipeline::VRTrack::Lane->new(name  => '1234_5#6', total_reads => 100000 ,_vrtrack => $vrtrack,_vr_library => $vr_library)->vr_lane();
 my $vr_file = UpdatePipeline::VRTrack::File->new(name => 'myfile.bam',md5 => 'abc1231343432432432',_vrtrack => $vrtrack,_vr_lane => $vr_lane)->vr_file();
 my $lane_metadata = UpdatePipeline::VRTrack::LaneMetaData->new(name => '1234_5#6',_vrtrack => $vrtrack)->lane_attributes;
+my @studies = ('EFG456');
 
 #############################################
 #Core tests for UpdatePipeline::Validate.pm 
 #############################################
-my @studies = ('EFG456');
 my $validator = UpdatePipeline::Validate->new(study_names => \@studies, _vrtrack => $vrtrack);
 isa_ok( $validator, 'UpdatePipeline::Validate' );
 can_ok($validator, '_new_lane_changed_too_recently_to_compare');
-
-#testing the method: '_new_lane_changed_too_recently_to_compare'
-
 
 #last change date new lane >=48
 $lane_metadata->{'hours_since_lane_changed'} = 120;
@@ -74,7 +71,6 @@ $lane_metadata->{'hours_since_lane_changed'} = -5;
 ok( $validator->_new_lane_changed_too_recently_to_compare( {lane_metadata => $lane_metadata, hour_threshold => 48} ) == 1,
     'Negative timediff values should return 1'
   );
-
 
 #just creating 
 my $file_meta_data_which_doesnt_need_changing = UpdatePipeline::FileMetaData->new(
