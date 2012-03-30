@@ -5,7 +5,7 @@ use Data::Dumper;
 
 BEGIN { unshift(@INC, './modules') }
 BEGIN {
-    use Test::Most tests => 7;
+    use Test::Most tests => 8;
     use_ok('UpdatePipeline::Validate');
     use DateTime;
     use DateTime::Format::MySQL;
@@ -68,17 +68,37 @@ ok( $validator->_new_lane_changed_too_recently_to_compare( {lane_metadata => $la
     'A processed lane should return 0 no matter what the lane_changed value is'
   ); 
 
-#last change date has a negative value
+#Negative values
 $lane_metadata->{'lane_processed'} = 0; 
 $lane_metadata->{'hours_since_lane_changed'} = -5;
-eval {
-    $validator->_new_lane_changed_too_recently_to_compare( {lane_metadata => $lane_metadata, hour_threshold => 48} );
-}; 
-if (my $e = Exception::Class->caught('UpdatePipeline::Exceptions::InvalidTimeDiff')) {
-    pass('Caught the correct exception class following a negative timediff');
-} else {
-    fail('Caught the correct exception class following a negative timediff');
-}
+ok( $validator->_new_lane_changed_too_recently_to_compare( {lane_metadata => $lane_metadata, hour_threshold => 48} ) == 1,
+    'Negative timediff values should return 1'
+  );
+
+
+#just creating 
+my $file_meta_data_which_doesnt_need_changing = UpdatePipeline::FileMetaData->new(
+  study_name              => 'DUMMY',
+  file_md5                => 'DUMMY',
+  file_name               => 'DUMMY.bam',
+  file_name_without_extension  => 'DUMMY',
+  library_name            => 'DUMMY',
+  library_ssid            => 123,
+  total_reads             => 100000,
+  sample_name             => 'DUMMY',
+  sample_accession_number => "DUMMY",
+  study_accession_number  => "DUMMY",
+  study_ssid              => 1234,
+  sample_common_name      => "SomeDUMMYBacteria",
+);
+
+$lane_metadata->{'lane_processed'} = 0; 
+$lane_metadata->{'hours_since_lane_changed'} = 17;
+$validator->_config_settings->{'minimum_passed_hours_before_comparing_new_lanes_to_irods'} = 48;
+is (undef, $validator->_compare_file_metadata_with_vrtrack_lane_metadata($file_meta_data_which_doesnt_need_changing, $lane_metadata),
+    'Testing _compare_file_metadata_with_vrtrack_lane_metadata() using a new lane that has a too recent lane_changed date.'
+   );
+
 
 
 delete_test_data($vrtrack);

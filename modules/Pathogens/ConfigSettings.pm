@@ -24,7 +24,6 @@ sub _build_settings
 {
   my $self = shift;
   my %config_settings = %{ Load( scalar read_file("config/".$self->environment."/".$self->filename.""))};
-
   return \%config_settings;
 } 
 

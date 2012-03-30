@@ -13,7 +13,7 @@ use Moose;
 use UpdatePipeline::IRODS;
 use UpdatePipeline::VRTrack::LaneMetaData;
 use Pathogens::ConfigSettings;
-use Carp qw(croak);
+use Carp qw(confess);
 use UpdatePipeline::Exceptions;
 
 extends 'UpdatePipeline::CommonMetaDataManipulation';
@@ -149,11 +149,10 @@ sub _compare_file_metadata_with_vrtrack_lane_metadata
 {
   my ($self, $file_metadata, $lane_metadata) = @_;
 
-
-  #for new lanes that were recently changed, we do no comparison
-  return if $self->_new_lane_changed_too_recently_to_compare({
-                                                                 lane_metadata => $lane_metadata
-                                                               , minimum_hours => 48
+  #We silently pass when dealing with new lanes that were recently changed
+  return if $self->_new_lane_changed_too_recently_to_compare(
+                                                             {   lane_metadata  => $lane_metadata
+                                                               , hour_threshold => $self->_config_settings->{'minimum_passed_hours_before_comparing_new_lanes_to_irods'}
                                                              }
                                                             );
 
@@ -213,24 +212,37 @@ sub _compare_file_metadata_with_vrtrack_lane_metadata
 
 sub _new_lane_changed_too_recently_to_compare
 {
-    my ($self, $args) = @_;
-    my $lane_metadata = $args->{'lane_metadata'}  || croak 'no lane_metadata hashref provided';
-    my $minimum_hours = $args->{'hour_threshold'} || croak 'no hour_threshold provided';
-    if ($lane_metadata->{'lane_processed'} == 0) {
-        if ( $lane_metadata->{'hours_since_lane_changed'} < 0 ) {
-            UpdatePipeline::Exceptions::InvalidTimeDiff->throw(error=> 'lane_changed value cannot be in the future');
+    my ($self, $args) = @_;   
+
+    if (not defined $args->{'hour_threshold'}) { 
+        if (defined $self->_config_settings->{'minimum_passed_hours_before_comparing_new_lanes_to_irods'}
+                and $self->_config_settings->{'minimum_passed_hours_before_comparing_new_lanes_to_irods'} > 0)            
+        {
+            #see if we can find a default value in the config.yml
+            $args->{'hour_threshold'} = $self->_config_settings->{'minimum_passed_hours_before_comparing_new_lanes_to_irods'}; 
+        } else {
+            #last resort: set it to 48 hours...
+            $args->{'hour_threshold'} = 48;
+        }
+    }
+
+    #this means the lane is new
+    if ($args->{'lane_metadata'}->{'lane_processed'} == 0) {
+        #this is a strange case, the lane_changed happens in the future? default response: too recent to compare
+        if ( $args->{'lane_metadata'}->{'hours_since_lane_changed'} < 0 ) {
+            return 1;
         } 
-        elsif ( $lane_metadata->{'hours_since_lane_changed'} >= $minimum_hours) {
+        #the new lane has been changed long ago, so it is not considered 'recent' anymore
+        elsif ( $args->{'lane_metadata'}->{'hours_since_lane_changed'} >= $args->{'hour_threshold'}) {
             return 0; 
         } 
-        elsif ( $lane_metadata->{'hours_since_lane_changed'} < $minimum_hours ) {
+        #the new lane is too fresh, consider it too recent to compare
+        elsif ( $args->{'lane_metadata'}->{'hours_since_lane_changed'} < $args->{'hour_threshold'} ) {
             return 1;
         }
+    #this is not a new lane, return false (i.e. '0')
     } else {
         return 0;
     }
 }
 1;
-
-
-

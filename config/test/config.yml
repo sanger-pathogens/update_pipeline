@@ -1,1 +1,2 @@
 test: abc
+minimum_passed_hours_before_comparing_new_lanes_to_irods: 48
