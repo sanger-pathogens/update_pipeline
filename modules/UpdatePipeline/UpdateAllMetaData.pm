@@ -28,6 +28,7 @@ has 'study_names'         => ( is => 'rw', isa => 'ArrayRef', required   => 1 );
 has '_vrtrack'            => ( is => 'rw', required => 1 );
 has '_exception_handler'  => ( is => 'rw', isa => 'UpdatePipeline::ExceptionHandler', lazy_build => 1 );
 has 'verbose_output'      => ( is => 'rw', isa => 'Bool', default    => 0);
+has 'update_if_changed'   => ( is => 'rw', isa => 'Bool', default    => 0 );
 has '_warehouse_dbh'      => ( is => 'rw',                lazy_build => 1 );
 has 'minimum_run_id'      => ( is => 'rw', isa => "Int");
 has 'environment'                   => ( is => 'rw', isa => 'Str', default => 'production');
@@ -80,7 +81,7 @@ sub update
     };
     if(my $exception = Exception::Class->caught())
     { 
-      $self->_exception_handler->add_exception($exception,$file_metadata->file_name_without_extension);
+      $self->_exception_handler->add_exception($exception,$file_metadata->file_name_without_extension) unless ($exception->isa("UpdatePipeline::Exceptions::PathToLaneChanged") && !$self->update_if_changed);
     }
   }
   $self->_exception_handler->print_report($self->verbose_output);
@@ -119,7 +120,7 @@ sub _update_lane
   };
   if(my $exception = Exception::Class->caught())
   { 
-    $self->_exception_handler->add_exception($exception, $file_metadata->file_name_without_extension);
+    $self->_exception_handler->add_exception($exception, $file_metadata->file_name_without_extension) unless ($exception->isa("UpdatePipeline::Exceptions::PathToLaneChanged") && !$self->update_if_changed);
   }
 }
 
