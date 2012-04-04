@@ -28,6 +28,7 @@ has 'study_names'         => ( is => 'rw', isa => 'ArrayRef', required   => 1 );
 has '_vrtrack'            => ( is => 'rw', required => 1 );
 has '_exception_handler'  => ( is => 'rw', isa => 'UpdatePipeline::ExceptionHandler', lazy_build => 1 );
 has 'verbose_output'      => ( is => 'rw', isa => 'Bool', default    => 0);
+has 'update_if_changed'   => ( is => 'rw', isa => 'Bool', default    => 0 );
 has '_warehouse_dbh'      => ( is => 'rw',                lazy_build => 1 );
 has 'minimum_run_id'      => ( is => 'rw', isa => "Int");
 has 'environment'                   => ( is => 'rw', isa => 'Str', default => 'production');
@@ -58,7 +59,7 @@ sub _build__warehouse_dbh
 sub _build__exception_handler
 {
   my ($self) = @_;
-  UpdatePipeline::ExceptionHandler->new( _vrtrack => $self->_vrtrack, minimum_run_id => $self->minimum_run_id); 
+  UpdatePipeline::ExceptionHandler->new( _vrtrack => $self->_vrtrack, minimum_run_id => $self->minimum_run_id, update_if_changed => $self->update_if_changed); 
 }
 
 
