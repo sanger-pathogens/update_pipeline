@@ -25,6 +25,7 @@ use UpdatePipeline::VRTrack::ExceptionHandling::File;
 has '_exception_reporter' => ( is => 'rw', isa => 'UpdatePipeline::ExceptionReporter', lazy_build => 1 );
 has '_vrtrack'            => ( is => 'rw', required => 1 );
 has 'minimum_run_id'      => ( is => 'rw', isa => 'Int');
+has 'update_if_changed'   => ( is => 'rw', isa => 'Bool', default    => 0 );
 
 sub _build__exception_reporter
 {
@@ -44,7 +45,7 @@ sub add_exception
   }
   $self->_exception_reporter->add_exception($exception);
 
-  if($exception->isa("UpdatePipeline::Exceptions::PathToLaneChanged"))
+  if($exception->isa("UpdatePipeline::Exceptions::PathToLaneChanged") && $self->update_if_changed == 1)
   {
     $self->_delete_lane($exception);
     $self->_delete_files($exception);
