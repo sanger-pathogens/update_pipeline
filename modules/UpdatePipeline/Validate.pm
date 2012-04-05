@@ -13,7 +13,6 @@ use Moose;
 use UpdatePipeline::IRODS;
 use UpdatePipeline::VRTrack::LaneMetaData;
 use Pathogens::ConfigSettings;
-use Carp qw(confess);
 use UpdatePipeline::Exceptions;
 
 extends 'UpdatePipeline::CommonMetaDataManipulation';
@@ -245,4 +244,5 @@ sub _new_lane_changed_too_recently_to_compare
         return 0;
     }
 }
+
 1;
