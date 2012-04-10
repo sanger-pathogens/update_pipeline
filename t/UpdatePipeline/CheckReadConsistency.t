@@ -5,7 +5,7 @@ use Data::Dumper;
 
 BEGIN { unshift(@INC, './modules') }
 BEGIN {
-    use Test::Most tests => 12;
+    use Test::Most tests => 15;
     use_ok('UpdatePipeline::CheckReadConsistency');
     use UpdatePipeline::VRTrack::LaneMetaData;
     use UpdatePipeline::Validate;
@@ -22,9 +22,9 @@ BEGIN {
 
 #create a vrtrack object
 my $vrtrack = VRTrack::VRTrack->new({database => "vrtrack_test",host => "localhost",port => 3306,user => "root",password => undef});
-
 #make sure that there is no leftover test data in the test database
 delete_test_data($vrtrack);
+
 
 VRTrack::Species->create($vrtrack, 'SomeBacteria' );
 my $vproject = UpdatePipeline::VRTrack::Project->new(name => 'My project', external_id => 1234, _vrtrack => $vrtrack)->vr_project();
@@ -33,11 +33,10 @@ $vproject->update;
 my $vr_sample = UpdatePipeline::VRTrack::Sample->new(name => 'My name',common_name => 'SomeBacteria',accession => "ABC123", _vrtrack => $vrtrack,_vr_project => $vproject)->vr_sample();
 my $vr_library = UpdatePipeline::VRTrack::Library->new(name => 'My library name', external_id  => 123,fragment_size_from => 123,fragment_size_to => 999, _vrtrack => $vrtrack,_vr_sample  => $vr_sample)->vr_library();
 my $vr_lane = UpdatePipeline::VRTrack::Lane->new(name  => '1234_5#6', total_reads => 100000 ,_vrtrack => $vrtrack,_vr_library => $vr_library)->vr_lane();
-
-
 my $lane_metadata = UpdatePipeline::VRTrack::LaneMetaData->new(name => '1234_5#6',_vrtrack => $vrtrack)->lane_attributes;
 my @studies = ('EFG456');
 my $validator = UpdatePipeline::Validate->new(study_names => \@studies, _vrtrack => $vrtrack);
+
 
 
 
@@ -54,32 +53,44 @@ can_ok( $consistency_evaluator, '_config_settings' );
 can_ok( $consistency_evaluator, '_full_path_by_lane_name' );
 can_ok( $consistency_evaluator, '_full_path_by_lane_name' );
 can_ok( $consistency_evaluator, '_fastq_file_names_by_lane_name' );
-ok( $consistency_evaluator->_database_name eq 'vrtrack_test', 'Database name is correct.' );
+is( $consistency_evaluator->_database_name, 'vrtrack_test', 'Database name is correct.' );
 
 #the directory root is set in the "config.yml". This root is bound 
 #to a database name. See "config.yml" for details
-ok( $consistency_evaluator->_fastq_root_path eq 't/data/', 'Root directory for the vrtrack fastq files could be traced via config.yml.' );
+is( $consistency_evaluator->_fastq_root_path, 't/data/', 'Root directory for the vrtrack fastq files could be traced via config.yml.' );
 
 
-#set the _lane_name explicitly (for test purposes only)
-my $vr_file = UpdatePipeline::VRTrack::File->new(   name => '1234_5#6_1.fastq.gz'
-                                                  , md5 => 'abc1231343432432432'
-                                                  , _vrtrack => $vrtrack
-                                                  , _vr_lane => $vr_lane
-                                                )->vr_file();
+#set the _lane_name explicitly. There are 10 reads in each fastq.gz file
+my $vr_file1 = UpdatePipeline::VRTrack::File->new( name => '1234_5#6_1.fastq.gz', md5 => 'abc1231343432432432', _vrtrack => $vrtrack, _vr_lane => $vr_lane )->vr_file();
+my $vr_file2 = UpdatePipeline::VRTrack::File->new( name => '1234_5#6_2.fastq.gz', md5 => 'abc1231343432432433', _vrtrack => $vrtrack, _vr_lane => $vr_lane )->vr_file();
 
-my $vr_file2 = UpdatePipeline::VRTrack::File->new(  name => '1234_5#6_2.fastq.gz'
-                                                  , md5 => 'abc1231343432432433'
-                                                  , _vrtrack => $vrtrack
-                                                  , _vr_lane => $vr_lane
-                                                )->vr_file();
-
+#see if the file names were retrieved correctly via the internal methods
 my $fastq_file_names = $consistency_evaluator->_fastq_file_names_by_lane_name('1234_5#6');                               
 is_deeply([sort @$fastq_file_names], [ '1234_5#6_1.fastq.gz', '1234_5#6_2.fastq.gz'], 'Test file (*.gz) names have been traced via the class methods.');
 
-ok($consistency_evaluator->read_counts_are_consistent( { lane_name => '1234_5#6', irods_read_count => 20 } ) == 1, 'Read numbers are consistent...');
+#run a routine comparison between irods and the lane
+is( $consistency_evaluator->read_counts_are_consistent( { lane_name => '1234_5#6', irods_read_count => 20 } ), 1, 'Comparing gzipped fastq count (20) to an imaginary irods counterpart with the same count' );
 
-delete_test_data($vrtrack);
+#run a comparison, where irods count is not consistent
+isnt( $consistency_evaluator->read_counts_are_consistent( { lane_name => '1234_5#6', irods_read_count => 50 } ), 1, 'Conflicting iRODS vs VRTrack counts should always return a zero when using the read_counts_are_consistent function' );
+
+
+throws_ok { $consistency_evaluator->_count_line_tetrads_in_gzipped_fastq_file('non_existing_dummy_fastq.gz') } 'UpdatePipeline::Exceptions::CommandFailed', 'Throwing UpdatePipeline::Exceptions::CommandFailed when lane is associated with non-existing files';
+
+
+#############
+#Associating a NON-gzipped file to the lane
+#############
+my $vr_file3 = UpdatePipeline::VRTrack::File->new( name => 'non_gzipped.fastq', md5 => 'abc1231343432432433', _vrtrack => $vrtrack, _vr_lane => $vr_lane )->vr_file();
+throws_ok { $consistency_evaluator->read_counts_are_consistent( { lane_name => '1234_5#6', irods_read_count => 20 } ) } 'UpdatePipeline::Exceptions::CommandFailed', 'Non-gzipped files trigger UpdatePipeline::Exceptions::CommandFailed';
+
+
+
+
+
+
+
+
 sub delete_test_data
 {
   my $vrtrack = shift;
