@@ -41,11 +41,10 @@ my $validator = UpdatePipeline::Validate->new(study_names => \@studies, _vrtrack
 
 
 #######################################################
-#Core tests for UpdatePipeline::CheckReadConsistency.pm 
+#Core tests for UpdatePipeline::CheckReadConsistency.pm
 #######################################################
-my $consistency_evaluator = UpdatePipeline::CheckReadConsistency->new(  _vrtrack => $vrtrack
-                                                                      , environment => 'test'
-                                                                     );
+my $consistency_evaluator = UpdatePipeline::CheckReadConsistency->new( _vrtrack => $vrtrack, environment => 'test' );
+
 isa_ok( $consistency_evaluator, 'UpdatePipeline::CheckReadConsistency' );
 can_ok( $consistency_evaluator, 'read_counts_are_consistent' );
 can_ok( $consistency_evaluator, '_database_name' );
@@ -59,36 +58,26 @@ is( $consistency_evaluator->_database_name, 'vrtrack_test', 'Database name is co
 #to a database name. See "config.yml" for details
 is( $consistency_evaluator->_fastq_root_path, 't/data/', 'Root directory for the vrtrack fastq files could be traced via config.yml.' );
 
-
-#set the _lane_name explicitly. There are 10 reads in each fastq.gz file
+#There are 10 reads in each of the two *.fastq.gz files below
 my $vr_file1 = UpdatePipeline::VRTrack::File->new( name => '1234_5#6_1.fastq.gz', md5 => 'abc1231343432432432', _vrtrack => $vrtrack, _vr_lane => $vr_lane )->vr_file();
 my $vr_file2 = UpdatePipeline::VRTrack::File->new( name => '1234_5#6_2.fastq.gz', md5 => 'abc1231343432432433', _vrtrack => $vrtrack, _vr_lane => $vr_lane )->vr_file();
 
-#see if the file names were retrieved correctly via the internal methods
+#test if the file names are retrieved correctly via the internal methods
 my $fastq_file_names = $consistency_evaluator->_fastq_file_names_by_lane_name('1234_5#6');                               
 is_deeply([sort @$fastq_file_names], [ '1234_5#6_1.fastq.gz', '1234_5#6_2.fastq.gz'], 'Test file (*.gz) names have been traced via the class methods.');
 
-#run a routine comparison between irods and the lane
+#test a routine comparison run between irods and the lane
 is( $consistency_evaluator->read_counts_are_consistent( { lane_name => '1234_5#6', irods_read_count => 20 } ), 1, 'Comparing gzipped fastq count (20) to an imaginary irods counterpart with the same count' );
 
-#run a comparison, where irods count is not consistent
+#test a comparison run, where irods count will not be consistent with the vrtrack count
 isnt( $consistency_evaluator->read_counts_are_consistent( { lane_name => '1234_5#6', irods_read_count => 50 } ), 1, 'Conflicting iRODS vs VRTrack counts should always return a zero when using the read_counts_are_consistent function' );
 
+#test comparison when the lane is associated with a non-existing file (same as wrong paths)
+throws_ok { $consistency_evaluator->_count_line_tetrads_in_gzipped_fastq_file('non_existing_dummy_fastq.gz') } 'UpdatePipeline::Exceptions::FileNotFound', 'Throwing UpdatePipeline::Exceptions::FileNotFound when lane is associated with non-existing files or wrong file paths';
 
-throws_ok { $consistency_evaluator->_count_line_tetrads_in_gzipped_fastq_file('non_existing_dummy_fastq.gz') } 'UpdatePipeline::Exceptions::CommandFailed', 'Throwing UpdatePipeline::Exceptions::CommandFailed when lane is associated with non-existing files';
-
-
-#############
-#Associating a NON-gzipped file to the lane
-#############
+#test a comparison when a lane is associated with a non-gzipped file
 my $vr_file3 = UpdatePipeline::VRTrack::File->new( name => 'non_gzipped.fastq', md5 => 'abc1231343432432433', _vrtrack => $vrtrack, _vr_lane => $vr_lane )->vr_file();
-throws_ok { $consistency_evaluator->read_counts_are_consistent( { lane_name => '1234_5#6', irods_read_count => 20 } ) } 'UpdatePipeline::Exceptions::CommandFailed', 'Non-gzipped files trigger UpdatePipeline::Exceptions::CommandFailed';
-
-
-
-
-
-
+throws_ok { $consistency_evaluator->read_counts_are_consistent( { lane_name => '1234_5#6', irods_read_count => 20 } ) } 'UpdatePipeline::Exceptions::CommandFailed', 'Non-gzipped files should trigger UpdatePipeline::Exceptions::CommandFailed (this also proves that "set -o pipefail" work properly _count_line_tetrads_in_gzipped_fastq_file)';
 
 
 sub delete_test_data

@@ -82,4 +82,8 @@ if($validate_pipeline->inconsistent_files->{files_missing_from_tracking} && @{$v
 }
 
 
-
+if($validate_pipeline->inconsistent_files->{read_count_discrepancy_between_irods_and_vrtrack_filesystem} && @{$validate_pipeline->inconsistent_files->{read_count_discrepancy_between_irods_and_vrtrack_filesystem}} > 0)
+{
+  print "\n\nTotal read counts in IRODS differs from the total read count on VRTrack's file-system.\n";
+  print join("\n", @{$validate_pipeline->inconsistent_files->{read_count_discrepancy_between_irods_and_vrtrack_filesystem}});
+}
