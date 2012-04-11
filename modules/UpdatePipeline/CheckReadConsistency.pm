@@ -46,7 +46,7 @@ sub _build__config_settings {
 
  Usage     : $self->_database_name;
  Purpose   : returns the name of the database that VRTrack::VRTrack has connected to.
- Returns   : a hashref
+ Returns   : a string (the name of the connected vrtrack database)
  Argument  : none
 
 =cut
@@ -61,7 +61,6 @@ sub _build__database_name {
  Purpose   : checks if the read count for a lane is identical in iRODS and vrtrack file-system
  Returns   : returns 1 for true, 0 for false
  Argument  : an anonymous hash with values for two keys: "lane_name" (Str) and "irods_read_count" (Int)
- Throws    : UpdatePipeline::Exceptions::CommandFailed, UpdatePipeline::Exceptions::FileNotFound, UpdatePipeline::Exceptions::NoFileAssociated
  Comment   : The read count for the vr-track file-system is obtained by gunzip-ping the fastq.gz files
              and counting the tetrads (i.e. assuming four lines per read).
 
@@ -113,6 +112,7 @@ sub _get_lane_read_count {
  Purpose   : Counts the number of tetrads (groups of four lines) by gunzip-ping the fastq.gz file
  Returns   : An integer (number of line tetrads)
  Argument  : (Str) path to a gzipped fastq file on the VRTrack file-system
+ Throws    : UpdatePipeline::Exceptions::CommandFailed, UpdatePipeline::Exceptions::FileNotFound
  Comment   : For gunzip and line count, two system processes are started in a shell pipeline.
              BASH, by default, returns the success message of the last process in the pipeline 
              even if earlier processes in the pipeline fail. To avoid this caveat, BASH offers 
