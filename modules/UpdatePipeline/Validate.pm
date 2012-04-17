@@ -28,7 +28,7 @@ has 'environment'                   => ( is => 'rw', isa => 'Str', default => 'p
 has '_config_settings'              => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
 has '_database_settings'            => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
 
-has '_consistency_evaluator'        => ( is => 'ro', isa => 'UpdatePipeline::CheckReadConsistency', lazy_build => 1 );
+has '_consistency_evaluator'        => ( is => 'rw', isa => 'UpdatePipeline::CheckReadConsistency', lazy_build => 1 );
 
 sub _build__config_settings
 {
@@ -191,13 +191,50 @@ sub _compare_file_metadata_with_vrtrack_lane_metadata
   } 
   elsif( defined( $file_metadata->total_reads ) ) 
   {
-    if (not $self->_consistency_evaluator->read_counts_are_consistent( {lane_name => $lane_metadata->{lane_name}, irods_read_count => $file_metadata->total_reads} ) ) 
-    {
+    if ( not $self->_irods_and_vrtrack_read_counts_are_consistent($lane_metadata->{lane_name}, $file_metadata->total_reads) ) {
       return "read_count_discrepancy_between_irods_and_vrtrack_filesystem";
     }
   }
   
   return;
+
+}
+
+#Checks if the iRODS has the some read count as the vrtrack file system for this lane.
+#The "_irods_and_vrtrack_read_counts_are_consistent" will return 0 when dealing with a 
+#lane that has no valid gzipped fastq file on the vrtrack file-system.
+
+sub _irods_and_vrtrack_read_counts_are_consistent {
+
+    my ($self, $lane_name, $irods_read_count) = @_;
+
+    #Try...
+    my $returnval;
+    eval 
+    {
+      $returnval = $self->_consistency_evaluator->read_counts_are_consistent( {lane_name => $lane_name, irods_read_count => $irods_read_count} ); 
+    };
+
+    #Catch...
+    my $error;
+    #An error.. If it is one of these, assume that read counts are NOT consistent.
+    if ( $error = Exception::Class->caught( 'UpdatePipeline::Exceptions::CommandFailed' ) 
+            or
+         $error = Exception::Class->caught( 'UpdatePipeline::Exceptions::FileNotFound' ) 
+       )
+    {
+      
+      return 0;
+
+    } 
+    elsif ( Exception::Class->caught() ) #Unexpected 
+    {
+       $error = Exception::Class->caught();
+       ref $error ? $error->rethrow : die $error;
+    } 
+
+    #No error, just return the value 
+    return $returnval;
 }
 
 =head2 _new_lane_changed_too_recently_to_compare

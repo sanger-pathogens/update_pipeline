@@ -71,8 +71,9 @@ sub read_counts_are_consistent {
 
     my $path_to_directory = $self->_full_path_by_lane_name( $args->{'lane_name'} );
     my $fastq_file_names  = $self->_fastq_file_names_by_lane_name( $args->{'lane_name'} );
+    my $lane_total;
 
-    my $lane_total = $self->_get_lane_read_count($path_to_directory, $fastq_file_names);
+    $lane_total = $self->_get_lane_read_count($path_to_directory, $fastq_file_names);
 
     if ($args->{'irods_read_count'} == $lane_total) {
         return 1;
@@ -125,7 +126,7 @@ sub _count_line_tetrads_in_gzipped_fastq_file {
     my ($self, $file_name) = @_;
 
     if (not -e $file_name) {
-        UpdatePipeline::Exceptions::FileNotFound->throw(error => $file_name);
+        UpdatePipeline::Exceptions::FileNotFound->throw(error => "Error: Missing file:\n".$file_name);
     }
 
     my $command = "set -o pipefail; gunzip -c $file_name | wc -l";
@@ -139,8 +140,8 @@ sub _count_line_tetrads_in_gzipped_fastq_file {
         return $stdout_buf->[0]/4;
 
     } else {
-        my $error_str = "An error occured when running the command:\n\t$command\n\t\t". join("\n", @$stderr_buf);
-        UpdatePipeline::Exceptions::CommandFailed->throw( error => "Error running: $command\n$error_str" );
+        my $error_str = "The error occured when running:\n\t$command\n\t\t". join("\n", @$stderr_buf);
+        UpdatePipeline::Exceptions::CommandFailed->throw( error => "Error: System exited with non-zero status: $command\n$error_str" );
     }
 }
 
@@ -155,7 +156,7 @@ sub _count_line_tetrads_in_gzipped_fastq_file {
 
 sub _full_path_by_lane_name {
     my ($self, $lane_name) = @_;
-    my $hierarchical_name = $self->_vrtrack->hierarchy_path_of_lane_name($lane_name);
+    my $hierarchical_name = $self->_vrtrack->hierarchy_path_of_lane_name($lane_name);   
     my $path = join('/', (  $self->_fastq_root_path
                           , $hierarchical_name
                          ) 

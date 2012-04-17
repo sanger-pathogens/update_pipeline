@@ -5,7 +5,7 @@ use Data::Dumper;
 
 BEGIN { unshift(@INC, './modules') }
 BEGIN {
-    use Test::Most tests => 15;
+    use Test::Most tests => 18;
     use_ok('UpdatePipeline::CheckReadConsistency');
     use UpdatePipeline::VRTrack::LaneMetaData;
     use UpdatePipeline::Validate;
@@ -35,7 +35,6 @@ my $vr_library = UpdatePipeline::VRTrack::Library->new(name => 'My library name'
 my $vr_lane = UpdatePipeline::VRTrack::Lane->new(name  => '1234_5#6', total_reads => 100000 ,_vrtrack => $vrtrack,_vr_library => $vr_library)->vr_lane();
 my $lane_metadata = UpdatePipeline::VRTrack::LaneMetaData->new(name => '1234_5#6',_vrtrack => $vrtrack)->lane_attributes;
 my @studies = ('EFG456');
-my $validator = UpdatePipeline::Validate->new(study_names => \@studies, _vrtrack => $vrtrack);
 
 
 
@@ -75,10 +74,35 @@ isnt( $consistency_evaluator->read_counts_are_consistent( { lane_name => '1234_5
 #test comparison when the lane is associated with a non-existing file (same as wrong paths)
 throws_ok { $consistency_evaluator->_count_line_tetrads_in_gzipped_fastq_file('non_existing_dummy_fastq.gz') } 'UpdatePipeline::Exceptions::FileNotFound', 'Throwing UpdatePipeline::Exceptions::FileNotFound when lane is associated with non-existing files or wrong file paths';
 
-#test a comparison when a lane is associated with a non-gzipped file
+
+#Access the methods via the validator interface
+my $validator = UpdatePipeline::Validate->new(study_names => \@studies, _vrtrack => $vrtrack );
+
+#overwrite the default consistency evaluator with our test object
+$validator->_consistency_evaluator($consistency_evaluator);
+
+#check the root path, this time via the UpdatePipeline::Validator
+is( $validator->_consistency_evaluator->_fastq_root_path, 't/data/', 'Root directory for the vrtrack fastq files could be traced via config.yml.' );
+
+is( $validator->_irods_and_vrtrack_read_counts_are_consistent('1234_5#6', 20), 1, 'Comparing gzipped fastq count (20) to an imaginary irods counterpart with the same count via UpdatePipeline::Validator' );
+
+
+
+##################################################################################
+#ADD A WRONG FILE TYPE TO THE VR-TRACK FILE-SYSTEM AND ASSOCIATE WITH THE LANE!!!#
+##################################################################################
 my $vr_file3 = UpdatePipeline::VRTrack::File->new( name => 'non_gzipped.fastq', md5 => 'abc1231343432432433', _vrtrack => $vrtrack, _vr_lane => $vr_lane )->vr_file();
+
+
+#Now that the lane is associated with wrong file type, this should throw exception
 throws_ok { $consistency_evaluator->read_counts_are_consistent( { lane_name => '1234_5#6', irods_read_count => 20 } ) } 'UpdatePipeline::Exceptions::CommandFailed', 'Non-gzipped files should trigger UpdatePipeline::Exceptions::CommandFailed (this also proves that "set -o pipefail" work properly _count_line_tetrads_in_gzipped_fastq_file)';
 
+
+#Now that the lane is associated with wrong file type, this will return 0 
+is( $validator->_irods_and_vrtrack_read_counts_are_consistent('1234_5#6', 20), 0, 'Comparing gzipped fastq count (20) to an imaginary irods counterpart with the same count via UpdatePipeline::Validator, where there is some error in the vrtrack filesystem' );
+
+
+done_testing;
 
 sub delete_test_data
 {
