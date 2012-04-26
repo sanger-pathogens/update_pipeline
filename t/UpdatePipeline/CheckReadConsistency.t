@@ -93,7 +93,6 @@ is( $validator->_irods_and_vrtrack_read_counts_are_consistent('1234_5#6', 20), 1
 ##################################################################################
 my $vr_file3 = UpdatePipeline::VRTrack::File->new( name => 'non_gzipped.fastq', md5 => 'abc1231343432432433', _vrtrack => $vrtrack, _vr_lane => $vr_lane )->vr_file();
 
-
 #Now that the lane is associated with wrong file type, this should throw exception
 throws_ok { $consistency_evaluator->read_counts_are_consistent( { lane_name => '1234_5#6', irods_read_count => 20 } ) } 'UpdatePipeline::Exceptions::CommandFailed', 'Non-gzipped files should trigger UpdatePipeline::Exceptions::CommandFailed (this also proves that "set -o pipefail" work properly _count_line_tetrads_in_gzipped_fastq_file)';
 
