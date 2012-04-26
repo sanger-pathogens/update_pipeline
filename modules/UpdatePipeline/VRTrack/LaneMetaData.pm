@@ -39,6 +39,7 @@ sub _build_lane_attributes
   lane.npg_qc_status as lane_manual_qc,
   lane.paired as lane_is_paired_read,
   lane.changed as lane_changed,
+  lane.name as lane_name,
   timestampdiff( hour, lane.changed, now() ) as hours_since_lane_changed,
   sample.ssid as sample_ssid,
   project.ssid as study_ssid,

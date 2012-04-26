@@ -1,2 +1,7 @@
-test: abc
 minimum_passed_hours_before_comparing_new_lanes_to_irods: 48
+
+#"VRTrack::VRTrack"'s "hierarchy_path_of_lane_name()" method returns the directory 
+#path of a lane by its name. However, the returned path is not a full path. Below we 
+#specify what the root (missing part) should be by employing VRTrack DB's name.
+root_path_by_db_name:
+    vrtrack_test: t/data/

@@ -12,9 +12,8 @@ package UpdatePipeline::Validate;
 use Moose;
 use UpdatePipeline::IRODS;
 use UpdatePipeline::VRTrack::LaneMetaData;
+use UpdatePipeline::CheckReadConsistency;
 use Pathogens::ConfigSettings;
-use Carp qw(confess);
-use UpdatePipeline::Exceptions;
 
 extends 'UpdatePipeline::CommonMetaDataManipulation';
 
@@ -29,6 +28,8 @@ has 'environment'                   => ( is => 'rw', isa => 'Str', default => 'p
 has '_config_settings'              => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
 has '_database_settings'            => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
 
+has '_consistency_evaluator'        => ( is => 'rw', isa => 'UpdatePipeline::CheckReadConsistency', lazy_build => 1 );
+
 sub _build__config_settings
 {
    my ($self) = @_;
@@ -41,6 +42,11 @@ sub _build__database_settings
   \%{Pathogens::ConfigSettings->new(environment => $self->environment, filename => 'database.yml')->settings()};
 }
 
+sub _build__consistency_evaluator 
+{
+    my ($self) = @_;
+    return UpdatePipeline::CheckReadConsistency->new( _vrtrack => $self->_vrtrack );
+}
 
 sub _build__warehouse_dbh
 {
@@ -150,11 +156,7 @@ sub _compare_file_metadata_with_vrtrack_lane_metadata
   my ($self, $file_metadata, $lane_metadata) = @_;
 
   #We silently pass when dealing with new lanes that were recently changed
-  return if $self->_new_lane_changed_too_recently_to_compare(
-                                                             {   lane_metadata  => $lane_metadata
-                                                               , hour_threshold => $self->_config_settings->{'minimum_passed_hours_before_comparing_new_lanes_to_irods'}
-                                                             }
-                                                            );
+  return if $self->_new_lane_changed_too_recently_to_compare( {lane_metadata  => $lane_metadata, hour_threshold => $self->_config_settings->{'minimum_passed_hours_before_comparing_new_lanes_to_irods'} } );
 
   return "irods_missing_sample_name"  unless defined($file_metadata->{sample_name});
   return "irods_missing_study_name"   unless defined($file_metadata->{study_name});
@@ -186,27 +188,64 @@ sub _compare_file_metadata_with_vrtrack_lane_metadata
   elsif( defined($file_metadata->total_reads ) && $file_metadata->total_reads > 10000 && !( $file_metadata->total_reads >= $lane_metadata->{total_reads}*0.9  && $file_metadata->total_reads <= $lane_metadata->{total_reads}*1.1 ) )
   {
     return "inconsistent_number_of_reads_in_tracking";
+  } 
+  elsif( defined( $file_metadata->total_reads ) ) 
+  {
+    if ( not $self->_irods_and_vrtrack_read_counts_are_consistent($lane_metadata->{lane_name}, $file_metadata->total_reads) ) {
+      return "read_count_discrepancy_between_irods_and_vrtrack_filesystem";
+    }
   }
   
   return;
+
+}
+
+#Checks if the iRODS has the some read count as the vrtrack file system for this lane.
+#The "_irods_and_vrtrack_read_counts_are_consistent" will return 0 when dealing with a 
+#lane that has no valid gzipped fastq file on the vrtrack file-system.
+
+sub _irods_and_vrtrack_read_counts_are_consistent {
+
+    my ($self, $lane_name, $irods_read_count) = @_;
+
+    #Try...
+    my $returnval;
+    eval 
+    {
+      $returnval = $self->_consistency_evaluator->read_counts_are_consistent( {lane_name => $lane_name, irods_read_count => $irods_read_count} ); 
+    };
+
+    #Catch...
+    my $error;
+    #An error.. If it is one of these, assume that read counts are NOT consistent.
+    if ( $error = Exception::Class->caught( 'UpdatePipeline::Exceptions::CommandFailed' ) 
+            or
+         $error = Exception::Class->caught( 'UpdatePipeline::Exceptions::FileNotFound' ) 
+       )
+    {
+      
+      return 0;
+
+    } 
+    elsif ( Exception::Class->caught() ) #Unexpected 
+    {
+       $error = Exception::Class->caught();
+       ref $error ? $error->rethrow : die $error;
+    } 
+
+    #No error, just return the value 
+    return $returnval;
 }
 
 =head2 _new_lane_changed_too_recently_to_compare
 
- Usage     : $self->_new_lane_changed_too_recently_to_compare({
-                                                                  lane_metadata  => $lane_metadata
-                                                                , hour_threshold => 48
-                                                              }
-                                                             );
- Purpose   : This method should skip comparisons for new lanes (processed == 0) 
-             with recent change (lane_changed date < hour_threshold).
- Returns   : (int) 1 for true or 0 for false.
- Argument  : Two named arguments: 
-             1) (hash reference) lane_metadata: a lane metadata.
-             2) (int) hour_threshold: a defines minimum timediff upon which to consider a lane as "non recent".
- Throws    : Nothing.
+ Usage     : $self->_new_lane_changed_too_recently_to_compare( {lane_metadata  => $lane_metadata, hour_threshold => 48} );
+ Purpose   : This method will return true (1) for new lanes with recent lane_changed date
+ Returns   : (Int) 1 for true or 0 for false.
+ Argument  : 1) (HashReference) lane_metadata: a lane metadata.
+             2) (Int) hour_threshold: lane is recent if the time difference between now and its lane_changed date (in VRTrack DB) is below this threshold
  Comment   : This method has been created to avoid comparing premature VRTrack lanes to their iRODS counterparts.
-             lane datasets to their iRODS counterparts. A new lane is defined by a 'processed' value of 0.
+             A new lane has a 'processed' (in VRTrack DB) value of 0.
 
 =cut
 
@@ -226,13 +265,13 @@ sub _new_lane_changed_too_recently_to_compare
         }
     }
 
-    #this means the lane is new
+    #the lane is new
     if ($args->{'lane_metadata'}->{'lane_processed'} == 0) {
         #this is a strange case, the lane_changed happens in the future? default response: too recent to compare
         if ( $args->{'lane_metadata'}->{'hours_since_lane_changed'} < 0 ) {
             return 1;
         } 
-        #the new lane has been changed long ago, so it is not considered 'recent' anymore
+        #the new lane has been changed long ago, it is not considered 'recent' anymore
         elsif ( $args->{'lane_metadata'}->{'hours_since_lane_changed'} >= $args->{'hour_threshold'}) {
             return 0; 
         } 
@@ -240,9 +279,10 @@ sub _new_lane_changed_too_recently_to_compare
         elsif ( $args->{'lane_metadata'}->{'hours_since_lane_changed'} < $args->{'hour_threshold'} ) {
             return 1;
         }
-    #this is not a new lane, return false (i.e. '0')
+    #not a new lane
     } else {
         return 0;
     }
 }
+
 1;

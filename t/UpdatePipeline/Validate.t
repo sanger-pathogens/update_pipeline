@@ -7,8 +7,6 @@ BEGIN { unshift(@INC, './modules') }
 BEGIN {
     use Test::Most tests => 8;
     use_ok('UpdatePipeline::Validate');
-    use DateTime;
-    use DateTime::Format::MySQL;
     use UpdatePipeline::VRTrack::LaneMetaData;
     use UpdatePipeline::Validate;
     use VRTrack::VRTrack;
