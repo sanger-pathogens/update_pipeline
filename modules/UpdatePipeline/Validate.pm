@@ -29,6 +29,7 @@ has '_config_settings'              => ( is => 'rw', isa => 'HashRef', lazy_buil
 has '_database_settings'            => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
 
 has '_consistency_evaluator'        => ( is => 'rw', isa => 'UpdatePipeline::CheckReadConsistency', lazy_build => 1 );
+has 'request_for_read_count_consistency_evaluation' => (is => 'rw', isa => 'Bool', default => undef);
 
 sub _build__config_settings
 {
@@ -189,7 +190,7 @@ sub _compare_file_metadata_with_vrtrack_lane_metadata
   {
     return "inconsistent_number_of_reads_in_tracking";
   } 
-  elsif( defined( $file_metadata->total_reads ) ) 
+  elsif( defined($file_metadata->total_reads) && $self->request_for_read_count_consistency_evaluation ) 
   {
     if ( not $self->_irods_and_vrtrack_read_counts_are_consistent($lane_metadata->{lane_name}, $file_metadata->total_reads) ) {
       return "read_count_discrepancy_between_irods_and_vrtrack_filesystem";
@@ -208,33 +209,32 @@ sub _irods_and_vrtrack_read_counts_are_consistent {
 
     my ($self, $lane_name, $irods_read_count) = @_;
 
-    #Try...
-    my $returnval;
+    my $evaluation_result;
+#Try
     eval 
     {
-      $returnval = $self->_consistency_evaluator->read_counts_are_consistent( {lane_name => $lane_name, irods_read_count => $irods_read_count} ); 
+      $evaluation_result = $self->_consistency_evaluator->read_counts_are_consistent( {lane_name => $lane_name, irods_read_count => $irods_read_count} ); 
     };
 
-    #Catch...
+#Catch
     my $error;
-    #An error.. If it is one of these, assume that read counts are NOT consistent.
     if ( $error = Exception::Class->caught( 'UpdatePipeline::Exceptions::CommandFailed' ) 
             or
          $error = Exception::Class->caught( 'UpdatePipeline::Exceptions::FileNotFound' ) 
        )
     {
       
-      return 0;
+      $evaluation_result = 0; #set read counts explicitly as inconsistent in cases of errors
 
     } 
-    elsif ( Exception::Class->caught() ) #Unexpected 
+    elsif ( Exception::Class->caught() ) #unexpected, dies here!
     {
        $error = Exception::Class->caught();
        ref $error ? $error->rethrow : die $error;
     } 
 
-    #No error, just return the value 
-    return $returnval;
+    return $evaluation_result;
+
 }
 
 =head2 _new_lane_changed_too_recently_to_compare

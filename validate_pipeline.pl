@@ -21,21 +21,23 @@ use Data::Dumper;
 use UpdatePipeline::Validate;
 use UpdatePipeline::Studies;
 
-my ( $studyfile, $help, $database );
+my ( $studyfile, $help, $database, $read_count_consistency_check_requested);
 
 GetOptions(
-    'p|studies=s'  => \$studyfile,
-    'd|database=s' => \$database,
-    'h|help'       => \$help,
+    'p|studies=s'      => \$studyfile,
+    'd|database=s'     => \$database,
+    'c|checkreadcount' => \$read_count_consistency_check_requested,
+    'h|help'           => \$help,
 );
 
 my $db = $database ;
 
 ( $studyfile &&  $db && !$help ) or die <<USAGE;
     Usage: $0   
-                --studies   <study name or file of SequenceScape study names>
-                [--database <vrtrack database name>]
-                --help      <this message>
+                --studies          <study name or file of SequenceScape study names>
+                [--database        <vrtrack database name>]
+                --checkreadcount   <activate read count consistency evaluation (IO intensive)>
+                --help             <this message>
 
 Check to see if the pipeline is valid compared to the data stored in IRODS
 
@@ -51,7 +53,15 @@ unless ($vrtrack) {
 }
 
 my @study_names = UpdatePipeline::Studies->new(filename => $studyfile)->study_names;
+
 my $validate_pipeline = UpdatePipeline::Validate->new(study_names => @study_names, _vrtrack => $vrtrack);
+
+if ($read_count_consistency_check_requested) 
+{
+    $validate_pipeline->request_for_read_count_consistency_evaluation(1);
+}
+
+
 my $pipeline_report  = $validate_pipeline->report();
 
 print "\n\nProblematic lanes\n";
