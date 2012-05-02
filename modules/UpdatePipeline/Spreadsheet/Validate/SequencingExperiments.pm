@@ -36,7 +36,7 @@ sub is_valid
   }
   catch{
     0;
-  }
+  };
   
 }
 

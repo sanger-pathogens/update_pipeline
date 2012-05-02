@@ -2,7 +2,6 @@
 # create a parsed object for the spreadsheet
 # fill in sensible default values
 # validate everything else
-# spreadsheet is an excel file in old or new format
 # Disable warehouse population
 
 
@@ -32,7 +31,7 @@ use UpdatePipeline::Spreadsheet;
 my $spreadsheet = UpdatePipeline::Spreadsheet->new(
   filename => 't/data/external_data_example.xls'
 );
-$spreadsheet->load_spreadsheet_into_tracking_database;
+$spreadsheet->files_metadata;
 
 =cut
 
@@ -44,12 +43,14 @@ use UpdatePipeline::Spreadsheet::Parser;
 use UpdatePipeline::Spreadsheet::SpreadsheetMetaData;
 
 
-has 'filename'          => ( is => 'ro', isa => 'Str', required => 1 );
+has 'filename'         => ( is => 'ro', isa => 'Str',      required => 1 );
+has 'files_metadata'   => ( is => 'ro', isa => 'ArrayRef', lazy_build => 1 );
 
-sub load_spreadsheet_into_tracking_database
+sub _build_files_metadata
 {
   my ($self) = @_;
   my $parser;
+  my $spreadsheet_metadata;
   
   try{
     $parser = UpdatePipeline::Spreadsheet::Parser->new(filename => $self->filename);
@@ -57,25 +58,20 @@ sub load_spreadsheet_into_tracking_database
   catch
   {
     UpdatePipeline::Exceptions::InvalidSpreadsheet->throw( error =>  "Couldnt parse the input spreadsheet");
-  }
+  };
   
   try{
-    my $spreadsheet_metadata = UpdatePipeline::Spreadsheet::SpreadsheetMetaData->new(
+    $spreadsheet_metadata = UpdatePipeline::Spreadsheet::SpreadsheetMetaData->new(
       input_header => $parser->header_metadata,
       raw_rows     => $parser->rows_metadata
     );
-    $spreadsheet_metadata->files_metadata;
   }
   catch
   {
      UpdatePipeline::Exceptions::InvalidSpreadsheetMetaData->throw( error =>  "The data in the spreadsheet is invalid");
-  }  
-
+  };
+  return $spreadsheet_metadata->files_metadata;
 }
-
-
-
-
 
 
 1;

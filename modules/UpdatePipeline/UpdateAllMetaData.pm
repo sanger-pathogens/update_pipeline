@@ -116,7 +116,11 @@ sub _update_lane
       _vrtrack      => $self->_vrtrack,
       _vr_library   => $vr_library)->vr_lane();
     
-    my $vr_file = UpdatePipeline::VRTrack::File->new(name => $file_metadata->file_name ,type => $file_metadata->file_type_number($file_metadata->file_type), md5 => $file_metadata->file_md5 ,_vrtrack => $self->_vrtrack,_vr_lane => $vr_lane)->vr_file();
+    UpdatePipeline::VRTrack::File->new(name => $file_metadata->file_name ,type => $file_metadata->file_type_number($file_metadata->file_type), md5 => $file_metadata->file_md5 ,_vrtrack => $self->_vrtrack,_vr_lane => $vr_lane)->vr_file();
+    if(defined($file_metadata->mate_file_name))
+    {
+      UpdatePipeline::VRTrack::File->new(name => $file_metadata->mate_file_name ,type => $file_metadata->file_type_number($file_metadata->mate_file_type), md5 => $file_metadata->mate_file_md5 ,_vrtrack => $self->_vrtrack,_vr_lane => $vr_lane)->vr_file();
+    }
   };
   if(my $exception = Exception::Class->caught())
   { 
