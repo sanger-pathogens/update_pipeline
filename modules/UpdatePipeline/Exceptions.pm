@@ -18,6 +18,9 @@ use Exception::Class (
     UpdatePipeline::Exceptions::DuplicateLibraryName      => { description => "Dupicate library name, only happens in old samples"},
     UpdatePipeline::Exceptions::CommandFailed             => { description => "External command returned non-zero exit status" },
     UpdatePipeline::Exceptions::FileNotFound              => { description => "File not found in VRTrack file system" },
+    UpdatePipeline::Exceptions::InvalidSpreadsheet        => { description => "Couldnt load the spreadsheet" },
+    UpdatePipeline::Exceptions::InvalidSpreadsheetMetaData=> { description => "The data in the spreadsheet is invalid" },
+    UpdatePipeline::Exceptions::UnknownFileType           => { description => "New file type detected" },
 );  
 
 1;

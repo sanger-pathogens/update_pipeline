@@ -31,10 +31,10 @@ has 'verbose_output'      => ( is => 'rw', isa => 'Bool', default    => 0);
 has 'update_if_changed'   => ( is => 'rw', isa => 'Bool', default    => 0 );
 has '_warehouse_dbh'      => ( is => 'rw',                lazy_build => 1 );
 has 'minimum_run_id'      => ( is => 'rw', isa => "Int");
-has 'environment'                   => ( is => 'rw', isa => 'Str', default => 'production');
-
-has '_config_settings'              => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
-has '_database_settings'            => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
+has 'environment'         => ( is => 'rw', isa => 'Str', default => 'production');
+                          
+has '_config_settings'    => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
+has '_database_settings'  => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
 
 
 sub _build__config_settings
@@ -116,7 +116,7 @@ sub _update_lane
       _vrtrack      => $self->_vrtrack,
       _vr_library   => $vr_library)->vr_lane();
     
-    my $vr_file = UpdatePipeline::VRTrack::File->new(name => $file_metadata->file_name ,md5 => $file_metadata->file_md5 ,_vrtrack => $self->_vrtrack,_vr_lane => $vr_lane)->vr_file();
+    my $vr_file = UpdatePipeline::VRTrack::File->new(name => $file_metadata->file_name ,type => $file_metadata->file_type_number($file_metadata->file_type), md5 => $file_metadata->file_md5 ,_vrtrack => $self->_vrtrack,_vr_lane => $vr_lane)->vr_file();
   };
   if(my $exception = Exception::Class->caught())
   { 
