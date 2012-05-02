@@ -18,6 +18,7 @@ $exception_reporter->print_report();
 package UpdatePipeline::ExceptionReporter;
 use Moose;
 use UpdatePipeline::Exceptions;
+use Data::Dumper;
 
 
 has '_exceptions'               => ( is => 'ro', isa => 'ArrayRef', default => sub { [] });
@@ -33,6 +34,7 @@ has 'print_unclassified'        => ( is => 'rw', isa => 'Bool', default => 0);
 sub add_exception
 {
   my($self, $exception) = @_;  
+  #print Dumper $exception;
   push(@{$self->_exceptions},$exception);
 }
 
@@ -67,6 +69,10 @@ sub print_report
   if(@{$self->_unclassified_exceptions} > 0)
   {
     print "Unclassified exceptions\t".@{$self->_unclassified_exceptions}."\n";
+    for my $unclassified_exception (sort @{$self->_unclassified_exceptions})
+    {
+      print Dumper $unclassified_exception;
+    }
   }
 
 }
@@ -101,7 +107,7 @@ sub _build_report
      else
      {
        # dont do anything with these exceptions other than count them
-       $self->_unclassified_exception;
+       $self->_unclassified_exception($exception);
      }
    }
    1;
