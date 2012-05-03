@@ -58,6 +58,8 @@ subtype 'SequencingExperiments'
 # inputs
 has 'input_header'            => ( is => 'ro', isa => 'Header',                required => 1 );
 has 'raw_rows'                => ( is => 'ro', isa => 'SequencingExperiments', required => 1 );
+has 'files_base_directory'    => ( is => 'ro', isa => 'Maybe[Str]');
+
 # lazy_build
 has '_header'                 => ( is => 'ro', isa => 'UpdatePipeline::Spreadsheet::HeaderMetaData',               lazy_build => 1 );
 has '_sequencing_experiments' => ( is => 'ro', isa => 'ArrayRef[UpdatePipeline::Spreadsheet::SequencingExperimentMetaData]', lazy_build => 1 );
@@ -89,6 +91,8 @@ sub _build_files_metadata
   for my $sequencing_experiment (@{$self->_sequencing_experiments})
   {
   
+    $sequencing_experiment->populate_file_locations_on_disk($self->files_base_directory);
+    
     my $file_metadata = UpdatePipeline::FileMetaData->new(
       file_type                        => $file_type,
       file_name                        => $sequencing_experiment->filename,
@@ -96,24 +100,23 @@ sub _build_files_metadata
       mate_file_type                   => (defined($sequencing_experiment->mate_filename)) ? $file_type : undef,
       mate_file_name                   => $sequencing_experiment->mate_filename,
       mate_file_name_without_extension => $self->_file_name_without_extension($sequencing_experiment->mate_filename,$file_type),
+      total_reads                      => $sequencing_experiment->raw_read_count,
+      lane_is_paired_read              => (defined($sequencing_experiment->mate_filename)) ? 1 : 0,
+      lane_manual_qc                   => '-',
+      library_name                     => $sequencing_experiment->library_name,
+      fragment_size_from               => $sequencing_experiment->insert_size,
+      fragment_size_to                 => $sequencing_experiment->insert_size,
+      sample_name                      => $sequencing_experiment->sample_name,
+      sample_accession_number          => $sequencing_experiment->sample_accession_number,
+      sample_common_name               => NCBI::TaxonLookup->new(taxon_id => $sequencing_experiment->taxon_id)->common_name,
       study_name                       => $self->_header->study_name,
       study_accession_number           => $self->_header->study_accession_number,
-      library_name            => $sequencing_experiment->library_name,
-      total_reads             => $sequencing_experiment->raw_read_count,
-      sample_name             => $sequencing_experiment->sample_name,
-      sample_accession_number => $sequencing_experiment->sample_accession_number,
-      lane_is_paired_read     => (defined($sequencing_experiment->mate_filename)) ? 1 : 0,
-      lane_manual_qc          => '-',
-      sample_common_name      => NCBI::TaxonLookup->new(taxon_id => $sequencing_experiment->taxon_id)->common_name,
-      fragment_size_from      => $sequencing_experiment->insert_size,
-      fragment_size_to        => $sequencing_experiment->insert_size
     );
     push(@files_metadata, $file_metadata);
   }
 
   return \@files_metadata;
 }
-
 
 sub _file_name_without_extension
 {
@@ -122,7 +125,5 @@ sub _file_name_without_extension
    $input_filename =~ s!.$input_file_type!!;
    return $input_filename;
 }
-
-
 
 1;

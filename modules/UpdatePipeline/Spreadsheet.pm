@@ -26,6 +26,7 @@ Spreadsheet.pm   - Main driver class which pulls everything together to allow fo
 use UpdatePipeline::Spreadsheet;
 my $spreadsheet = UpdatePipeline::Spreadsheet->new(
   filename           => 't/data/external_data_example.xls',
+  files_base_directory => '/path/to/files/to/add',
   dont_use_warehouse => 1,
   common_name_required => 0,
   _vrtrack    => $vrtrack,
@@ -44,11 +45,13 @@ use UpdatePipeline::Spreadsheet::SpreadsheetMetaData;
 extends "UpdatePipeline::UpdateAllMetaData";
 
 has 'filename'              => ( is => 'ro', isa => 'Str',      required => 1 );
+has 'files_base_directory'  => ( is => 'ro', isa => 'Maybe[Str]');
+
 has '_files_metadata'       => ( is => 'ro', isa => 'ArrayRef', lazy_build => 1 );
 
-has '_sample_name_to_ssid'  => ( is => 'rw', isa => 'HashRef', default => sub{{}} );
-has '_library_name_to_ssid' => ( is => 'rw', isa => 'HashRef', default => sub{{}} );
-has '_study_name_to_ssid'   => ( is => 'rw', isa => 'HashRef', default => sub{{}} );
+has '_sample_name_to_ssid'  => ( is => 'rw', isa => 'HashRef',  default => sub{{}} );
+has '_library_name_to_ssid' => ( is => 'rw', isa => 'HashRef',  default => sub{{}} );
+has '_study_name_to_ssid'   => ( is => 'rw', isa => 'HashRef',  default => sub{{}} );
 
 sub _build__files_metadata
 {
@@ -66,8 +69,9 @@ sub _build__files_metadata
   
   try{
     $spreadsheet_metadata = UpdatePipeline::Spreadsheet::SpreadsheetMetaData->new(
-      input_header => $parser->header_metadata,
-      raw_rows     => $parser->rows_metadata
+      input_header         => $parser->header_metadata,
+      raw_rows             => $parser->rows_metadata,
+      files_base_directory => $self->files_base_directory
     );
   }
   catch
@@ -187,6 +191,7 @@ sub _max_value_in_hash
   my @sorted_values = reverse(sort(values(%{$search_hash})));
   return $sorted_values[0];
 }
+
 
 
 1;
