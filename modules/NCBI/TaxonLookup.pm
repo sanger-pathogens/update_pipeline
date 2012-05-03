@@ -55,7 +55,6 @@ sub _remote_lookup_translation_table
   eval {
     my $tpp = $self->_setup_xml_parser_via_proxy;
     my $tree = $tpp->parsehttp( GET => $url );
-    $tree = $tpp->parse($tree->{html}->{body}->{pre});
     $tree->{TaxaSet}->{Taxon}->{ScientificName};
   } or do
   {
