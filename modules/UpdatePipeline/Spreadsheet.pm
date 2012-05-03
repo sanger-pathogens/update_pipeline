@@ -27,9 +27,11 @@ use UpdatePipeline::Spreadsheet;
 my $spreadsheet = UpdatePipeline::Spreadsheet->new(
   filename           => 't/data/external_data_example.xls',
   dont_use_warehouse => 1,
-  common_name_required => 0
+  common_name_required => 0,
+  _vrtrack    => $vrtrack,
+  study_names => [],
 );
-$spreadsheet->_files_metadata;
+$spreadsheet->update();
 
 =cut
 

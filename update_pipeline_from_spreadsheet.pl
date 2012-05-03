@@ -54,6 +54,8 @@ unless ($vrtrack) { die "Can't connect to tracking database: $database \n";}
 my $spreadsheet = UpdatePipeline::Spreadsheet->new(
   filename             => $spreadsheet_filename,
   dont_use_warehouse   => 1,
-  common_name_required => 0
+  common_name_required => 0,
+  _vrtrack             => $vrtrack,
+  study_names          => [],
 );
 $spreadsheet->update();
