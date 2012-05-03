@@ -45,8 +45,10 @@ use UpdatePipeline::Spreadsheet::Parser;
 use UpdatePipeline::Spreadsheet::SpreadsheetMetaData;
 extends "UpdatePipeline::UpdateAllMetaData";
 
-has 'filename'              => ( is => 'ro', isa => 'Str',      required => 1 );
-has 'files_base_directory'  => ( is => 'ro', isa => 'Maybe[Str]');
+has 'filename'                => ( is => 'ro', isa => 'Str',      required => 1 );
+has 'files_base_directory'    => ( is => 'ro', isa => 'Maybe[Str]');
+has 'pipeline_base_directory' => ( is => 'ro', isa => 'Maybe[Str]');
+
 
 has '_files_metadata'       => ( is => 'ro', isa => 'ArrayRef', lazy_build => 1 );
 
@@ -218,6 +220,8 @@ sub import_sequencing_files_to_pipeline
        my $target_mate_file = join('/',($self->pipeline_base_directory, $lane_path, $sequencing_experiment->pipeline_mate_filename));
        copy($source_mate_file,$target_mate_file) or die "Copy failed: $!";;
      }
+     $vlane->is_processed('import',1);
+     $vlane->update();
    }
    return $self;
 }

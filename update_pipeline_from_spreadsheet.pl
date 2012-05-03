@@ -22,12 +22,13 @@ use VRTrack::VRTrack;
 use VertRes::Utils::VRTrackFactory;
 use UpdatePipeline::Spreadsheet;
 
-my ( $help, $verbose_output, $database, $update_if_changed, $files_to_add_directory );
+my ( $help, $verbose_output, $database, $update_if_changed, $files_to_add_directory,$pipeline_base_directory );
 
 GetOptions(
     'd|database=s'              => \$database,
     'v|verbose'                 => \$verbose_output,
     'f|files_to_add_directory'  => \$files_to_add_directory,
+    'p|pipeline_base_directory' => \$pipeline_base_directory,
     'u|update_if_changed'       => \$update_if_changed,
     'h|help'                    => \$help,
 );
@@ -39,14 +40,16 @@ Usage: $0 [options] spreadsheet.xls
   -d|--database                <vrtrack database name>
   -v|--verbose                 <print out debugging information>
   -f|--files_to_add_directory  <base directory containing files to add to the pipeline>
+  -p|--pipeline_base_directory <required if -f provided, path to sequencing pipeline root directory>
   -u|--update_if_changed       <optionally delete lane & file entries, if metadata changes, for reimport>
+
   -h|--help                    <this message>
 
 # update the database only
 $0 -d pathogen_abc_track spreadsheet.xls
 
 # update the database and copy the sequencing files
-$0 -d pathogen_abc_track -f /path/to/incoming/sequencing_files spreadsheet.xls
+$0 -d pathogen_abc_track -f /path/to/incoming/sequencing_files -p /lustre/scratch10x/xxx/seq-pipelines spreadsheet.xls
 
 USAGE
 
@@ -64,6 +67,7 @@ my $spreadsheet = UpdatePipeline::Spreadsheet->new(
   _vrtrack             => $vrtrack,
   study_names          => [],
   files_base_directory => $files_to_add_directory,
+  pipeline_base_directory => $pipeline_base_directory,
 );
 $spreadsheet->update();
 $spreadsheet->import_sequencing_files_to_pipeline();
