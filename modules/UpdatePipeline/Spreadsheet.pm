@@ -1,9 +1,5 @@
-# override sub _build__files_metadata to read in from file
-# create a parsed object for the spreadsheet
 # fill in sensible default values
 # validate everything else
-# Disable warehouse population
-
 
 # when importing the files
 # if an md5.sum file is provided in a directory, the md5's are checked.
@@ -13,12 +9,12 @@
 
 # one file per study, per sequencing technology
 
-# incrementally update the ssid of the study/sample/library/...
-
 # essential information:
 # filename & mate
 # taxon
 # platform
+
+# files need to be in fastq.gz format. If its paired ended, the files need to be named with _1 and _2, e.g. mysample_1.fastq.gz and mysample_2.fastq.gz
 
 =head1 NAME
 
