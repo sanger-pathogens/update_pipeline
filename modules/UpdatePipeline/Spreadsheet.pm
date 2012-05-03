@@ -177,6 +177,7 @@ sub _next_ssid
   my $sth = $self->_vrtrack->{_dbh}->prepare('select MAX(ssid) as max_ssid from '.$table_name);
   $sth->execute();
   my $result = $sth->fetchrow_hashref();
+  return 1 unless(defined($result) && defined($result->{max_ssid}));
   return ($result->{max_ssid} + 1);
 }
   
