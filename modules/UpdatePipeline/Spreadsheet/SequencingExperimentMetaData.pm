@@ -33,6 +33,32 @@ has 'comments'                   => ( is => 'ro', isa => 'Maybe[Str]');
 has 'file_location_on_disk'      => ( is => 'rw', isa => 'Maybe[Str]');
 has 'mate_file_location_on_disk' => ( is => 'rw', isa => 'Maybe[Str]');
 
+has 'pipeline_filename'          => ( is => 'rw', isa => 'Str',       lazy_build => 1);
+has 'pipeline_mate_filename'     => ( is => 'rw', isa => 'Maybe[Str]',lazy_build => 1);
+
+# convert the filename found in the spreadsheet into a format that matches the pipeline schema
+sub _build_pipeline_filename
+{
+  my ($self) = @_;
+  $self->_convert_name_into_pipeline_format($self->filename, '_1.fastq.gz');
+}
+
+sub _build_pipeline_mate_filename
+{
+  my ($self) = @_;
+  return undef unless(defined($self->mate_filename));
+  $self->_convert_name_into_pipeline_format($self->filename, '_2.fastq.gz');
+}
+
+sub _convert_name_into_pipeline_format
+{
+  my ($self, $filename, $suffix) = @_;
+  $filename =~ s!\.fastq\.gz$!!i;
+  $filename =~ s!\.fq\.gz$!!i;
+  
+  return $filename.$suffix;
+}
+
 sub populate_file_locations_on_disk
 {
   my ($self,$files_base_directory) = @_;

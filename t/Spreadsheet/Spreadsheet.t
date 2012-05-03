@@ -32,7 +32,7 @@ ok my $spreadsheet = UpdatePipeline::Spreadsheet->new(
 ), 'initialise spreadsheet driver class';
 ok $spreadsheet->_files_metadata, 'generate the files metadata';
 
-is $spreadsheet->_files_metadata->[0]->file_name,'myfile.fastq.gz', 'filename returned correctly';
+is $spreadsheet->_files_metadata->[0]->file_name,'myfile_1.fastq.gz', 'filename returned correctly';
 
 is $spreadsheet->_files_metadata->[0]->study_ssid,   123, 'existing study ssid reused';
 is $spreadsheet->_files_metadata->[0]->sample_ssid,  457, 'next sample ssid';

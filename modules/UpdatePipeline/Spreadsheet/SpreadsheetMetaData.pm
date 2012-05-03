@@ -95,11 +95,11 @@ sub _build_files_metadata
     
     my $file_metadata = UpdatePipeline::FileMetaData->new(
       file_type                        => $file_type,
-      file_name                        => $sequencing_experiment->filename,
-      file_name_without_extension      => $self->_file_name_without_extension($sequencing_experiment->filename,$file_type),
+      file_name                        => $sequencing_experiment->pipeline_filename,
+      file_name_without_extension      => $self->_file_name_without_extension($sequencing_experiment->pipeline_filename,$file_type),
       mate_file_type                   => (defined($sequencing_experiment->mate_filename)) ? $file_type : undef,
-      mate_file_name                   => $sequencing_experiment->mate_filename,
-      mate_file_name_without_extension => $self->_file_name_without_extension($sequencing_experiment->mate_filename,$file_type),
+      mate_file_name                   => $sequencing_experiment->pipeline_mate_filename,
+      mate_file_name_without_extension => $self->_file_name_without_extension($sequencing_experiment->pipeline_mate_filename,$file_type),
       total_reads                      => $sequencing_experiment->raw_read_count,
       lane_is_paired_read              => (defined($sequencing_experiment->mate_filename)) ? 1 : 0,
       lane_manual_qc                   => '-',
