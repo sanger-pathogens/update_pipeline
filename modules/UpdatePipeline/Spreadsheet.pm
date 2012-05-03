@@ -39,6 +39,7 @@ $spreadsheet->update();
 package UpdatePipeline::Spreadsheet;
 use Moose;
 use Try::Tiny;
+use File::Copy;
 use UpdatePipeline::Exceptions;
 use UpdatePipeline::Spreadsheet::Parser;
 use UpdatePipeline::Spreadsheet::SpreadsheetMetaData;
@@ -52,6 +53,9 @@ has '_files_metadata'       => ( is => 'ro', isa => 'ArrayRef', lazy_build => 1 
 has '_sample_name_to_ssid'  => ( is => 'rw', isa => 'HashRef',  default => sub{{}} );
 has '_library_name_to_ssid' => ( is => 'rw', isa => 'HashRef',  default => sub{{}} );
 has '_study_name_to_ssid'   => ( is => 'rw', isa => 'HashRef',  default => sub{{}} );
+
+has '_spreadsheet_metadata' => ( is => 'rw', isa => 'Maybe[UpdatePipeline::Spreadsheet::SpreadsheetMetaData]');
+has 'hierarchy_template'    => ( is => 'rw', isa => 'Str',      default => "genus:species-subspecies:TRACKING:projectssid:sample:technology:library:lane" );
 
 sub _build__files_metadata
 {
@@ -79,6 +83,7 @@ sub _build__files_metadata
      UpdatePipeline::Exceptions::InvalidSpreadsheetMetaData->throw( error =>  "The data in the spreadsheet is invalid");
   };
   $self->_populate_files_metadata_with_dummy_ssids($spreadsheet_metadata->files_metadata);
+  $self->_spreadsheet_metadata($spreadsheet_metadata);
   return $spreadsheet_metadata->files_metadata;
 }
 
@@ -192,6 +197,30 @@ sub _max_value_in_hash
   return $sorted_values[0];
 }
 
+
+sub import_sequencing_files_to_pipeline
+{
+   my ($self) = @_;
+   return unless(defined($self->files_base_directory));
+   
+   for my $sequencing_experiment (@{$self->_spreadsheet_metadata->_sequencing_experiments})
+   {
+     my $vlane = VRTrack::Lane->new_by_name( $self->_vrtrack, $self->_spreadsheet_metadata->_file_name_without_extension($sequencing_experiment->filename,'fastq.gz'));
+     my $lane_path = $self->_vrtrack->hierarchy_path_of_lane($vlane,$self->hierarchy_template);
+     
+     my $source_file = join('/',($sequencing_experiment->file_location_on_disk,$sequencing_experiment->filename));
+     my $target_file = join('/',($self->pipeline_base_directory,$lane_path,$sequencing_experiment->pipeline_filename ));
+     copy($source_file,$target_file) or die "Copy failed: $!";;
+     
+     if(defined($sequencing_experiment->mate_filename))
+     {
+       my $source_mate_file = join('/',($sequencing_experiment->mate_file_location_on_disk, $sequencing_experiment->mate_filename));
+       my $target_mate_file = join('/',($self->pipeline_base_directory, $lane_path, $sequencing_experiment->pipeline_mate_filename));
+       copy($source_mate_file,$target_mate_file) or die "Copy failed: $!";;
+     }
+   }
+   return $self;
+}
 
 
 1;

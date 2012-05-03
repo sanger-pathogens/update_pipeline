@@ -66,3 +66,4 @@ my $spreadsheet = UpdatePipeline::Spreadsheet->new(
   files_base_directory => $files_to_add_directory,
 );
 $spreadsheet->update();
+$spreadsheet->import_sequencing_files_to_pipeline();
