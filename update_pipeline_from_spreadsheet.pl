@@ -27,8 +27,8 @@ my ( $help, $verbose_output, $database, $update_if_changed, $files_to_add_direct
 GetOptions(
     'd|database=s'              => \$database,
     'v|verbose'                 => \$verbose_output,
-    'f|files_to_add_directory'  => \$files_to_add_directory,
-    'p|pipeline_base_directory' => \$pipeline_base_directory,
+    'f|files_to_add_directory=s'  => \$files_to_add_directory,
+    'p|pipeline_base_directory=s' => \$pipeline_base_directory,
     'u|update_if_changed'       => \$update_if_changed,
     'h|help'                    => \$help,
 );
@@ -70,4 +70,4 @@ my $spreadsheet = UpdatePipeline::Spreadsheet->new(
   pipeline_base_directory => $pipeline_base_directory,
 );
 $spreadsheet->update();
-$spreadsheet->import_sequencing_files_to_pipeline();
+$spreadsheet->import_sequencing_files_to_pipeline() if(defined(files_to_add_directory));

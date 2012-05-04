@@ -40,6 +40,8 @@ package UpdatePipeline::Spreadsheet;
 use Moose;
 use Try::Tiny;
 use File::Copy;
+use File::Path qw(make_path  );
+use Parallel::ForkManager;
 use UpdatePipeline::Exceptions;
 use UpdatePipeline::Spreadsheet::Parser;
 use UpdatePipeline::Spreadsheet::SpreadsheetMetaData;
@@ -48,6 +50,7 @@ extends "UpdatePipeline::UpdateAllMetaData";
 has 'filename'                => ( is => 'ro', isa => 'Str',      required => 1 );
 has 'files_base_directory'    => ( is => 'ro', isa => 'Maybe[Str]');
 has 'pipeline_base_directory' => ( is => 'ro', isa => 'Maybe[Str]');
+has 'parallel_processes'      => ( is => 'ro', isa => 'Int',    default => 4);
 
 
 has '_files_metadata'       => ( is => 'ro', isa => 'ArrayRef', lazy_build => 1 );
@@ -58,6 +61,13 @@ has '_study_name_to_ssid'   => ( is => 'rw', isa => 'HashRef',  default => sub{{
 
 has '_spreadsheet_metadata' => ( is => 'rw', isa => 'Maybe[UpdatePipeline::Spreadsheet::SpreadsheetMetaData]');
 has 'hierarchy_template'    => ( is => 'rw', isa => 'Str',      default => "genus:species-subspecies:TRACKING:projectssid:sample:technology:library:lane" );
+has '_rsync'                => ( is => 'rw', isa => 'File::RsyncP', lazy_build => 1 );
+
+sub _build__rsync
+{
+  my ($self) = @_;
+  File::RsyncP->new();
+}
 
 sub _build__files_metadata
 {
@@ -200,30 +210,62 @@ sub _max_value_in_hash
 }
 
 
+# TODO: use RSYNC module instead of shelling out
 sub import_sequencing_files_to_pipeline
 {
    my ($self) = @_;
    return unless(defined($self->files_base_directory));
+   my @files_source_and_dest; 
+   
    
    for my $sequencing_experiment (@{$self->_spreadsheet_metadata->_sequencing_experiments})
    {
-     my $vlane = VRTrack::Lane->new_by_name( $self->_vrtrack, $self->_spreadsheet_metadata->_file_name_without_extension($sequencing_experiment->filename,'fastq.gz'));
+     my $vlane = VRTrack::Lane->new_by_name( $self->_vrtrack, $self->_spreadsheet_metadata->_file_name_without_extension($sequencing_experiment->filename,'fastq.gz').'_1');
      my $lane_path = $self->_vrtrack->hierarchy_path_of_lane($vlane,$self->hierarchy_template);
+     my $target_directory = join('/',($self->pipeline_base_directory,$lane_path));
+     make_path($target_directory , {mode => 0775});
      
-     my $source_file = join('/',($sequencing_experiment->file_location_on_disk,$sequencing_experiment->filename));
-     my $target_file = join('/',($self->pipeline_base_directory,$lane_path,$sequencing_experiment->pipeline_filename ));
-     copy($source_file,$target_file) or die "Copy failed: $!";;
+     my $target_file = join('/',($target_directory,$sequencing_experiment->pipeline_filename ));
+     my $source_file = $sequencing_experiment->file_location_on_disk;
+     my @source_and_dest = ($source_file,$target_file );
+     push(@files_source_and_dest, \@source_and_dest);
      
      if(defined($sequencing_experiment->mate_filename))
      {
-       my $source_mate_file = join('/',($sequencing_experiment->mate_file_location_on_disk, $sequencing_experiment->mate_filename));
-       my $target_mate_file = join('/',($self->pipeline_base_directory, $lane_path, $sequencing_experiment->pipeline_mate_filename));
-       copy($source_mate_file,$target_mate_file) or die "Copy failed: $!";;
+       my $target_mate_file = join('/',($target_directory, $sequencing_experiment->pipeline_mate_filename));
+       my $source_mate_file =$sequencing_experiment->mate_file_location_on_disk;
+       my @mate_source_and_dest = ($source_mate_file,$target_mate_file );
+       push(@files_source_and_dest, \@mate_source_and_dest);
      }
+   }
+   
+   $self->_copy_files(\@files_source_and_dest);
+   $self->_vrtrack->{_dbh}->{mysql_auto_reconnect} = 1;
+   
+   for my $sequencing_experiment (@{$self->_spreadsheet_metadata->_sequencing_experiments})
+   {
+     my $vlane = VRTrack::Lane->new_by_name( $self->_vrtrack, $self->_spreadsheet_metadata->_file_name_without_extension($sequencing_experiment->filename,'fastq.gz').'_1');
      $vlane->is_processed('import',1);
      $vlane->update();
    }
-   return $self;
+   
+   return 1;
+}
+
+sub _copy_files
+{
+   my ($self, $files_source_and_dest) = @_;
+   my $pm = new Parallel::ForkManager($self->parallel_processes); 
+   for my $file_source_and_dest (@{$files_source_and_dest})
+   {
+     $pm->start and next; # do the fork
+     my $source_file = $file_source_and_dest->[0];
+     my $target_file = $file_source_and_dest->[1];
+     `rsync $source_file $target_file`;
+     
+     $pm->finish; # do the exit in the child process
+   }
+   $pm->wait_all_children;
 }
 
 

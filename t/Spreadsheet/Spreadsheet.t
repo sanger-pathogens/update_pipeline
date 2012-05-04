@@ -4,6 +4,7 @@ use warnings;
 use Data::Dumper;
 use Test::MockObject;
 use VRTrack::VRTrack;
+use File::Path qw(rmtree);
 
 
 BEGIN { unshift(@INC, './modules') }
@@ -14,7 +15,7 @@ BEGIN {
   my $ncbi_taxon_lookup = Test::MockObject->new();
   $ncbi_taxon_lookup->fake_module( 'NCBI::TaxonLookup', test => sub{1} );
   $ncbi_taxon_lookup->fake_new( 'NCBI::TaxonLookup' );
-  $ncbi_taxon_lookup->mock('common_name', sub{ 'SomeCommonName' });
+  $ncbi_taxon_lookup->mock('common_name', sub{ 'Some Common Name' });
 }
 
 my $vrtrack = VRTrack::VRTrack->new({database => "vrtrack_test",host => "localhost",port => 3306,user => "root",password => undef});
@@ -24,11 +25,13 @@ $vrtrack->{_dbh}->do("INSERT INTO `sample`  (`sample_id`, `ssid`,`name`, `hierar
 $vrtrack->{_dbh}->do("INSERT INTO `library` (`library_id`,`ssid`,`name`, `hierarchy_name`,`changed`,`latest`) VALUES	(1,789,'ABC45678','ABC45678',NOW(),1)");
 
 ok my $spreadsheet = UpdatePipeline::Spreadsheet->new(
-  filename    => 't/data/external_data_example.xls',
-  _vrtrack    => $vrtrack,
-  study_names => [],
-  dont_use_warehouse => 1,
-  common_name_required => 0
+  filename                => 't/data/external_data_example.xls',
+  _vrtrack                => $vrtrack,
+  study_names             => [],
+  dont_use_warehouse      => 1,
+  common_name_required    => 0,
+  pipeline_base_directory => 't/data/pipeline_base_directory',
+  files_base_directory    => 't/data/path/to/sequencing'
 ), 'initialise spreadsheet driver class';
 ok $spreadsheet->_files_metadata, 'generate the files metadata';
 
@@ -50,9 +53,22 @@ is $spreadsheet->_files_metadata->[2]->library_ssid, 789, 'increment twice libra
 # put in some tests here to check the state
 ok $spreadsheet->update();
 
+ok my $vlane = VRTrack::Lane->new_by_name( $vrtrack, 'myfile_1'), 'retrieve the lane object';
+is $vrtrack->hierarchy_path_of_lane($vlane,"genus:species-subspecies:TRACKING:projectssid:sample:technology:library:lane"), 'Some/Common_Name/TRACKING/123/1/SLX/L5_AB_12_2011/myfile_1', 'Lane path generated correctly indictating primary data in DB okay';
+is $vlane->is_processed('import'), 0, 'import initially not set for lane';
 
+ok $spreadsheet->import_sequencing_files_to_pipeline(),'copy the files into the correct location';
+ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/1/SLX/L5_AB_12_2011/myfile_1/myfile_1.fastq.gz');
+ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/2/SLX/EF_CD_12_2011/myotherfile_L3_1/myotherfile_L3_2.fastq.gz');
+ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/2/SLX/EF_CD_12_2011/myotherfile_L3_1/myotherfile_L3_1.fastq.gz');
+
+ok my $vlane_updated = VRTrack::Lane->new_by_name( $vrtrack, 'myfile_1'), 'retrieve the updated lane object';
+is $vlane_updated->is_processed('import'), 1, 'import for lane after import';
+ok my $vlane_updated_2 = VRTrack::Lane->new_by_name( $vrtrack, 'myotherfile_L3_1'), 'retrieve the updated lane object';
+is $vlane_updated_2->is_processed('import'), 1, 'import for lane after import';
 
 done_testing();
+rmtree('t/data/pipeline_base_directory');
 delete_test_data($vrtrack);
 
 sub delete_test_data
@@ -61,4 +77,8 @@ sub delete_test_data
   $vrtrack->{_dbh}->do('delete from project where name="My Study Name"');
   $vrtrack->{_dbh}->do('delete from sample');
   $vrtrack->{_dbh}->do('delete from library');
+  $vrtrack->{_dbh}->do('delete from lane');
+  $vrtrack->{_dbh}->do('delete from file');
+  $vrtrack->{_dbh}->do('delete from study');
+  $vrtrack->{_dbh}->do('delete from individual');
 }
