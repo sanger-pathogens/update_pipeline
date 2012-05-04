@@ -44,6 +44,8 @@ is $spreadsheet->_files_metadata->[0]->library_ssid, 790, 'next library ssid use
 is $spreadsheet->_files_metadata->[1]->study_ssid,   123, 'existing study ssid reused';
 is $spreadsheet->_files_metadata->[1]->sample_ssid,  456, 'existing sample ssid';
 is $spreadsheet->_files_metadata->[1]->library_ssid, 791, 'existing library ssid used';
+is $spreadsheet->_files_metadata->[1]->file_type_number($spreadsheet->_files_metadata->[1]->file_type), 2, 'file type set to fastq';
+
 
 is $spreadsheet->_files_metadata->[2]->study_ssid,   123, 'existing study ssid reused';
 is $spreadsheet->_files_metadata->[2]->sample_ssid,  458, 'increment twice sample ssid';
@@ -54,6 +56,7 @@ is $spreadsheet->_files_metadata->[2]->library_ssid, 789, 'increment twice libra
 ok $spreadsheet->update();
 
 ok my $vlane = VRTrack::Lane->new_by_name( $vrtrack, 'myfile_1'), 'retrieve the lane object';
+is $vlane->files->[0]->type, 2, 'file type set correctly';
 is $vrtrack->hierarchy_path_of_lane($vlane,"genus:species-subspecies:TRACKING:projectssid:sample:technology:library:lane"), 'Some/Common_Name/TRACKING/123/1/SLX/L5_AB_12_2011/myfile_1', 'Lane path generated correctly indictating primary data in DB okay';
 is $vlane->is_processed('import'), 0, 'import initially not set for lane';
 

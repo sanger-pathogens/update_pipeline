@@ -70,4 +70,4 @@ my $spreadsheet = UpdatePipeline::Spreadsheet->new(
   pipeline_base_directory => $pipeline_base_directory,
 );
 $spreadsheet->update();
-$spreadsheet->import_sequencing_files_to_pipeline() if(defined(files_to_add_directory));
+$spreadsheet->import_sequencing_files_to_pipeline() if(defined($files_to_add_directory));
