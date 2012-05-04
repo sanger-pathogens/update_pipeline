@@ -16,8 +16,10 @@ use Moose;
 use UpdatePipeline::VRTrack::LaneMetaData;
 use UpdatePipeline::FileMetaData;
 
-has 'lane_meta_data'  => ( is => 'ro', isa => "Maybe[HashRef]");
-has 'file_meta_data'  => ( is => 'ro', isa => 'UpdatePipeline::FileMetaData',                required => 1 );
+has 'lane_meta_data'       => ( is => 'ro', isa => "Maybe[HashRef]");
+has 'file_meta_data'       => ( is => 'ro', isa => 'UpdatePipeline::FileMetaData',   required => 1 );
+
+has 'common_name_required' => ( is => 'ro', isa => 'Bool', default => 1);
 
 sub update_required
 {
@@ -34,9 +36,10 @@ sub _differences_between_file_and_lane_meta_data
   return 0 if (defined($self->file_meta_data->total_reads ) && $self->file_meta_data->total_reads < 10000);
 
   UpdatePipeline::Exceptions::UndefinedSampleName->throw( error => $self->file_meta_data->file_name) if(not defined($self->file_meta_data->sample_name));
-  UpdatePipeline::Exceptions::UndefinedSampleCommonName->throw( error => $self->file_meta_data->sample_name) if(not defined($self->file_meta_data->sample_common_name));
+  UpdatePipeline::Exceptions::UndefinedSampleCommonName->throw( error => $self->file_meta_data->sample_name) if($self->common_name_required == 1 && not defined($self->file_meta_data->sample_common_name));
   UpdatePipeline::Exceptions::UndefinedStudySSID->throw( error => $self->file_meta_data->file_name) if(not defined($self->file_meta_data->study_ssid));
   UpdatePipeline::Exceptions::UndefinedLibraryName->throw( error => $self->file_meta_data->file_name) if(not defined($self->file_meta_data->library_name));
+  
 
   return 1 unless(defined $self->lane_meta_data);
 
