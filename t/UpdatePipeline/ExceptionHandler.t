@@ -69,9 +69,9 @@ is_deeply $exception_handler_min_run_id->_exception_reporter->_inconsistent_tota
 
 # check to see if a lane gets unset properly
 $vrtrack->{_dbh}->do('insert into lane (name,latest) values("test_lane_for_deletion",1)');
-
+my $exception_handler_reset = UpdatePipeline::ExceptionHandler->new(_vrtrack => $vrtrack, update_if_changed => 1),
 eval { UpdatePipeline::Exceptions::PathToLaneChanged->throw(error => "test_lane_for_deletion"); };
-if(my $exception = Exception::Class->caught()){ ok $exception_handler->add_exception($exception), 'path changed exception added';}
+if(my $exception = Exception::Class->caught()){ ok $exception_handler_reset->add_exception($exception), 'path changed exception added';}
 
 # check to see if the lane was updated properly
 my $sth = $vrtrack->{_dbh}->prepare(qq[select latest from lane where name = "test_lane_for_deletion"]);
