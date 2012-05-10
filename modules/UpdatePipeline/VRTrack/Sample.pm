@@ -29,6 +29,7 @@ has '_vr_project' => ( is => 'ro',               required   => 1 );
 
 has 'accession'   => ( is => 'ro', isa => 'Maybe[Str]' );
 has 'external_id' => ( is => 'ro', isa => 'Maybe[Int]' );
+has 'common_name_required' => ( is => 'rw', default    => 1,            isa => 'Bool');
 
 # external variable
 has 'vr_sample'   => ( is => 'ro',               lazy_build => 1 );
@@ -69,7 +70,17 @@ sub _build_vr_sample
 sub _build__vr_species
 {
   my ($self) = @_;
-  my $vr_species = VRTrack::Species->new_by_name( $self->_vrtrack, $self->common_name) || VRTrack::Species->create( $self->_vrtrack, $self->common_name);
+  my $vr_species = VRTrack::Species->new_by_name( $self->_vrtrack, $self->common_name);
+  
+  if((not defined($vr_species) )&& $self->common_name_required ==0)
+  {
+      $vr_species = VRTrack::Species->create( $self->_vrtrack, $self->common_name);
+  }
+  elsif((not defined($vr_species) )&& $self->common_name_required ==1)
+  {
+      UpdatePipeline::Exceptions::UnknownCommonName->throw( error => $self->common_name );
+  }
+  
   return $vr_species;
 }
 
