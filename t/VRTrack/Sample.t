@@ -41,9 +41,13 @@ is_deeply $vr_sample2->individual->species, $vr_sample->individual->species, 're
 
 
 # a species should be added if it doesnt previously exist
-ok my $sample3 = UpdatePipeline::VRTrack::Sample->new(name => 'Another name',common_name => 'UnseenCommonName',_vrtrack => $vrtrack,_vr_project => $vproject), 'initialise a sample';
+ok my $sample3 = UpdatePipeline::VRTrack::Sample->new(common_name_required => 0, name => 'Another name',common_name => 'UnseenCommonName',_vrtrack => $vrtrack,_vr_project => $vproject), 'initialise a sample';
 ok my $vr_sample3 = $sample3->vr_sample(), 'find a vr sample';
 is $vr_sample3->individual->species->name, "UnseenCommonName", 'get the species back';
+
+
+# a species should throw an error if a common name is required and its not alrady in the database
+throws_ok( sub{UpdatePipeline::VRTrack::Sample->new(common_name_required => 1, name => 'Another name',common_name => 'YetAnotherUnseenCommonName',_vrtrack => $vrtrack,_vr_project => $vproject)->vr_sample()}, qr/YetAnotherUnseenCommonName/, 'common name required but doesnt exist in database already');
 
 # individual previously exists
 my $preexisting_individual = VRTrack::Individual->create($vrtrack, 'SampleNameThatAlreadyExists');
@@ -66,7 +70,7 @@ sub delete_test_data
   $vrtrack->{_dbh}->do('delete from project where name="My project"');
   $vrtrack->{_dbh}->do('delete from sample where name in ("SampleNameThatAlreadyExists","My name","Another name" )');
   $vrtrack->{_dbh}->do('delete from individual where name in ("SampleNameThatAlreadyExists","My name","Another name" )');
-  $vrtrack->{_dbh}->do('delete from species where name in ("SomeBacteria","UnseenCommonName")');
+  $vrtrack->{_dbh}->do('delete from species where name in ("YetAnotherUnseenCommonName","SomeBacteria","UnseenCommonName")');
   $vrtrack->{_dbh}->do('delete from population where name="Population"');
 }
 
