@@ -72,7 +72,7 @@ $parallel_processes ||= 1;
 $verbose_output ||= 0;
 $update_if_changed ||= 0;
 $errors_min_run_id ||= 6000;
-$dont_use_warehouse ||= 1;
+$dont_use_warehouse ||= 0;
 
 my $study_names;
 
