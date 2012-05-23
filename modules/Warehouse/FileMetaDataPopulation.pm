@@ -49,6 +49,8 @@ sub post_populate
 {
   my($self) = @_;
   # the order here is very important. Its in decending order of accuracy.
+  # Get supplier name for sample
+  Warehouse::Sample->new( file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->post_populate();
   # Get requested size for a non multiplexed library
   Warehouse::Library->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->post_populate();
   # Get requested size for a multiplexed library

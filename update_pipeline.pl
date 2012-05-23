@@ -21,8 +21,9 @@ use Parallel::ForkManager;
 
 use UpdatePipeline::UpdateAllMetaData;
 use UpdatePipeline::Studies;
+use UpdatePipeline::VRTrack::Species;
 
-my ( $studyfile, $help, $number_of_files_to_return, $parallel_processes, $verbose_output, $errors_min_run_id, $database,$input_study_name, $update_if_changed, $dont_use_warehouse  );
+my ( $studyfile, $help, $number_of_files_to_return, $parallel_processes, $verbose_output, $errors_min_run_id, $database,$input_study_name, $update_if_changed, $dont_use_warehouse, $taxon_id, $overwrite_common_name, $use_supplier_name );
 
 GetOptions(
     's|studies=s'               => \$studyfile,
@@ -34,6 +35,8 @@ GetOptions(
     'r|min_run_id=s'            => \$errors_min_run_id,
     'u|update_if_changed'       => \$update_if_changed,
     'w|dont_use_warehouse'      => \$dont_use_warehouse,
+    't|taxon_id=i'              => \$taxon_id,
+    'l|use_supplier_name'       => \$use_supplier_name,
     'h|help'                    => \$help,
 );
 
@@ -50,6 +53,8 @@ Usage: $0
   -r|--min_run_id              <optionally filter out errors below this run_id, defaults to 6000>
   -u|--update_if_changed       <optionally delete lane & file entries, if metadata changes, for reimport>
   -w|--dont_use_warehouse      <dont use the warehouse to fill in missing data>
+  -t|--taxon_id                <optionally provide taxon id to overwrite species info in bam file common name>
+  -l|--use_supplier_name       <optionally use the supplier name from the warehouse to populate name and hierarchy name of the individual table>
   -h|--help                    <this message>
 
 Update the tracking database from IRODs and the warehouse.
@@ -73,6 +78,8 @@ $verbose_output ||= 0;
 $update_if_changed ||= 0;
 $errors_min_run_id ||= 6000;
 $dont_use_warehouse ||= 0;
+$use_supplier_name ||=0;
+$taxon_id ||= 0;
 
 my $study_names;
 
@@ -90,6 +97,7 @@ if($parallel_processes == 1)
 {
   my $vrtrack = VertRes::Utils::VRTrackFactory->instantiate(database => $db,mode     => 'rw');
   unless ($vrtrack) { die "Can't connect to tracking database: $db \n";}
+  if ( $taxon_id ) { $overwrite_common_name = ((UpdatePipeline::VRTrack::Species->new( taxon_id => $taxon_id, _vrtrack => $vrtrack))->vr_species())->name(); }
   my $update_pipeline = UpdatePipeline::UpdateAllMetaData->new(
     study_names               => $study_names, 
     _vrtrack                  => $vrtrack, 
@@ -97,7 +105,9 @@ if($parallel_processes == 1)
     verbose_output            => $verbose_output, 
     minimum_run_id            => $errors_min_run_id, 
     update_if_changed         => $update_if_changed,
-    dont_use_warehouse        => $dont_use_warehouse
+    dont_use_warehouse        => $dont_use_warehouse,
+    overwrite_common_name     => $overwrite_common_name,
+    use_supplier_name         => $use_supplier_name,
   );
   $update_pipeline->update();
 }
@@ -111,6 +121,7 @@ else
     
     my $vrtrack = VertRes::Utils::VRTrackFactory->instantiate(database => $db,mode     => 'rw');
     unless ($vrtrack) { die "Can't connect to tracking database: $db \n";}
+    if ( $taxon_id ) { $overwrite_common_name = ((UpdatePipeline::VRTrack::Species->new( taxon_id => $taxon_id, _vrtrack => $vrtrack))->vr_species())->name(); }
     my $update_pipeline = UpdatePipeline::UpdateAllMetaData->new(
       study_names               => \@split_study_names, 
       _vrtrack                  => $vrtrack, 
@@ -118,7 +129,9 @@ else
       verbose_output            => $verbose_output, 
       minimum_run_id            => $errors_min_run_id, 
       update_if_changed         => $update_if_changed,
-      dont_use_warehouse        => $dont_use_warehouse
+      dont_use_warehouse        => $dont_use_warehouse,
+      overwrite_common_name     => $overwrite_common_name,
+      use_supplier_name         => $use_supplier_name,
     );
     $update_pipeline->update();
     $pm->finish; # do the exit in the child process

@@ -30,6 +30,7 @@ has 'total_reads'                      => ( is => 'rw', isa => 'Maybe[Int]');
 has 'sample_name'                      => ( is => 'rw', isa => 'Maybe[Str]');
 has 'sample_accession_number'          => ( is => 'rw', isa => 'Maybe[Str]');
 has 'sample_common_name'               => ( is => 'rw', isa => 'Maybe[Str]');
+has 'supplier_name'                    => ( is => 'rw', isa => 'Maybe[Str]');
 has 'lane_is_paired_read'              => ( is => 'rw', isa => 'Bool',        default    => 1 );
 has 'lane_manual_qc'                   => ( is => 'rw', isa => 'Str',         default    => '-');
 has 'study_ssid'                       => ( is => 'rw', isa => 'Maybe[Int]');

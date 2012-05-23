@@ -22,29 +22,33 @@ use UpdatePipeline::VRTrack::Study;
 use UpdatePipeline::ExceptionHandler;
 use Pathogens::ConfigSettings;
 
+use Data::Dumper;
+
 extends 'UpdatePipeline::CommonMetaDataManipulation';
 
 
-has '_vrtrack'             => ( is => 'rw', required   => 1);
+has '_vrtrack'              => ( is => 'rw', required   => 1);
                            
-has '_exception_handler'   => ( is => 'rw', lazy_build => 1,            isa => 'UpdatePipeline::ExceptionHandler' );
-has '_config_settings'     => ( is => 'rw', lazy_build => 1,            isa => 'HashRef' );
-has '_database_settings'   => ( is => 'rw', lazy_build => 1,            isa => 'HashRef' );
+has '_exception_handler'    => ( is => 'rw', lazy_build => 1,            isa => 'UpdatePipeline::ExceptionHandler' );
+has '_config_settings'      => ( is => 'rw', lazy_build => 1,            isa => 'HashRef' );
+has '_database_settings'    => ( is => 'rw', lazy_build => 1,            isa => 'HashRef' );
                            
-has 'verbose_output'       => ( is => 'rw', default    => 0,            isa => 'Bool');
-has 'update_if_changed'    => ( is => 'rw', default    => 0,            isa => 'Bool');
-has 'dont_use_warehouse'   => ( is => 'ro', default    => 0,            isa => 'Bool');
+has 'verbose_output'        => ( is => 'rw', default    => 0,            isa => 'Bool');
+has 'update_if_changed'     => ( is => 'rw', default    => 0,            isa => 'Bool');
+has 'dont_use_warehouse'    => ( is => 'ro', default    => 0,            isa => 'Bool');
+has 'use_supplier_name'     => ( is => 'ro', default    => 0,            isa => 'Bool');
                            
-has '_warehouse_dbh'       => ( is => 'rw', lazy_build => 1 );
-has 'minimum_run_id'       => ( is => 'rw', default    => 1,            isa => 'Int' );
-has 'environment'          => ( is => 'rw', default    => 'production', isa => 'Str');
-has 'common_name_required' => ( is => 'rw', default    => 1,            isa => 'Bool');
+has '_warehouse_dbh'        => ( is => 'rw', lazy_build => 1 );
+has 'minimum_run_id'        => ( is => 'rw', default    => 1,            isa => 'Int' );
+has 'environment'           => ( is => 'rw', default    => 'production', isa => 'Str');
+has 'common_name_required'  => ( is => 'rw', default    => 1,            isa => 'Bool');
+has 'overwrite_common_name' => ( is => 'rw',                             isa => 'Maybe[Str]');
 
 
 sub _build__config_settings
 {
    my ($self) = @_;
-   \%{Pathogens::ConfigSettings->neSpreadsheetw(environment => $self->environment, filename => 'config.yml')->settings()};
+   \%{Pathogens::ConfigSettings->new(environment => $self->environment, filename => 'config.yml')->settings()};
 }
 
 sub _build__database_settings
@@ -71,12 +75,13 @@ sub update
 {
   my ($self) = @_;
 
-  for my $file_metadata (@{$self->_files_metadata})
-  {
+  for my $file_metadata (@{$self->_files_metadata}) {
     eval {
       if(UpdatePipeline::UpdateLaneMetaData->new(
           lane_meta_data => $self->_lanes_metadata->{$file_metadata->file_name_without_extension},
-          file_meta_data => $file_metadata)->update_required
+          file_meta_data => $file_metadata,
+          overwrite_common_name => $self->overwrite_common_name)->update_required
+          
         )
       {
           $self->_post_populate_file_metadata($file_metadata) unless($self->dont_use_warehouse);
@@ -104,11 +109,18 @@ sub _update_lane
       my $vstudy   = UpdatePipeline::VRTrack::Study->new(accession => $file_metadata->study_accession_number, _vr_project => $vproject)->vr_study();
       $vproject->update;
     }
+    
     my $vr_sample = UpdatePipeline::VRTrack::Sample->new(
       common_name_required => $self->common_name_required,
       name => $file_metadata->sample_name,  
       external_id => $file_metadata->sample_ssid, 
-      common_name => $file_metadata->sample_common_name, accession => $file_metadata->sample_accession_number, _vrtrack => $self->_vrtrack,_vr_project => $vproject)->vr_sample();
+      common_name => $file_metadata->sample_common_name, 
+      accession => $file_metadata->sample_accession_number,
+      supplier_name => $file_metadata->supplier_name,
+      use_supplier_name => $self->use_supplier_name,
+      _vrtrack => $self->_vrtrack,
+      _vr_project => $vproject)->vr_sample();
+      
     my $vr_library = UpdatePipeline::VRTrack::Library->new(
       name => $file_metadata->library_name,
       external_id        => $file_metadata->library_ssid,
