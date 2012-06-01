@@ -63,6 +63,8 @@ sub _populate_name_from_ssid
   }
 }
 
+__PACKAGE__->meta->make_immutable;
 
+no Moose;
 
 1;

@@ -45,4 +45,8 @@ sub find_file_on_disk
   $self->_file_location;
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
+
 1;

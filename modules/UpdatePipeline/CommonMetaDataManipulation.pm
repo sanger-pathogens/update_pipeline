@@ -37,4 +37,9 @@ sub _build__lanes_metadata
   }
   return \%lanes_metadata;
 }
+
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
+
 1;

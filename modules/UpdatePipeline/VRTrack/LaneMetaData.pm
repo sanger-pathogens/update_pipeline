@@ -76,6 +76,8 @@ sub _build_lane_attributes
   return \%lane_attributes;
 }
 
+__PACKAGE__->meta->make_immutable;
 
+no Moose;
 
 1;
