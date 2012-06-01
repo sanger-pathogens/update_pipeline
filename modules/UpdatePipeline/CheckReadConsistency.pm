@@ -208,5 +208,8 @@ sub _fastq_file_names_by_lane_name {
     return \@file_names;
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
 
 1;

@@ -24,4 +24,8 @@ use Exception::Class (
     UpdatePipeline::Exceptions::CantFindSequencingFile    => { description => "Sequencing file in spreadsheet not found on disk" },
 );  
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
+
 1;

@@ -32,4 +32,8 @@ has 'study_accession_number'        => ( is => 'ro', isa => 'Maybe[Str]');
 has 'total_size_of_files_in_gbytes' => ( is => 'ro', isa => 'Maybe[Str]');
 has 'data_to_be_kept_until'         => ( is => 'ro', isa => 'Maybe[Str]');
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
+
 1;

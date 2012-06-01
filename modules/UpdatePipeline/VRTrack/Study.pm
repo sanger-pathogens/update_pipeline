@@ -36,4 +36,8 @@ sub _build_vr_study
   return $vstudy;
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
+
 1;
