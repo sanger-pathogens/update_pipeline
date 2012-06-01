@@ -149,4 +149,8 @@ sub _unknown_common_name
   $self->_unknown_common_names->{$exception->error}++;
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
+
 1;

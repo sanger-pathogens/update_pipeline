@@ -100,4 +100,8 @@ sub _stream_location
   return $self->bin_directory . "imeta ls -d ".$self->file_location." |";
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
+
 1;

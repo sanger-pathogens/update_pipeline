@@ -58,4 +58,8 @@ sub post_populate
   Warehouse::NPGInformation->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->post_populate();
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
+
 1;

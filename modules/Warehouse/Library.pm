@@ -170,6 +170,8 @@ sub _populate_name_from_pulldown_multiplexed_library_tube_ssid
   }
 }
 
+__PACKAGE__->meta->make_immutable;
 
+no Moose;
 
 1;

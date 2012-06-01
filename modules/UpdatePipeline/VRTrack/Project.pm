@@ -42,5 +42,8 @@ sub _build_vr_project
   return $vproject;
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
 
 1;

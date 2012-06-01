@@ -47,4 +47,8 @@ sub _populate_fragment_size_from_library_ssid
   }
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
+
 1;

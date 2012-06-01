@@ -142,6 +142,9 @@ sub _post_populate_file_metadata
   Warehouse::FileMetaDataPopulation->new(file_meta_data => $file_metadata, _dbh => $self->_warehouse_dbh)->post_populate();
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
 
 1;
 
