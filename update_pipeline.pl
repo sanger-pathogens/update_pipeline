@@ -23,7 +23,7 @@ use UpdatePipeline::UpdateAllMetaData;
 use UpdatePipeline::Studies;
 use UpdatePipeline::VRTrack::Species;
 
-my ( $studyfile, $help, $number_of_files_to_return, $parallel_processes, $verbose_output, $errors_min_run_id, $database,$input_study_name, $update_if_changed, $dont_use_warehouse, $taxon_id, $overwrite_common_name, $use_supplier_name );
+my ( $studyfile, $help, $number_of_files_to_return, $parallel_processes, $verbose_output, $errors_min_run_id, $database,$input_study_name, $update_if_changed, $dont_use_warehouse, $taxon_id, $overwrite_common_name, $use_supplier_name, $specific_run_id );
 
 GetOptions(
     's|studies=s'               => \$studyfile,
@@ -37,6 +37,7 @@ GetOptions(
     'w|dont_use_warehouse'      => \$dont_use_warehouse,
     't|taxon_id=i'              => \$taxon_id,
     'l|use_supplier_name'       => \$use_supplier_name,
+    'i|specific_run_id=i'       => \$specific_run_id,
     'h|help'                    => \$help,
 );
 
@@ -55,6 +56,7 @@ Usage: $0
   -w|--dont_use_warehouse      <dont use the warehouse to fill in missing data>
   -t|--taxon_id                <optionally provide taxon id to overwrite species info in bam file common name>
   -l|--use_supplier_name       <optionally use the supplier name from the warehouse to populate name and hierarchy name of the individual table>
+  -i|--specific_run_id         <optionally provide a specfic run id for a study>
   -h|--help                    <this message>
 
 Update the tracking database from IRODs and the warehouse.
@@ -80,6 +82,7 @@ $errors_min_run_id ||= 6000;
 $dont_use_warehouse ||= 0;
 $use_supplier_name ||=0;
 $taxon_id ||= 0;
+$specific_run_id ||=0;
 
 my $study_names;
 
@@ -108,6 +111,7 @@ if($parallel_processes == 1)
     dont_use_warehouse        => $dont_use_warehouse,
     overwrite_common_name     => $overwrite_common_name,
     use_supplier_name         => $use_supplier_name,
+    specific_run_id           => $specific_run_id,
   );
   $update_pipeline->update();
 }
@@ -132,6 +136,7 @@ else
       dont_use_warehouse        => $dont_use_warehouse,
       overwrite_common_name     => $overwrite_common_name,
       use_supplier_name         => $use_supplier_name,
+      specific_run_id           => $specific_run_id,
     );
     $update_pipeline->update();
     $pm->finish; # do the exit in the child process

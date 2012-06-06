@@ -37,6 +37,7 @@ has 'study_ssid'                       => ( is => 'rw', isa => 'Maybe[Int]');
 has 'sample_ssid'                      => ( is => 'rw', isa => 'Maybe[Int]');
 has 'fragment_size_from'               => ( is => 'rw', isa => 'Maybe[Int]' );
 has 'fragment_size_to'                 => ( is => 'rw', isa => 'Maybe[Int]' );
+has 'id_run'                           => ( is => 'rw', isa => 'Maybe[Int]' ); 
 
 
 sub file_type_number
