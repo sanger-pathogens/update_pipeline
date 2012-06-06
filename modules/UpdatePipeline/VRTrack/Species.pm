@@ -37,4 +37,8 @@ sub _build_vr_species
   return $vspecies;
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
+
 1;
