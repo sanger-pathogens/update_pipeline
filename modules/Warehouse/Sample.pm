@@ -89,7 +89,6 @@ sub _populate_supplier_name
 }
 
 __PACKAGE__->meta->make_immutable;
->>>>>>> upstream/master
 
 no Moose;
 
