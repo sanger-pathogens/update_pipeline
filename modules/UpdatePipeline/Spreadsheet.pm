@@ -268,5 +268,8 @@ sub _copy_files
    $pm->wait_all_children;
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
 
 1;

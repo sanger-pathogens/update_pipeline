@@ -84,5 +84,9 @@ sub populate_file_locations_on_disk
   return $self;
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
+
 1;
 

@@ -32,5 +32,8 @@ sub delete_files
   $self->_vrtrack->{_dbh}->do($file_sql);
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
 
 1;

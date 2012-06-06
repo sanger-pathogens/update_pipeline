@@ -107,5 +107,8 @@ sub _normalise_sample_name
   return $sample_name;
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
 
 1;

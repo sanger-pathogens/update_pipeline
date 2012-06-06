@@ -285,4 +285,8 @@ sub _new_lane_changed_too_recently_to_compare
     }
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
+
 1;

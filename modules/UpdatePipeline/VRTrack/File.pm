@@ -71,4 +71,8 @@ sub _build_vr_file
   return $vfile;
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
+
 1;

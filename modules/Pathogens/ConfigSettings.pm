@@ -27,4 +27,8 @@ sub _build_settings
   return \%config_settings;
 } 
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
+
 1;

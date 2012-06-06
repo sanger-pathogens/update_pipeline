@@ -107,4 +107,8 @@ sub _convert_hash_values_empty_strings_to_undef
    return $input_hash;
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
+
 1;

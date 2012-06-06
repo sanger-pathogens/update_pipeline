@@ -73,5 +73,8 @@ sub _setup_xml_parser_via_proxy
   $tpp;
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
 
 1;

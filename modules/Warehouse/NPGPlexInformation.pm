@@ -115,5 +115,8 @@ sub _split_file_name
   }
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
 
 1;
