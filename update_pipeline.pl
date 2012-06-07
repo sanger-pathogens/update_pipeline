@@ -21,7 +21,6 @@ use Parallel::ForkManager;
 
 use UpdatePipeline::UpdateAllMetaData;
 use UpdatePipeline::Studies;
-use UpdatePipeline::VRTrack::Species;
 
 my ( $studyfile, $help, $number_of_files_to_return, $parallel_processes, $verbose_output, $errors_min_run_id, $database,$input_study_name, $update_if_changed, $dont_use_warehouse, $taxon_id, $overwrite_common_name, $use_supplier_name, $specific_run_id, $common_name_required );
 

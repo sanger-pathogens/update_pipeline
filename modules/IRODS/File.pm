@@ -45,7 +45,7 @@ sub _build_file_attributes
    $self->_convert_manual_qc_values(\%file_attributes);
    
    if (! defined($file_attributes{md5})) {
-       $file_attributes{md5} = $self->_md5_from_icat;
+       $file_attributes{md5} = $self->_get_md5_from_icat;
    }
    
    return \%file_attributes;
@@ -105,7 +105,7 @@ sub _stream_location
   return $self->bin_directory . "imeta ls -d ".$self->file_location." |";
 }
 
-sub _md5_from_icat
+sub _get_md5_from_icat
 {
   my ($self) = @_; 
   
