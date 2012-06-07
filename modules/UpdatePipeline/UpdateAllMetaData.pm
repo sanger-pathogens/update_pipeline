@@ -43,7 +43,7 @@ has '_warehouse_dbh'        => ( is => 'rw', lazy_build => 1 );
 has 'minimum_run_id'        => ( is => 'rw', default    => 1,            isa => 'Int' );
 has 'environment'           => ( is => 'rw', default    => 'production', isa => 'Str');
 has 'common_name_required'  => ( is => 'rw', default    => 1,            isa => 'Bool');
-has 'overwrite_common_name' => ( is => 'rw',                             isa => 'Maybe[Str]');
+has 'taxon_id'              => ( is => 'rw', default    => 0,            isa => 'Int' );
 
 
 sub _build__config_settings
@@ -81,7 +81,8 @@ sub update
       if(UpdatePipeline::UpdateLaneMetaData->new(
           lane_meta_data => $self->_lanes_metadata->{$file_metadata->file_name_without_extension},
           file_meta_data => $file_metadata,
-          overwrite_common_name => $self->overwrite_common_name)->update_required
+          common_name_required => $self->common_name_required,
+          )->update_required
           
         )
       {
@@ -119,6 +120,7 @@ sub _update_lane
       accession => $file_metadata->sample_accession_number,
       supplier_name => $file_metadata->supplier_name,
       use_supplier_name => $self->use_supplier_name,
+      taxon_id => $self->taxon_id,
       _vrtrack => $self->_vrtrack,
       _vr_project => $vproject)->vr_sample();
       
