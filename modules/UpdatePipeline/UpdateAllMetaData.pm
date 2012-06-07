@@ -22,7 +22,6 @@ use UpdatePipeline::VRTrack::Study;
 use UpdatePipeline::ExceptionHandler;
 use Pathogens::ConfigSettings;
 
-use Data::Dumper;
 
 extends 'UpdatePipeline::CommonMetaDataManipulation';
 
