@@ -19,7 +19,7 @@ use UpdatePipeline::FileMetaData;
 has 'lane_meta_data'       => ( is => 'ro', isa => "Maybe[HashRef]");
 has 'file_meta_data'       => ( is => 'ro', isa => 'UpdatePipeline::FileMetaData',   required => 1 );
 
-has 'common_name_required' => ( is => 'ro', isa => 'Bool', default => 1);
+has 'common_name_required'  => ( is => 'ro', isa => 'Bool', default => 1);
 
 sub update_required
 {
@@ -34,7 +34,10 @@ sub _differences_between_file_and_lane_meta_data
   
   # ignore files where there are only a few reads, its usually bad data
   return 0 if (defined($self->file_meta_data->total_reads ) && $self->file_meta_data->total_reads < 10000);
-
+  
+  # to stop exception being thrown where the common name is missing from the file metadata, but is not required
+  $self->file_meta_data->sample_common_name('default') if (! $self->common_name_required && not defined $self->file_meta_data->sample_common_name);
+  
   UpdatePipeline::Exceptions::UndefinedSampleName->throw( error => $self->file_meta_data->file_name) if(not defined($self->file_meta_data->sample_name));
   UpdatePipeline::Exceptions::UndefinedSampleCommonName->throw( error => $self->file_meta_data->sample_name) if($self->common_name_required == 1 && not defined($self->file_meta_data->sample_common_name));
   UpdatePipeline::Exceptions::UndefinedStudySSID->throw( error => $self->file_meta_data->file_name) if(not defined($self->file_meta_data->study_ssid));

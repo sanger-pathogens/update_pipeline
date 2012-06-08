@@ -41,7 +41,12 @@ sub _build_file_attributes
        if (/^value: (.+)$/)     { $file_attributes{$attribute} = $1; }
    }
    close $irods;
+   
    $self->_convert_manual_qc_values(\%file_attributes);
+   
+   if (! defined($file_attributes{md5})) {
+       $file_attributes{md5} = $self->_get_md5_from_icat;
+   }
    
    return \%file_attributes;
 }
@@ -98,6 +103,19 @@ sub _stream_location
   }
   
   return $self->bin_directory . "imeta ls -d ".$self->file_location." |";
+}
+
+sub _get_md5_from_icat
+{
+  my ($self) = @_; 
+  
+  my $cmd = $self->bin_directory . "ichksum ".$self->file_location;
+  #stolen from VertRes::Wrapper::iRODS
+  my $md5 = `$cmd`;
+  chomp $md5;
+  $md5 =~s/.*\s//;
+  return $md5;
+
 }
 
 __PACKAGE__->meta->make_immutable;

@@ -63,6 +63,7 @@ sub _build_files_metadata
         file_type               => $irods_file_metadata->{type},
         file_name               => $irods_file_metadata->{file_name},
         file_name_without_extension => $irods_file_metadata->{file_name_without_extension},
+        id_run                  => $irods_file_metadata->{id_run},
         library_name            => $irods_file_metadata->{library},
         library_ssid            => $irods_file_metadata->{library_id},
         total_reads             => $irods_file_metadata->{total_reads},
@@ -130,6 +131,7 @@ sub print_file_metadata
     print( ($file_metadata->file_md5                ? $file_metadata->file_md5                : '')  .', ');
     print( ($file_metadata->file_type               ? $file_metadata->file_type               : '')  .', ');
     print( ($file_metadata->file_name               ? $file_metadata->file_name               : '')  .', ');
+    print( ($file_metadata->id_run                  ? $file_metadata->id_run                  : '')  .', ');
     print( ($file_metadata->library_name            ? $file_metadata->library_name            : '')  .', ');
     print( ($file_metadata->library_ssid            ? $file_metadata->library_ssid            : '')  .', ');
     print( ($file_metadata->total_reads             ? $file_metadata->total_reads             : '')  .', ');

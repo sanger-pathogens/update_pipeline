@@ -5,6 +5,7 @@ use Exception::Class (
     UpdatePipeline::Exceptions::CouldntCreateProject      => { description => 'Couldnt create a row in VRTrack for project' },
     UpdatePipeline::Exceptions::CouldntCreateLibrary      => { description => 'Couldnt create a row in VRTrack for library' },
     UpdatePipeline::Exceptions::CouldntCreateSample       => { description => 'Couldnt create a row in VRTrack for sample' },
+    UpdatePipeline::Exceptions::CouldntCreateSpecies      => { description => 'Couldnt create a row in VRTrack for species'},
     UpdatePipeline::Exceptions::CouldntCreateStudy        => { description => 'Couldnt create a row in VRTrack for study' },
     UpdatePipeline::Exceptions::CouldntCreateLane         => { description => 'Couldnt create a row in VRTrack for lane' },
     UpdatePipeline::Exceptions::CouldntCreateFile         => { description => 'Couldnt create a row in VRTrack for file' },
