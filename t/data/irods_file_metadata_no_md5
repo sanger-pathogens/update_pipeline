@@ -1,0 +1,65 @@
+AVUs defined for dataObj /seq/7434/7434_6#82.bam:
+attribute: study_title
+value: WGS of Borbera genetic isolate
+units: 
+----
+attribute: id_run
+value: 7434
+units: 
+----
+attribute: type
+value: bam
+units: 
+----
+attribute: is_paired_read
+value: 1
+units: 
+----
+attribute: total_reads
+value: 154906330
+units: 
+----
+attribute: sample
+value: VBSEQ5231072
+units: 
+----
+attribute: sample_common_name
+value: Homo Sapien
+units: 
+----
+attribute: manual_qc
+value: 1
+units: 
+----
+attribute: study_id
+value: 1948
+units: 
+----
+attribute: library
+value: 4202230
+units: 
+----
+attribute: lane
+value: 6
+units: 
+----
+attribute: target
+value: 1
+units: 
+----
+attribute: sample_accession_number
+value: EGAN00001029367
+units: 
+----
+attribute: alignment
+value: 1
+units: 
+----
+attribute: sample_id
+value: 1283434
+units: 
+----
+attribute: library_id
+value: 4202230
+units: 
+----
