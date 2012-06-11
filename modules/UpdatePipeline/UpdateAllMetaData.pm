@@ -36,6 +36,7 @@ has 'verbose_output'        => ( is => 'rw', default    => 0,            isa => 
 has 'update_if_changed'     => ( is => 'rw', default    => 0,            isa => 'Bool');
 has 'dont_use_warehouse'    => ( is => 'ro', default    => 0,            isa => 'Bool');
 has 'use_supplier_name'     => ( is => 'ro', default    => 0,            isa => 'Bool');
+has 'no_pending_lanes'      => ( is => 'ro', default    => 0,            isa => 'Bool');
 has 'specific_run_id'       => ( is => 'ro', default    => 0,            isa => 'Int');
                            
 has '_warehouse_dbh'        => ( is => 'rw', lazy_build => 1 );
@@ -82,11 +83,12 @@ sub update
           file_meta_data => $file_metadata,
           common_name_required => $self->common_name_required,
           )->update_required
-          
         )
       {
           $self->_post_populate_file_metadata($file_metadata) unless($self->dont_use_warehouse);
-          $self->_update_lane($file_metadata);
+		  my $filter_pending = ( !$self->no_pending_lanes || ( $self->no_pending_lanes && defined $file_metadata->lane_manual_qc && $file_metadata->lane_manual_qc ne 'pending' ) );
+		  my $filter_id_run = ( !$self->specific_run_id || ( $self->specific_run_id && defined $file_metadata->id_run && $self->specific_run_id == $file_metadata->id_run));
+          $self->_update_lane($file_metadata) unless ( !$filter_pending  || !$filter_id_run );
       }
     };
     if(my $exception = Exception::Class->caught())
@@ -103,7 +105,6 @@ sub _update_lane
 {
   my ($self, $file_metadata) = @_;
   eval {
-	if ( !$self->specific_run_id || ( $self->specific_run_id && defined $file_metadata->id_run && $self->specific_run_id == $file_metadata->id_run) ) {
     my $vproject = UpdatePipeline::VRTrack::Project->new(name => $file_metadata->study_name, external_id => $file_metadata->study_ssid, _vrtrack => $self->_vrtrack)->vr_project();
     if(defined($file_metadata->study_accession_number))
     {
@@ -143,7 +144,6 @@ sub _update_lane
     {
       UpdatePipeline::VRTrack::File->new(name => $file_metadata->mate_file_name ,file_type => $file_metadata->file_type_number($file_metadata->mate_file_type), md5 => $file_metadata->mate_file_md5 ,_vrtrack => $self->_vrtrack,_vr_lane => $vr_lane)->vr_file();
     }
-  }  
   };
   if(my $exception = Exception::Class->caught())
   {
