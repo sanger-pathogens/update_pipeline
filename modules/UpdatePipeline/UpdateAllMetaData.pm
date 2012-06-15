@@ -44,6 +44,7 @@ has 'minimum_run_id'        => ( is => 'rw', default    => 1,            isa => 
 has 'environment'           => ( is => 'rw', default    => 'production', isa => 'Str');
 has 'common_name_required'  => ( is => 'rw', default    => 1,            isa => 'Bool');
 has 'taxon_id'              => ( is => 'rw', default    => 0,            isa => 'Int' );
+has 'species_name'          => ( is => 'ro',                             isa => 'Maybe[Str]' );
 
 
 sub _build__config_settings
@@ -77,6 +78,9 @@ sub update
   my ($self) = @_;
 
   for my $file_metadata (@{$self->_files_metadata}) {
+    if ($self->taxon_id && defined $self->species_name) {
+    	$file_metadata->sample_common_name($self->species_name);
+    }
     eval {
       if(UpdatePipeline::UpdateLaneMetaData->new(
           lane_meta_data => $self->_lanes_metadata->{$file_metadata->file_name_without_extension},

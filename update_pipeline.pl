@@ -16,13 +16,13 @@ use POSIX;
 use Getopt::Long;
 use VRTrack::VRTrack;
 use VertRes::Utils::VRTrackFactory;
-use Data::Dumper;
+use NCBI::TaxonLookup;
 use Parallel::ForkManager;
 
 use UpdatePipeline::UpdateAllMetaData;
 use UpdatePipeline::Studies;
 
-my ( $studyfile, $help, $number_of_files_to_return, $parallel_processes, $verbose_output, $errors_min_run_id, $database,$input_study_name, $update_if_changed, $dont_use_warehouse, $taxon_id, $overwrite_common_name, $use_supplier_name, $specific_run_id, $common_name_required, $no_pending_lanes );
+my ( $studyfile, $help, $number_of_files_to_return, $parallel_processes, $verbose_output, $errors_min_run_id, $database,$input_study_name, $update_if_changed, $dont_use_warehouse, $taxon_id, $overwrite_common_name, $use_supplier_name, $specific_run_id, $common_name_required, $no_pending_lanes, $species_name );
 
 GetOptions(
     's|studies=s'               => \$studyfile,
@@ -86,6 +86,7 @@ $taxon_id ||= 0;
 $common_name_required = $taxon_id ? 0 : 1;
 $specific_run_id ||=0;
 $no_pending_lanes ||=0;
+$species_name = $taxon_id ? NCBI::TaxonLookup->new( taxon_id => $taxon_id )->common_name : undef;
 
 my $study_names;
 
@@ -113,6 +114,7 @@ if($parallel_processes == 1)
     dont_use_warehouse        => $dont_use_warehouse,
     common_name_required      => $common_name_required,
     taxon_id                  => $taxon_id,
+    species_name              => $species_name,
     use_supplier_name         => $use_supplier_name,
     specific_run_id           => $specific_run_id,
     no_pending_lanes          => $no_pending_lanes,
@@ -138,6 +140,7 @@ else
       dont_use_warehouse        => $dont_use_warehouse,
       common_name_required      => $common_name_required,
       taxon_id                  => $taxon_id,
+      species_name              => $species_name,
       use_supplier_name         => $use_supplier_name,
       specific_run_id           => $specific_run_id,
       no_pending_lanes          => $no_pending_lanes,
