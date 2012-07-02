@@ -16,7 +16,7 @@ use POSIX;
 use Getopt::Long;
 use VRTrack::VRTrack;
 use VertRes::Utils::VRTrackFactory;
-use NCBI::TaxonLookup;
+use NCBI::SimpleLookup;
 use Parallel::ForkManager;
 
 use UpdatePipeline::UpdateAllMetaData;
@@ -86,7 +86,7 @@ $taxon_id ||= 0;
 $common_name_required = $taxon_id ? 0 : 1;
 $specific_run_id ||=0;
 $no_pending_lanes ||=0;
-$species_name = $taxon_id ? NCBI::TaxonLookup->new( taxon_id => $taxon_id )->common_name : undef;
+$species_name = $taxon_id ? NCBI::SimpleLookup->new( taxon_id => $taxon_id )->common_name : undef;
 
 my $study_names;
 
