@@ -61,9 +61,22 @@ is $vrtrack->hierarchy_path_of_lane($vlane,"genus:species-subspecies:TRACKING:pr
 is $vlane->is_processed('import'), 0, 'import initially not set for lane';
 
 ok $spreadsheet->import_sequencing_files_to_pipeline(),'copy the files into the correct location';
-ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/1/SLX/L5_AB_12_2011/myfile_1/myfile_1.fastq.gz');
-ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/2/SLX/EF_CD_12_2011/myotherfile_L3_1/myotherfile_L3_2.fastq.gz');
-ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/2/SLX/EF_CD_12_2011/myotherfile_L3_1/myotherfile_L3_1.fastq.gz');
+ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/1/SLX/L5_AB_12_2011/myfile_1/myfile_1.fastq.gz', 'target fastq exists myfile_1');
+ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/2/SLX/EF_CD_12_2011/myotherfile_L3_1/myotherfile_L3_2.fastq.gz', 'target fastq exists myotherfile_L3_2');
+ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/2/SLX/EF_CD_12_2011/myotherfile_L3_1/myotherfile_L3_1.fastq.gz', 'target fastq exists myotherfile_L3_1');
+
+ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/1/SLX/L5_AB_12_2011/myfile_1/myfile_1.fastq.gz.md5', 'md5 hash file exists for myfile_1');
+ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/2/SLX/EF_CD_12_2011/myotherfile_L3_1/myotherfile_L3_1.fastq.gz.md5', 'md5 hash file exists for myotherfile_L3_1');
+ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/2/SLX/EF_CD_12_2011/myotherfile_L3_1/myotherfile_L3_2.fastq.gz.md5', 'md5 hash file exists for myotherfile_L3_2');
+ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/3/SLX/ABC45678/yetanotherfile_L4_1/yetanotherfile_L4_1.fastq.gz.md5', 'md5 hash file exists for yetanotherfile_L4_1');
+
+# check that the files all have md5 hashes in the database
+ok my $vfile_myfile_1 = VRTrack::File->new_by_name( $vrtrack, 'myfile_1.fastq.gz'), 'retrieve the updated file object myfile_1';
+is($vfile_myfile_1->md5, "7bfa821c601bebc2a96f7b8dda141457", 'MD5 for myfile_1');
+ok my $vfile_myotherfile_L3_2 = VRTrack::File->new_by_name( $vrtrack, 'myotherfile_L3_2.fastq.gz'), 'retrieve the updated file object myotherfile_L3_2';
+is($vfile_myotherfile_L3_2->md5, "81b5693c5751dec6606faec306271061", 'MD5 for myotherfile_L3_2');
+ok my $vfile_myotherfile_L3_1 = VRTrack::File->new_by_name( $vrtrack, 'myotherfile_L3_1.fastq.gz'), 'retrieve the updated file object myotherfile_L3_1';
+is($vfile_myotherfile_L3_1->md5, "c1fb9ece9e438899c419999a6db75e63", 'MD5 for myotherfile_L3_1');
 
 ok my $vlane_updated = VRTrack::Lane->new_by_name( $vrtrack, 'myfile_1'), 'retrieve the updated lane object';
 is $vlane_updated->is_processed('import'), 1, 'import for lane after import';
