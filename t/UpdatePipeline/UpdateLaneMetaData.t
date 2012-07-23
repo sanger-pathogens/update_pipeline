@@ -217,7 +217,7 @@ ok my $file_metadata_paired_changed = UpdatePipeline::FileMetaData->new(
   sample_common_name      => "SomeBacteria",
   lane_is_paired_read     => 0
 ), 'file meta data with changed paired flag';
-is 1, UpdatePipeline::UpdateLaneMetaData->new(lane_meta_data => $lane_metadata, file_meta_data => $file_metadata_paired_changed )->update_required(), 'paired flag changed';
+is 0, UpdatePipeline::UpdateLaneMetaData->new(lane_meta_data => $lane_metadata, file_meta_data => $file_metadata_paired_changed )->update_required(), 'paired flag changed but we do nothing';
 
 
 # missing essential data
