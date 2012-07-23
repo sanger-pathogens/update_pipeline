@@ -231,7 +231,7 @@ sub import_sequencing_files_to_pipeline
      my @source_and_dest = ($source_file,$target_file );
      push(@files_source_and_dest, \@source_and_dest);
      
-     $self->_update_md5_of_file_in_database($vlane, $sequencing_experiment->pipeline_filename,$source_file );
+     $self->_update_md5_of_file_in_database($vlane, $sequencing_experiment->pipeline_filename,$source_file, $target_file );
      
      if(defined($sequencing_experiment->mate_filename))
      {
@@ -240,7 +240,7 @@ sub import_sequencing_files_to_pipeline
        my @mate_source_and_dest = ($source_mate_file,$target_mate_file );
        push(@files_source_and_dest, \@mate_source_and_dest);
        
-       $self->_update_md5_of_file_in_database($vlane, $sequencing_experiment->pipeline_mate_filename,$source_mate_file );
+       $self->_update_md5_of_file_in_database($vlane, $sequencing_experiment->pipeline_mate_filename,$source_mate_file,$target_mate_file );
 
      }
    }
@@ -279,15 +279,24 @@ sub _copy_files
 
 sub _update_md5_of_file_in_database
 {
-   my ($self,$vlane, $pipeline_filename, $source_file) = @_;
+   my ($self,$vlane, $pipeline_filename, $source_file, $target_file) = @_;
    
    for my $vfile (@{$vlane->files})
    {
      my $expected_name = $pipeline_filename;
      if($vfile->name =~ /$expected_name/)
      {
-       $vfile->md5($self->_calculate_md5_of_gzip_file($source_file));
+       my $md5_of_gzip_file = $self->_calculate_md5_of_gzip_file($source_file);
+       
+       # save to DB
+       $vfile->md5($md5_of_gzip_file);
        $vfile->update();
+       
+       # write it out to disk
+       open(OUT, "+>".$target_file.'.md5');
+       print OUT $md5_of_gzip_file."  ".$source_file."";
+       close(OUT);
+       
        return;
      }
    }
