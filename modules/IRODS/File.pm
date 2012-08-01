@@ -110,12 +110,11 @@ sub _get_md5_from_icat
   my ($self) = @_; 
   
   my $cmd = $self->bin_directory . "ichksum ".$self->file_location;
-  #stolen from VertRes::Wrapper::iRODS
-  my $md5 = `$cmd`;
+  open(my $irods_md5_fh, '-|', $cmd);
+  my $md5 = <$irods_md5_fh>;
   chomp $md5;
   $md5 =~s/.*\s//;
   return $md5;
-
 }
 
 __PACKAGE__->meta->make_immutable;
