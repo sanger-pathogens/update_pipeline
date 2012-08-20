@@ -1,5 +1,5 @@
 warehouse:
-  database: warehouse_two_production
-  host:     mcs7
-  port:     3306
+  database: sequencescape_warehouse
+  host:     mcs12
+  port:     3379
   user:     warehouse_ro

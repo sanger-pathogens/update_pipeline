@@ -42,6 +42,7 @@ use Try::Tiny;
 use File::Copy;
 use File::Path qw(make_path  );
 use Parallel::ForkManager;
+use Digest::MD5;
 use UpdatePipeline::Exceptions;
 use UpdatePipeline::Spreadsheet::Parser;
 use UpdatePipeline::Spreadsheet::SpreadsheetMetaData;
@@ -230,12 +231,17 @@ sub import_sequencing_files_to_pipeline
      my @source_and_dest = ($source_file,$target_file );
      push(@files_source_and_dest, \@source_and_dest);
      
+     $self->_update_md5_of_file_in_database($vlane, $sequencing_experiment->pipeline_filename,$source_file, $target_file );
+     
      if(defined($sequencing_experiment->mate_filename))
      {
        my $target_mate_file = join('/',($target_directory, $sequencing_experiment->pipeline_mate_filename));
        my $source_mate_file =$sequencing_experiment->mate_file_location_on_disk;
        my @mate_source_and_dest = ($source_mate_file,$target_mate_file );
        push(@files_source_and_dest, \@mate_source_and_dest);
+       
+       $self->_update_md5_of_file_in_database($vlane, $sequencing_experiment->pipeline_mate_filename,$source_mate_file,$target_mate_file );
+
      }
    }
    
@@ -263,9 +269,46 @@ sub _copy_files
      my $target_file = $file_source_and_dest->[1];
      `rsync $source_file $target_file`;
      
+     # create fastqcheck file from the original file
+     `gunzip -c $source_file | fastqcheck > $target_file.fastqcheck`;
+     
      $pm->finish; # do the exit in the child process
    }
    $pm->wait_all_children;
+}
+
+sub _update_md5_of_file_in_database
+{
+   my ($self,$vlane, $pipeline_filename, $source_file, $target_file) = @_;
+   
+   for my $vfile (@{$vlane->files})
+   {
+     my $expected_name = $pipeline_filename;
+     if($vfile->name =~ /$expected_name/)
+     {
+       my $md5_of_gzip_file = $self->_calculate_md5_of_gzip_file($source_file);
+       
+       # save to DB
+       $vfile->md5($md5_of_gzip_file);
+       $vfile->update();
+       
+       # write it out to disk
+       open(OUT, "+>".$target_file.'.md5');
+       print OUT $md5_of_gzip_file."  ".$source_file."";
+       close(OUT);
+       
+       return;
+     }
+   }
+}
+
+sub _calculate_md5_of_gzip_file
+{
+  my ($self,$input_file) = @_;
+  open(my $input_gzip_file_handle, '-|', "gunzip -c ".$input_file);
+  my $md5 = Digest::MD5->new();
+  $md5->addfile($input_gzip_file_handle);
+  return $md5->hexdigest;
 }
 
 __PACKAGE__->meta->make_immutable;
