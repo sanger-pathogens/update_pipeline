@@ -49,6 +49,22 @@ sub file_type_number
   }
   elsif($file_type eq 'fastq.gz')
   {
+    return 1;
+  }
+  else
+  {
+    UpdatePipeline::Exceptions::UnknownFileType->throw(error => 'Unknown file type '+$file_type);
+  }
+  
+  return -1;
+}
+
+sub mate_file_type_number
+{
+  my($self,$file_type) = @_;
+
+  if($file_type eq 'fastq.gz')
+  {
     return 2;
   }
   else
