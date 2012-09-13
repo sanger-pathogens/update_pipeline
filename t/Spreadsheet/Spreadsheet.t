@@ -44,7 +44,7 @@ is $spreadsheet->_files_metadata->[0]->library_ssid, 790, 'next library ssid use
 is $spreadsheet->_files_metadata->[1]->study_ssid,   123, 'existing study ssid reused';
 is $spreadsheet->_files_metadata->[1]->sample_ssid,  456, 'existing sample ssid';
 is $spreadsheet->_files_metadata->[1]->library_ssid, 791, 'existing library ssid used';
-is $spreadsheet->_files_metadata->[1]->file_type_number($spreadsheet->_files_metadata->[1]->file_type), 2, 'file type set to fastq';
+is $spreadsheet->_files_metadata->[1]->file_type_number($spreadsheet->_files_metadata->[1]->file_type), 1, 'file type set to fastq';
 
 
 is $spreadsheet->_files_metadata->[2]->study_ssid,   123, 'existing study ssid reused';
