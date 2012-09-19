@@ -20,7 +20,6 @@ my $vr_sample = $sample->vr_sample();
 package UpdatePipeline::VRTrack::Sample;
 use VRTrack::Sample;
 use UpdatePipeline::Exceptions;
-use NCBI::TaxonLookup;
 use Moose;
 
 has 'name'        => ( is => 'ro', isa => 'Str', required   => 1 );
@@ -87,32 +86,16 @@ sub _build__vr_species
 {
   my ($self) = @_;
   
-  my $vr_species;
-   
-  if ( $self->taxon_id ) {
-      
-      $vr_species = VRTrack::Species->new_by_taxon_id( $self->_vrtrack, $self->taxon_id);
-      
-      if ( not defined($vr_species) ) {
-          my $taxon_lookup = NCBI::TaxonLookup->new( taxon_id => $self->taxon_id );
-          my $taxon_name = $taxon_lookup->common_name;
-          $vr_species = VRTrack::Species->create( $self->_vrtrack, $taxon_name, $self->taxon_id );
-          UpdatePipeline::Exceptions::CouldntCreateSpecies->throw( error => "Couldnt create species with taxon_id/name ".$self->taxon_id."/$taxon_name\n" ) if(not defined($vr_species));
-      }
-  }
-  else {
-   
-      $vr_species = VRTrack::Species->new_by_name( $self->_vrtrack, $self->common_name);
+  my $vr_species = VRTrack::Species->new_by_name( $self->_vrtrack, $self->common_name);
 	  
-      if((not defined($vr_species) )&& $self->common_name_required ==0)
-      {
-          $vr_species = VRTrack::Species->create( $self->_vrtrack, $self->common_name);
-      }
-      elsif((not defined($vr_species) )&& $self->common_name_required ==1)
-      {
-          UpdatePipeline::Exceptions::UnknownCommonName->throw( error => $self->common_name );
-      }
-  } 
+  if((not defined($vr_species) )&& $self->common_name_required ==0)
+  {
+      $vr_species = VRTrack::Species->create( $self->_vrtrack, $self->common_name, $self->taxon_id );
+  }
+  elsif((not defined($vr_species) )&& $self->common_name_required ==1)
+  {
+      UpdatePipeline::Exceptions::UnknownCommonName->throw( error => $self->common_name );
+  }
   return $vr_species;
 }
 

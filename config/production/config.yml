@@ -8,3 +8,5 @@ root_path_by_db_name:
     pathogen_prok_track: /lustre/scratch108/pathogen/pathpipe/prokaryotes/seq-pipelines/
     pathogen_helminth_track: /lustre/scratch108/pathogen/pathpipe/helminths/seq-pipelines/
     pathogen_virus_track: /lustre/scratch108/pathogen/pathpipe/viruses/seq-pipelines/
+
+email_eutils: foo_bar@sanger.ac.uk
