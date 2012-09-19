@@ -5,3 +5,5 @@ minimum_passed_hours_before_comparing_new_lanes_to_irods: 48
 #specify what the root (missing part) should be by employing VRTrack DB's name.
 root_path_by_db_name:
     vrtrack_test: t/data/
+
+email_eutils: foo_bar@sanger.ac.uk

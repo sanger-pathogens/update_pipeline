@@ -16,13 +16,13 @@ use POSIX;
 use Getopt::Long;
 use VRTrack::VRTrack;
 use VertRes::Utils::VRTrackFactory;
-use Data::Dumper;
+use NCBI::SimpleLookup;
 use Parallel::ForkManager;
 
 use UpdatePipeline::UpdateAllMetaData;
 use UpdatePipeline::Studies;
 
-my ( $studyfile, $help, $number_of_files_to_return, $parallel_processes, $verbose_output, $errors_min_run_id, $database,$input_study_name, $update_if_changed, $dont_use_warehouse, $taxon_id, $overwrite_common_name, $use_supplier_name, $specific_run_id, $common_name_required );
+my ( $studyfile, $help, $number_of_files_to_return, $parallel_processes, $verbose_output, $errors_min_run_id, $database,$input_study_name, $update_if_changed, $dont_use_warehouse, $taxon_id, $overwrite_common_name, $use_supplier_name, $specific_run_id, $common_name_required, $no_pending_lanes, $species_name );
 
 GetOptions(
     's|studies=s'               => \$studyfile,
@@ -34,9 +34,10 @@ GetOptions(
     'r|min_run_id=s'            => \$errors_min_run_id,
     'u|update_if_changed'       => \$update_if_changed,
     'w|dont_use_warehouse'      => \$dont_use_warehouse,
-    't|taxon_id=i'              => \$taxon_id,
-    'l|use_supplier_name'       => \$use_supplier_name,
-    'i|specific_run_id=i'       => \$specific_run_id,
+    'tax|taxon_id=i'            => \$taxon_id,
+    'sup|use_supplier_name'     => \$use_supplier_name,
+    'run|specific_run_id=i'     => \$specific_run_id,
+    'nop|no_pending_lanes'      => \$no_pending_lanes,
     'h|help'                    => \$help,
 );
 
@@ -53,9 +54,10 @@ Usage: $0
   -r|--min_run_id              <optionally filter out errors below this run_id, defaults to 6000>
   -u|--update_if_changed       <optionally delete lane & file entries, if metadata changes, for reimport>
   -w|--dont_use_warehouse      <dont use the warehouse to fill in missing data>
-  -t|--taxon_id                <optionally provide taxon id to overwrite species info in bam file common name>
-  -l|--use_supplier_name       <optionally use the supplier name from the warehouse to populate name and hierarchy name of the individual table>
-  -i|--specific_run_id         <optionally provide a specfic run id for a study>
+  -tax|--taxon_id              <optionally provide taxon id to overwrite species info in bam file common name>
+  -sup|--use_supplier_name     <optionally use the supplier name from the warehouse to populate name and hierarchy name of the individual table>
+  -run|--specific_run_id       <optionally provide a specfic run id for a study>
+  -nop|--no_pending_lanes      <optionally filter out lanes whose npg QC status is pending>
   -h|--help                    <this message>
 
 Update the tracking database from IRODs and the warehouse.
@@ -83,6 +85,8 @@ $use_supplier_name ||=0;
 $taxon_id ||= 0;
 $common_name_required = $taxon_id ? 0 : 1;
 $specific_run_id ||=0;
+$no_pending_lanes ||=0;
+$species_name = $taxon_id ? NCBI::SimpleLookup->new( taxon_id => $taxon_id )->common_name : undef;
 
 my $study_names;
 
@@ -110,8 +114,10 @@ if($parallel_processes == 1)
     dont_use_warehouse        => $dont_use_warehouse,
     common_name_required      => $common_name_required,
     taxon_id                  => $taxon_id,
+    species_name              => $species_name,
     use_supplier_name         => $use_supplier_name,
     specific_run_id           => $specific_run_id,
+    no_pending_lanes          => $no_pending_lanes,
   );
   $update_pipeline->update();
 }
@@ -134,8 +140,10 @@ else
       dont_use_warehouse        => $dont_use_warehouse,
       common_name_required      => $common_name_required,
       taxon_id                  => $taxon_id,
+      species_name              => $species_name,
       use_supplier_name         => $use_supplier_name,
       specific_run_id           => $specific_run_id,
+      no_pending_lanes          => $no_pending_lanes,
     );
     $update_pipeline->update();
     $pm->finish; # do the exit in the child process
