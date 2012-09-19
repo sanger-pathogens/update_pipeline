@@ -6,4 +6,4 @@ minimum_passed_hours_before_comparing_new_lanes_to_irods: 48
 root_path_by_db_name:
     vrtrack_test: t/data/
 
-email_eutils: jm23@sanger.ac.uk
+email_eutils: foo_bar@sanger.ac.uk
