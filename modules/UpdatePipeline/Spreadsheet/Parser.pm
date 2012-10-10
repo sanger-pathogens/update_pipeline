@@ -78,7 +78,7 @@ sub _build_rows_metadata
         sample_accession_number => $self->_worksheet_parser->get_cell($row, 3) ? $self->_worksheet_parser->get_cell($row, 3)->value() : undef,
         taxon_id                => $self->_worksheet_parser->get_cell($row, 4) ? $self->_worksheet_parser->get_cell($row, 4)->value() : undef,
         library_name            => $self->_worksheet_parser->get_cell($row, 5) ? $self->_worksheet_parser->get_cell($row, 5)->value() : undef,
-        insert_size             => $self->_worksheet_parser->get_cell($row, 6) ? $self->_worksheet_parser->get_cell($row, 6)->value() : undef,
+        fragment_size             => $self->_worksheet_parser->get_cell($row, 6) ? $self->_worksheet_parser->get_cell($row, 6)->value() : undef,
         raw_read_count          => $self->_worksheet_parser->get_cell($row, 7) ? $self->_worksheet_parser->get_cell($row, 7)->value() : undef,
         raw_base_count          => $self->_worksheet_parser->get_cell($row, 8) ? $self->_worksheet_parser->get_cell($row, 8)->value() : undef,
         comments                => $self->_worksheet_parser->get_cell($row, 9) ? $self->_worksheet_parser->get_cell($row, 9)->value() : undef,
