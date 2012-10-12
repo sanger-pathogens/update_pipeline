@@ -70,7 +70,7 @@ sub _differences_between_file_and_lane_meta_data
     UpdatePipeline::Exceptions::PathToLaneChanged->throw( error => $self->file_meta_data->file_name_without_extension );
   }
 
-  my @fields_to_check_file_defined_and_not_equal = ("study_name", "library_name","sample_common_name", "study_accession_number","sample_accession_number","library_ssid", "lane_manual_qc", "study_ssid","sample_ssid");
+  my @fields_to_check_file_defined_and_not_equal = ("study_name", "library_name","sample_common_name", "study_accession_number","sample_accession_number","library_ssid", "lane_manual_qc", "study_ssid","sample_ssid","file_md5");
   for my $field_name (@fields_to_check_file_defined_and_not_equal)
   {
     if( $self->_file_defined_and_not_equal($self->file_meta_data->$field_name, $self->lane_meta_data->{$field_name}) )

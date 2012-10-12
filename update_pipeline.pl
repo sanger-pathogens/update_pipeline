@@ -15,14 +15,16 @@ no warnings 'uninitialized';
 use POSIX;
 use Getopt::Long;
 use VRTrack::VRTrack;
+use VRTrack::Lane;
 use VertRes::Utils::VRTrackFactory;
 use NCBI::SimpleLookup;
+use NCBI::TaxonLookup;
 use Parallel::ForkManager;
 
 use UpdatePipeline::UpdateAllMetaData;
 use UpdatePipeline::Studies;
 
-my ( $studyfile, $help, $number_of_files_to_return, $parallel_processes, $verbose_output, $errors_min_run_id, $database,$input_study_name, $update_if_changed, $dont_use_warehouse, $taxon_id, $overwrite_common_name, $use_supplier_name, $specific_run_id, $common_name_required, $no_pending_lanes, $species_name );
+my ( $studyfile, $help, $number_of_files_to_return, $parallel_processes, $verbose_output, $errors_min_run_id, $database,$input_study_name, $update_if_changed, $dont_use_warehouse, $taxon_id, $overwrite_common_name, $use_supplier_name, $specific_run_id, $common_name_required, $no_pending_lanes, $species_name, $override_md5, $withdraw_del, $vrtrack_lanes );
 
 GetOptions(
     's|studies=s'               => \$studyfile,
@@ -38,6 +40,8 @@ GetOptions(
     'sup|use_supplier_name'     => \$use_supplier_name,
     'run|specific_run_id=i'     => \$specific_run_id,
     'nop|no_pending_lanes'      => \$no_pending_lanes,
+    'md5|override_md5'          => \$override_md5,
+    'wdr|withdraw_del'          => \$withdraw_del,
     'h|help'                    => \$help,
 );
 
@@ -58,6 +62,8 @@ Usage: $0
   -sup|--use_supplier_name     <optionally use the supplier name from the warehouse to populate name and hierarchy name of the individual table>
   -run|--specific_run_id       <optionally provide a specfic run id for a study>
   -nop|--no_pending_lanes      <optionally filter out lanes whose npg QC status is pending>
+  -md5|--override_md5          <optionally update md5 on imported file if the iRODS md5 changes>
+  -wdr|--withdraw_del          <optionally withdraw a lane if has been deleted from iRODS>
   -h|--help                    <this message>
 
 Update the tracking database from IRODs and the warehouse.
@@ -86,8 +92,17 @@ $taxon_id ||= 0;
 $common_name_required = $taxon_id ? 0 : 1;
 $specific_run_id ||=0;
 $no_pending_lanes ||=0;
-$species_name = $taxon_id ? NCBI::SimpleLookup->new( taxon_id => $taxon_id )->common_name : undef;
-
+$override_md5 ||=0;
+$withdraw_del ||=0;
+eval{
+  $species_name = $taxon_id ? NCBI::SimpleLookup->new( taxon_id => $taxon_id )->common_name : undef;
+};
+if ($@) {  
+  eval {
+	$species_name = $taxon_id ? NCBI::TaxonLookup->new( taxon_id => $taxon_id )->common_name : undef;
+  };
+  die "Unable to retrieve taxonomic data from NCBI.\n" if ($@);	
+}
 my $study_names;
 
 if(defined($studyfile))
@@ -104,6 +119,13 @@ if($parallel_processes == 1)
 {
   my $vrtrack = VertRes::Utils::VRTrackFactory->instantiate(database => $db,mode     => 'rw');
   unless ($vrtrack) { die "Can't connect to tracking database: $db \n";}
+  if ( $withdraw_del ) {
+      foreach my $study (@$study_names) {
+	      foreach my $lane ( $vrtrack->get_lanes(project => [$study]) ) {
+		  	  $vrtrack_lanes->{ $lane->name } = $lane->id; 
+		  }
+	  }
+  } 
   my $update_pipeline = UpdatePipeline::UpdateAllMetaData->new(
     study_names               => $study_names, 
     _vrtrack                  => $vrtrack, 
@@ -118,6 +140,8 @@ if($parallel_processes == 1)
     use_supplier_name         => $use_supplier_name,
     specific_run_id           => $specific_run_id,
     no_pending_lanes          => $no_pending_lanes,
+    override_md5              => $override_md5,
+    vrtrack_lanes             => $vrtrack_lanes,
   );
   $update_pipeline->update();
 }
@@ -130,6 +154,13 @@ else
     push(@split_study_names, $study_name);
     my $vrtrack = VertRes::Utils::VRTrackFactory->instantiate(database => $db,mode     => 'rw');
     unless ($vrtrack) { die "Can't connect to tracking database: $db \n";}
+    if ( $withdraw_del ) {
+      foreach my $study (@split_study_names) {
+	      foreach my $lane ( $vrtrack->get_lanes(project => [$study]) ) {
+		  	  $vrtrack_lanes->{ $lane->name } = $lane->id; 
+		  }
+	  }
+    } 
     my $update_pipeline = UpdatePipeline::UpdateAllMetaData->new(
       study_names               => \@split_study_names, 
       _vrtrack                  => $vrtrack, 
@@ -144,6 +175,8 @@ else
       use_supplier_name         => $use_supplier_name,
       specific_run_id           => $specific_run_id,
       no_pending_lanes          => $no_pending_lanes,
+      override_md5              => $override_md5, 
+      vrtrack_lanes             => $vrtrack_lanes,
     );
     $update_pipeline->update();
     $pm->finish; # do the exit in the child process
