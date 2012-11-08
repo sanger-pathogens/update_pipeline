@@ -270,7 +270,7 @@ sub _copy_files
      `rsync $source_file $target_file`;
      
      # create fastqcheck file from the original file
-     `gunzip -c $source_file | fastqcheck > $target_file.fastqcheck`;
+     `gunzip -c $source_file | sed 's/ /_/g' | fastqcheck > $target_file.fastqcheck`;
      
      $pm->finish; # do the exit in the child process
    }
