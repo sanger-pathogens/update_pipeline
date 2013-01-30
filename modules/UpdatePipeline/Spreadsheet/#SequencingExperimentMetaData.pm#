@@ -1,3 +1,4 @@
+
 =head1 NAME
 
 SequencingExperimentMetaData.pm  - A class to represent the metadata associated with a single sequencing experiment
