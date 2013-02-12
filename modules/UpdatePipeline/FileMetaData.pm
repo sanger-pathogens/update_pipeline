@@ -30,12 +30,14 @@ has 'total_reads'                      => ( is => 'rw', isa => 'Maybe[Int]');
 has 'sample_name'                      => ( is => 'rw', isa => 'Maybe[Str]');
 has 'sample_accession_number'          => ( is => 'rw', isa => 'Maybe[Str]');
 has 'sample_common_name'               => ( is => 'rw', isa => 'Maybe[Str]');
+has 'supplier_name'                    => ( is => 'rw', isa => 'Maybe[Str]');
 has 'lane_is_paired_read'              => ( is => 'rw', isa => 'Bool',        default    => 1 );
 has 'lane_manual_qc'                   => ( is => 'rw', isa => 'Str',         default    => '-');
 has 'study_ssid'                       => ( is => 'rw', isa => 'Maybe[Int]');
 has 'sample_ssid'                      => ( is => 'rw', isa => 'Maybe[Int]');
 has 'fragment_size_from'               => ( is => 'rw', isa => 'Maybe[Int]' );
 has 'fragment_size_to'                 => ( is => 'rw', isa => 'Maybe[Int]' );
+has 'id_run'                           => ( is => 'rw', isa => 'Maybe[Int]' ); 
 
 
 sub file_type_number
@@ -47,6 +49,22 @@ sub file_type_number
   }
   elsif($file_type eq 'fastq.gz')
   {
+    return 1;
+  }
+  else
+  {
+    UpdatePipeline::Exceptions::UnknownFileType->throw(error => 'Unknown file type '+$file_type);
+  }
+  
+  return -1;
+}
+
+sub mate_file_type_number
+{
+  my($self,$file_type) = @_;
+
+  if($file_type eq 'fastq.gz')
+  {
     return 2;
   }
   else
@@ -56,5 +74,9 @@ sub file_type_number
   
   return -1;
 }
+
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
 
 1;

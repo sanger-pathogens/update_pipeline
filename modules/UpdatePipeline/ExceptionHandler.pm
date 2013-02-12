@@ -74,4 +74,8 @@ sub _delete_files
   $lane_exception_handler->delete_files();
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
+
 1;

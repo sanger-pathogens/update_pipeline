@@ -60,4 +60,8 @@ sub _stream_location
   return $self->bin_directory . "imeta qu -z seq -d study = '".$self->name."' and target = 1 and total_reads != 0 |";
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
+
 1;

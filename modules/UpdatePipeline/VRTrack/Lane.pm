@@ -58,5 +58,8 @@ sub _build_vr_lane
   return $vlane;
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
 
 1;

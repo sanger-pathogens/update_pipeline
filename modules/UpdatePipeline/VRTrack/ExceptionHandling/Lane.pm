@@ -29,5 +29,8 @@ sub delete_lane
   $self->_vrtrack->{_dbh}->do($lane_sql);
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
 
 1;

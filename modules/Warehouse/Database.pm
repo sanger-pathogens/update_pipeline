@@ -16,4 +16,8 @@ sub connect
     $user, undef, {'RaiseError' => 1, 'PrintError'=>0});
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
+
 1;

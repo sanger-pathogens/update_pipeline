@@ -93,4 +93,8 @@ sub swap_fragment_sizes_if_to_less_than_from
    
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
+
 1;

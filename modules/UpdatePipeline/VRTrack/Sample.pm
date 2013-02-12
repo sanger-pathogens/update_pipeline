@@ -29,6 +29,11 @@ has '_vr_project' => ( is => 'ro',               required   => 1 );
 
 has 'accession'   => ( is => 'ro', isa => 'Maybe[Str]' );
 has 'external_id' => ( is => 'ro', isa => 'Maybe[Int]' );
+has 'supplier_name' => ( is => 'ro', isa => 'Maybe[Str]' );
+
+has 'common_name_required' => ( is => 'rw', default    => 1, isa => 'Bool');
+has 'use_supplier_name' => ( is => 'ro', default    => 0, isa => 'Bool');
+has 'taxon_id' => ( is => 'ro', default => 0, isa => 'Int');
 
 # external variable
 has 'vr_sample'   => ( is => 'ro',               lazy_build => 1 );
@@ -49,9 +54,20 @@ sub _build_vr_sample
   UpdatePipeline::Exceptions::CouldntCreateSample->throw( error => "Couldnt create sample with name ".$self->name."\n" ) if(not defined($vsample));
   
   # an individual links a sample to a species
-  my $vr_individual = VRTrack::Individual->new_by_name( $self->_vrtrack, $self->name );
+  my $individual_name = ( $self->use_supplier_name && defined $self->supplier_name ) ? $self->supplier_name : $self->name;
+  my $vr_individual = VRTrack::Individual->new_by_name( $self->_vrtrack, $individual_name );
   if ( not defined $vr_individual ) {
-    $vr_individual = $vsample->add_individual($self->name);
+    my $vr_individual_hierarchy_name = VRTrack::Individual->new_by_hierarchy_name( $self->_vrtrack, $vsample->hierarchy_name);
+    if(defined $vr_individual_hierarchy_name )
+    {
+      $vr_individual = $vsample->add_individual($self->name.'_'.int(rand(100000)));
+      $vr_individual->name($self->name);
+      $vr_individual->update();
+    }
+    else
+    {
+      $vr_individual = $vsample->add_individual($individual_name);
+    }
   }
   elsif(not defined ($vsample->individual) ||  (defined ($vsample->individual) && $vr_individual->id() != $vsample->individual_id() ))  
   {
@@ -69,7 +85,17 @@ sub _build_vr_sample
 sub _build__vr_species
 {
   my ($self) = @_;
-  my $vr_species = VRTrack::Species->new_by_name( $self->_vrtrack, $self->common_name) || VRTrack::Species->create( $self->_vrtrack, $self->common_name);
+  
+  my $vr_species = VRTrack::Species->new_by_name( $self->_vrtrack, $self->common_name);
+	  
+  if((not defined($vr_species) )&& $self->common_name_required ==0)
+  {
+      $vr_species = VRTrack::Species->create( $self->_vrtrack, $self->common_name, $self->taxon_id );
+  }
+  elsif((not defined($vr_species) )&& $self->common_name_required ==1)
+  {
+      UpdatePipeline::Exceptions::UnknownCommonName->throw( error => $self->common_name );
+  }
   return $vr_species;
 }
 
@@ -103,5 +129,8 @@ sub _add_default_population
   } 
 }
 
+__PACKAGE__->meta->make_immutable;
+
+no Moose;
 
 1;
