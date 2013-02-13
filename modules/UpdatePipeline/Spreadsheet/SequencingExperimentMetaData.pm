@@ -55,7 +55,7 @@ sub _convert_name_into_pipeline_format
   my ($self, $filename, $suffix) = @_;
   $filename =~ s!\.fastq\.gz$!!i;
   $filename =~ s!\.fq\.gz$!!i;
-  
+  $filename =~ s!\_1$!!i;
   return $filename.$suffix;
 }
 
