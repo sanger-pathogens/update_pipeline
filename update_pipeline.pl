@@ -18,7 +18,6 @@ use VRTrack::VRTrack;
 use VertRes::Utils::VRTrackFactory;
 use NCBI::SimpleLookup;
 use Parallel::ForkManager;
-use Fcntl qw(:flock SEEK_END);
 
 use UpdatePipeline::UpdateAllMetaData;
 use UpdatePipeline::Studies;
@@ -89,13 +88,11 @@ $taxon_id ||= 0;
 $common_name_required = $taxon_id ? 0 : 1;
 $specific_run_id ||=0;
 $no_pending_lanes ||=0;
-$species_name = $taxon_id ? NCBI::SimpleLookup->new( taxon_id => $taxon_id )->common_name : undef;
 
-my $lock_fh;
+
 if(defined($lock_file))
 {
-  open($lock_fh, '+>', $lock_file) or die 'Couldnt open the lock file';
-  lock($lock_fh);
+  create_lock($lock_file);
 }
 
 
@@ -110,6 +107,8 @@ else
   my @studyname = ($input_study_name);
   $study_names = \@studyname;
 }
+
+$species_name = $taxon_id ? NCBI::SimpleLookup->new( taxon_id => $taxon_id )->common_name : undef;
 
 if($parallel_processes == 1)
 {
@@ -164,20 +163,38 @@ else
 
 if(defined($lock_file))
 {
-  unlock($lock_fh);
+  remove_lock($lock_file);
 }
 
 
-sub lock 
+# Taken from vr-codebase/scripts/run-pipeline
+sub create_lock
 {
-  my ($fh) = @_;
-  flock($fh, LOCK_EX) or die "Cannot lock - $!\n";
-  # and, in case someone appended while we were waiting...
-  seek($fh, 0, SEEK_END) or die "Cannot seek, another process appended to the lock file while we were waiting our turn - $!\n";
+    my ($lock) = @_;
+    if ( !$lock ) { return; } # the locking not requested
+
+    if ( -e $lock )
+    {
+        # Find out the PID of the running pipeline
+        my ($pid) = `cat $lock` || '';
+        chomp($pid);
+        if ( !($pid=~/^\d+$/) ) { print(qq[Broken lock file $lock? Expected number, found "$pid".\n]); }
+
+        # Is it still running? (Will work only when both are running on the same host.)
+        my ($running) = `ps h $pid`;
+        if ( $running ) { die "Another process already running: $pid\n"; }
+    }
+
+    open(my $fh,'>',$lock) or die "Couldnt open lock file for writing";
+    print $fh $$ . "\n";
+    close($fh);
+
+    return;
 }
 
-sub unlock 
+sub remove_lock
 {
-   my ($fh) = @_;
-   flock($fh, LOCK_UN) or die "Cannot unlock - $!\n";
+    my ($lock) = @_;
+    if ( $lock && -e $lock ) { unlink($lock); }
+    return;
 }
