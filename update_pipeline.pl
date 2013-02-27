@@ -18,11 +18,12 @@ use VRTrack::VRTrack;
 use VertRes::Utils::VRTrackFactory;
 use NCBI::SimpleLookup;
 use Parallel::ForkManager;
+use Fcntl qw(:flock SEEK_END);
 
 use UpdatePipeline::UpdateAllMetaData;
 use UpdatePipeline::Studies;
 
-my ( $studyfile, $help, $number_of_files_to_return, $parallel_processes, $verbose_output, $errors_min_run_id, $database,$input_study_name, $update_if_changed, $dont_use_warehouse, $taxon_id, $overwrite_common_name, $use_supplier_name, $specific_run_id, $common_name_required, $no_pending_lanes, $species_name );
+my ( $studyfile, $help, $number_of_files_to_return, $lock_file, $parallel_processes, $verbose_output, $errors_min_run_id, $database,$input_study_name, $update_if_changed, $dont_use_warehouse, $taxon_id, $overwrite_common_name, $use_supplier_name, $specific_run_id, $common_name_required, $no_pending_lanes, $species_name );
 
 GetOptions(
     's|studies=s'               => \$studyfile,
@@ -38,6 +39,7 @@ GetOptions(
     'sup|use_supplier_name'     => \$use_supplier_name,
     'run|specific_run_id=i'     => \$specific_run_id,
     'nop|no_pending_lanes'      => \$no_pending_lanes,
+    'l|lock_file=s'             => \$lock_file,
     'h|help'                    => \$help,
 );
 
@@ -58,6 +60,7 @@ Usage: $0
   -sup|--use_supplier_name     <optionally use the supplier name from the warehouse to populate name and hierarchy name of the individual table>
   -run|--specific_run_id       <optionally provide a specfic run id for a study>
   -nop|--no_pending_lanes      <optionally filter out lanes whose npg QC status is pending>
+  -l|--lock_file               <optional lock file to prevent multiple instances running>
   -h|--help                    <this message>
 
 Update the tracking database from IRODs and the warehouse.
@@ -87,6 +90,14 @@ $common_name_required = $taxon_id ? 0 : 1;
 $specific_run_id ||=0;
 $no_pending_lanes ||=0;
 $species_name = $taxon_id ? NCBI::SimpleLookup->new( taxon_id => $taxon_id )->common_name : undef;
+
+my $lock_fh;
+if(defined($lock_file))
+{
+  open($lock_fh, '+>', $lock_file) or die 'Couldnt open the lock file';
+  lock($lock_fh);
+}
+
 
 my $study_names;
 
@@ -151,3 +162,22 @@ else
   $pm->wait_all_children;
 }
 
+if(defined($lock_file))
+{
+  unlock($lock_fh);
+}
+
+
+sub lock 
+{
+  my ($fh) = @_;
+  flock($fh, LOCK_EX) or die "Cannot lock - $!\n";
+  # and, in case someone appended while we were waiting...
+  seek($fh, 0, SEEK_END) or die "Cannot seek, another process appended to the lock file while we were waiting our turn - $!\n";
+}
+
+sub unlock 
+{
+   my ($fh) = @_;
+   flock($fh, LOCK_UN) or die "Cannot unlock - $!\n";
+}
