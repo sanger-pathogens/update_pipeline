@@ -221,7 +221,7 @@ sub import_sequencing_files_to_pipeline
    
    for my $sequencing_experiment (@{$self->_spreadsheet_metadata->_sequencing_experiments})
    {
-     my $vlane = VRTrack::Lane->new_by_name( $self->_vrtrack, $self->_spreadsheet_metadata->_file_name_without_extension($sequencing_experiment->filename,'fastq.gz').'_1');
+     my $vlane = VRTrack::Lane->new_by_name( $self->_vrtrack, $self->_spreadsheet_metadata->_file_name_without_extension($sequencing_experiment->filename,'fastq.gz'));
      my $lane_path = $self->_vrtrack->hierarchy_path_of_lane($vlane,$self->hierarchy_template);
      my $target_directory = join('/',($self->pipeline_base_directory,$lane_path));
      make_path($target_directory , {mode => 0775});
@@ -250,7 +250,7 @@ sub import_sequencing_files_to_pipeline
    
    for my $sequencing_experiment (@{$self->_spreadsheet_metadata->_sequencing_experiments})
    {
-     my $vlane = VRTrack::Lane->new_by_name( $self->_vrtrack, $self->_spreadsheet_metadata->_file_name_without_extension($sequencing_experiment->filename,'fastq.gz').'_1');
+     my $vlane = VRTrack::Lane->new_by_name( $self->_vrtrack, $self->_spreadsheet_metadata->_file_name_without_extension($sequencing_experiment->filename,'fastq.gz'));
      $vlane->is_processed('import',1);
      $vlane->update();
    }
@@ -270,7 +270,7 @@ sub _copy_files
      `rsync $source_file $target_file`;
      
      # create fastqcheck file from the original file
-     `gunzip -c $source_file | fastqcheck > $target_file.fastqcheck`;
+     `gunzip -c $source_file | sed 's/ /_/g' | fastqcheck > $target_file.fastqcheck`;
      
      $pm->finish; # do the exit in the child process
    }
