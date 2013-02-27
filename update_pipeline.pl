@@ -22,7 +22,7 @@ use Parallel::ForkManager;
 use UpdatePipeline::UpdateAllMetaData;
 use UpdatePipeline::Studies;
 
-my ( $studyfile, $help, $number_of_files_to_return, $parallel_processes, $verbose_output, $errors_min_run_id, $database,$input_study_name, $update_if_changed, $dont_use_warehouse, $taxon_id, $overwrite_common_name, $use_supplier_name, $specific_run_id, $common_name_required, $no_pending_lanes, $species_name );
+my ( $studyfile, $help, $number_of_files_to_return, $lock_file, $parallel_processes, $verbose_output, $errors_min_run_id, $database,$input_study_name, $update_if_changed, $dont_use_warehouse, $taxon_id, $overwrite_common_name, $use_supplier_name, $specific_run_id, $common_name_required, $no_pending_lanes, $species_name );
 
 GetOptions(
     's|studies=s'               => \$studyfile,
@@ -38,6 +38,7 @@ GetOptions(
     'sup|use_supplier_name'     => \$use_supplier_name,
     'run|specific_run_id=i'     => \$specific_run_id,
     'nop|no_pending_lanes'      => \$no_pending_lanes,
+    'l|lock_file=s'             => \$lock_file,
     'h|help'                    => \$help,
 );
 
@@ -58,6 +59,7 @@ Usage: $0
   -sup|--use_supplier_name     <optionally use the supplier name from the warehouse to populate name and hierarchy name of the individual table>
   -run|--specific_run_id       <optionally provide a specfic run id for a study>
   -nop|--no_pending_lanes      <optionally filter out lanes whose npg QC status is pending>
+  -l|--lock_file               <optional lock file to prevent multiple instances running>
   -h|--help                    <this message>
 
 Update the tracking database from IRODs and the warehouse.
@@ -86,7 +88,13 @@ $taxon_id ||= 0;
 $common_name_required = $taxon_id ? 0 : 1;
 $specific_run_id ||=0;
 $no_pending_lanes ||=0;
-$species_name = $taxon_id ? NCBI::SimpleLookup->new( taxon_id => $taxon_id )->common_name : undef;
+
+
+if(defined($lock_file))
+{
+  create_lock($lock_file);
+}
+
 
 my $study_names;
 
@@ -99,6 +107,8 @@ else
   my @studyname = ($input_study_name);
   $study_names = \@studyname;
 }
+
+$species_name = $taxon_id ? NCBI::SimpleLookup->new( taxon_id => $taxon_id )->common_name : undef;
 
 if($parallel_processes == 1)
 {
@@ -151,3 +161,40 @@ else
   $pm->wait_all_children;
 }
 
+if(defined($lock_file))
+{
+  remove_lock($lock_file);
+}
+
+
+# Taken from vr-codebase/scripts/run-pipeline
+sub create_lock
+{
+    my ($lock) = @_;
+    if ( !$lock ) { return; } # the locking not requested
+
+    if ( -e $lock )
+    {
+        # Find out the PID of the running pipeline
+        my ($pid) = `cat $lock` || '';
+        chomp($pid);
+        if ( !($pid=~/^\d+$/) ) { print(qq[Broken lock file $lock? Expected number, found "$pid".\n]); }
+
+        # Is it still running? (Will work only when both are running on the same host.)
+        my ($running) = `ps h $pid`;
+        if ( $running ) { die "Another process already running: $pid\n"; }
+    }
+
+    open(my $fh,'>',$lock) or die "Couldnt open lock file for writing";
+    print $fh $$ . "\n";
+    close($fh);
+
+    return;
+}
+
+sub remove_lock
+{
+    my ($lock) = @_;
+    if ( $lock && -e $lock ) { unlink($lock); }
+    return;
+}
