@@ -1,0 +1,6 @@
+warehouse:
+  database: vrtrack_wh_test_two
+  host:     mcs4a
+  port:     3306
+  user:     vreseq_rw
+  pass:     t3aml3ss

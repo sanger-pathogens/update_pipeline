@@ -29,7 +29,7 @@ has '_bad_irods_records'        => ( is => 'ro', isa => 'ArrayRef', default => s
 has '_path_changed_to_lanes'    => ( is => 'ro', isa => 'ArrayRef', default => sub { [] });
 has '_unclassified_exceptions'  => ( is => 'ro', isa => 'ArrayRef', default => sub { [] });
 
-has 'print_unclassified'        => ( is => 'rw', isa => 'Bool', default => 0);
+has 'print_unclassified'        => ( is => 'rw', isa => 'Bool', default => 1);
 
 sub add_exception
 {
@@ -57,9 +57,9 @@ sub print_report
   {
      print "Inconsistent total reads\t$filename\n";
   }
-  for my $filename (sort @{$self->_bad_irods_records})
+  for my $error_description (sort @{$self->_bad_irods_records})
   {
-    print "Irods data missing\t$filename\n";
+    print "Irods data missing: $error_description\n";
   }
   for my $filename (sort @{$self->_path_changed_to_lanes})
   {
@@ -71,7 +71,7 @@ sub print_report
     print "Unclassified exceptions\t".@{$self->_unclassified_exceptions}."\n";
     for my $unclassified_exception (sort @{$self->_unclassified_exceptions})
     {
-      print Dumper $unclassified_exception;
+      print "$unclassified_exception\n";
     }
   }
 
@@ -116,7 +116,7 @@ sub _build_report
 sub _unclassified_exception
 {
   my($self,$exception) = @_;
-  push(@{$self->_unclassified_exceptions}, $exception);
+  push(@{$self->_unclassified_exceptions}, $exception->error);
 }
 
 sub _path_changed_to_lane
@@ -134,7 +134,8 @@ sub _undefined_common_name
 sub _bad_irods_record
 {
    my($self,$exception) = @_;
-   push(@{$self->_bad_irods_records}, $exception->error);
+   my $error_message = $exception->description.' '.$exception->error;
+   push(@{$self->_bad_irods_records}, $error_message);
 }
 
 sub _total_read_inconsistency

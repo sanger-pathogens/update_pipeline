@@ -56,6 +56,9 @@ sub _build_vr_sample
   # an individual links a sample to a species
   my $individual_name = ( $self->use_supplier_name && defined $self->supplier_name ) ? $self->supplier_name : $self->name;
   my $vr_individual = VRTrack::Individual->new_by_name( $self->_vrtrack, $individual_name );
+  if ( $self->use_supplier_name && not defined $vr_individual ) {
+	  $vr_individual = VRTrack::Individual->new_by_hierarchy_name( $self->_vrtrack, $individual_name );
+  }  
   if ( not defined $vr_individual ) {
     my $vr_individual_hierarchy_name = VRTrack::Individual->new_by_hierarchy_name( $self->_vrtrack, $vsample->hierarchy_name);
     if(defined $vr_individual_hierarchy_name )

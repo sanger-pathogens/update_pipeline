@@ -27,12 +27,12 @@ sub populate
   # library name exists, library ssid missing
   $self->_populate_ssid_from_library_tube_name;
   $self->_populate_ssid_from_multiplexed_library_tube_name;
-  $self->_populate_ssid_from_pulldown_multiplexed_library_tube_name;
+  $self->_populate_ssid_from_aliquot_sample_ssid;
   
   # library ssid exists, library name missing
   $self->_populate_name_from_library_tube_ssid;
   $self->_populate_name_from_multiplexed_library_tube_ssid;
-  $self->_populate_name_from_pulldown_multiplexed_library_tube_ssid;
+  $self->_populate_name_from_aliquot_sample_ssid;
   1;
 }
 
@@ -100,13 +100,13 @@ sub _populate_ssid_from_multiplexed_library_tube_name
   }
 }
 
-sub _populate_ssid_from_pulldown_multiplexed_library_tube_name
+sub _populate_ssid_from_aliquot_sample_ssid
 {
   my($self) = @_;
-  if(defined($self->file_meta_data->library_name) && ! defined($self->file_meta_data->library_ssid)  )
+  if(defined($self->file_meta_data->sample_ssid) && ! defined($self->file_meta_data->library_ssid)  )
   {
-    my $library_name = $self->file_meta_data->library_name;
-    my $sql = qq[select internal_id as library_ssid from current_pulldown_multiplexed_library_tubes where name = "$library_name" limit 1;];
+    my $sample_ssid = $self->file_meta_data->sample_ssid;
+    my $sql = qq[select library_internal_id from current_aliquots where receptacle_type = 'multiplexed_library_tube' and sample_internal_id = $sample_ssid limit 1;];
     my $sth = $self->_dbh->prepare($sql);
     $sth->execute;
     my @library_warehouse_details  = $sth->fetchrow_array;
@@ -153,13 +153,13 @@ sub _populate_name_from_multiplexed_library_tube_ssid
   }
 }
 
-sub _populate_name_from_pulldown_multiplexed_library_tube_ssid
+sub _populate_name_from_aliquot_sample_ssid
 {
   my($self) = @_;
-  if(defined($self->file_meta_data->library_ssid) && ! defined($self->file_meta_data->library_name)  )
+  if(defined($self->file_meta_data->sample_ssid) && ! defined($self->file_meta_data->library_name)  )
   {
-    my $library_ssid = $self->file_meta_data->library_ssid;
-    my $sql = qq[select name as library_name from current_pulldown_multiplexed_library_tubes where internal_id = "$library_ssid" limit 1;];
+    my $sample_ssid = $self->file_meta_data->sample_ssid;
+    my $sql = qq[select library_internal_id from current_aliquots where receptacle_type = 'multiplexed_library_tube' and sample_internal_id = $sample_ssid limit 1;];
     my $sth = $self->_dbh->prepare($sql);
     $sth->execute;
     my @library_warehouse_details  = $sth->fetchrow_array;
