@@ -30,6 +30,7 @@ has '_database_settings'            => ( is => 'rw', isa => 'HashRef', lazy_buil
 
 has '_consistency_evaluator'        => ( is => 'rw', isa => 'UpdatePipeline::CheckReadConsistency', lazy_build => 1 );
 has 'request_for_read_count_consistency_evaluation' => (is => 'rw', isa => 'Bool', default => undef);
+has 'list_all_missing_lanes' => (is => 'rw', isa => 'Bool', default => 0);
 
 sub _build__config_settings
 {
@@ -96,7 +97,7 @@ sub _build_report
     else
     {
       # file missing from tracking database
-      if($file_metadata->total_reads > 10000 && $file_metadata->lane_manual_qc ne 'pending')
+      if($file_metadata->total_reads > 10000 && ($file_metadata->lane_manual_qc ne 'pending' || $self->list_all_missing_lanes))
       {
         push(@{$inconsistent_files{files_missing_from_tracking}}, $file_metadata->file_name_without_extension);
       }
