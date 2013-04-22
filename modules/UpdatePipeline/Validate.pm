@@ -96,7 +96,7 @@ sub _build_report
     else
     {
       # file missing from tracking database
-      if($file_metadata->total_reads > 10000)
+      if($file_metadata->total_reads > 10000 && $file_metadata->lane_manual_qc ne 'pending')
       {
         push(@{$inconsistent_files{files_missing_from_tracking}}, $file_metadata->file_name_without_extension);
       }

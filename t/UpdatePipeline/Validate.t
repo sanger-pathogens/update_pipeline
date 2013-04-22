@@ -5,7 +5,7 @@ use Data::Dumper;
 
 BEGIN { unshift(@INC, './modules') }
 BEGIN {
-    use Test::Most tests => 8;
+    use Test::Most tests => 13;
     use_ok('UpdatePipeline::Validate');
     use UpdatePipeline::VRTrack::LaneMetaData;
     use UpdatePipeline::Validate;
@@ -93,6 +93,42 @@ is (undef, $validator->_compare_file_metadata_with_vrtrack_lane_metadata($file_m
     'Testing _compare_file_metadata_with_vrtrack_lane_metadata() using a new lane that has a too recent lane_changed date.'
    );
 
+# file in irods but not in tracking database
+my $file_in_irods_metadata = UpdatePipeline::FileMetaData->new(
+
+    'study_name'                       => 'My project',
+    'study_accession_number'           => 'EFG456',
+    'file_md5'                         => 'DUMMY',
+    'file_type'                        => 'bam',
+    'file_name'                        => '12345_6#7.bam',
+    'file_name_without_extension'      => '12345_6#7',
+    'library_name'                     => 'My library name',
+    'library_ssid'                     => 123,
+    'total_reads'                      => 1000000,
+    'sample_name'                      => 'My name',
+    'sample_accession_number'          => 'ABC123',
+    'sample_common_name'               => 'SomeBacteria',
+    'lane_is_paired_read'              => 1,
+    'lane_manual_qc'                   => 'pending',
+    'study_ssid'                       => 1234,
+    'id_run'                           => 12345,
+
+    );
+
+# get report
+$validator->_files_metadata([$file_in_irods_metadata]);
+my $report = $validator->report;
+ok( defined $report, 'got report');
+ok(defined($report) && $report->{total_files_in_irods} == 1, 'irods file found');
+ok(defined($report) && $report->{files_missing_from_tracking} == 1, 'irods file missing from tracking');
+ok(!defined($validator->inconsistent_files->{files_missing_from_tracking}), 'missing irods file skipped (qc pending)');
+
+# set irods bam qc to passed and get new report
+$file_in_irods_metadata->lane_manual_qc('pass');
+$validator->_files_metadata([$file_in_irods_metadata]);
+$validator->clear_report;
+$report = $validator->report;
+ok(($validator->inconsistent_files->{files_missing_from_tracking} && @{$validator->inconsistent_files->{files_missing_from_tracking}} == 1), 'missing irods file listed (qc passed)');
 
 
 delete_test_data($vrtrack);
