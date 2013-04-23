@@ -5,7 +5,7 @@ use Data::Dumper;
 
 BEGIN { unshift(@INC, './modules') }
 BEGIN {
-    use Test::Most tests => 15;
+    use Test::Most tests => 14;
     use_ok('UpdatePipeline::Validate');
     use UpdatePipeline::VRTrack::LaneMetaData;
     use UpdatePipeline::Validate;
@@ -121,29 +121,24 @@ my $report = $validator->report;
 ok( defined $report, 'got report');
 ok(defined($report) && $report->{total_files_in_irods} == 1, 'irods file found');
 ok(defined($report) && $report->{files_missing_from_tracking} == 1, 'irods file missing from tracking');
-ok(!defined($validator->inconsistent_files->{files_missing_from_tracking}), 'missing irods file skipped (qc pending)');
+ok(($validator->inconsistent_files->{files_missing_from_tracking} && @{$validator->inconsistent_files->{files_missing_from_tracking}} == 1), 'missing irods file listed  (qc pending)');
 
-# set to list missing lanes regardless of qc status
-$validator->list_all_missing_lanes(1);
+# set to skip lanes with pending qc
+$validator->no_pending_lanes(1);
 $validator->clear_report;
 $report = $validator->report;
-ok(($validator->inconsistent_files->{files_missing_from_tracking} && @{$validator->inconsistent_files->{files_missing_from_tracking}} == 1), 'missing irods file listed (list all + qc pending)');
-
-# reset list all missing lanes flag
-$validator->list_all_missing_lanes(0);
-$validator->clear_report;
-$report = $validator->report;
-ok(!defined($validator->inconsistent_files->{files_missing_from_tracking}), 'confirm list_all_missing_lanes flag reset');
+ok(!defined($validator->inconsistent_files->{files_missing_from_tracking}), 'missing irods file skipped (qc pending + no_pending_lanes)');
 
 # set irods bam qc to passed and get new report
 $file_in_irods_metadata->lane_manual_qc('pass');
 $validator->_files_metadata([$file_in_irods_metadata]);
 $validator->clear_report;
 $report = $validator->report;
-ok(($validator->inconsistent_files->{files_missing_from_tracking} && @{$validator->inconsistent_files->{files_missing_from_tracking}} == 1), 'missing irods file listed (qc passed)');
+ok(($validator->inconsistent_files->{files_missing_from_tracking} && @{$validator->inconsistent_files->{files_missing_from_tracking}} == 1), 'missing irods file listed  (qc passed)');
 
 
 delete_test_data($vrtrack);
+
 sub delete_test_data
 {
   my $vrtrack = shift;

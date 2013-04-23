@@ -21,13 +21,13 @@ use Data::Dumper;
 use UpdatePipeline::Validate;
 use UpdatePipeline::Studies;
 
-my ( $studyfile, $help, $database, $read_count_consistency_check_requested, $list_all_missing_lanes_requested);
+my ( $studyfile, $help, $database, $read_count_consistency_check_requested, $no_pending_lanes);
 
 GetOptions(
     'p|studies=s'      => \$studyfile,
     'd|database=s'     => \$database,
     'c|checkreadcount' => \$read_count_consistency_check_requested,
-    'l|listallmissing' => \$list_all_missing_lanes_requested,
+    'nop|no_pending_lanes' => \$no_pending_lanes,
     'h|help'           => \$help,
 );
 
@@ -35,11 +35,11 @@ my $db = $database ;
 
 ( $studyfile &&  $db && !$help ) or die <<USAGE;
     Usage: $0   
-                --studies          <study name or file of SequenceScape study names>
-                [--database        <vrtrack database name>]
-                --checkreadcount   <activate read count consistency evaluation (IO intensive)>
-                --listallmissing   <list all missing irods lanes with over 10000 reads (ignore iRODS qc status)>
-                --help             <this message>
+                --studies               <study name or file of SequenceScape study names>
+                [--database             <vrtrack database name>]
+                --checkreadcount        <activate read count consistency evaluation (IO intensive)>
+                -nop|--no_pending_lanes <optionally filter out lanes whose npg QC status is pending>
+                --help                  <this message>
 
 Check to see if the pipeline is valid compared to the data stored in IRODS
 
@@ -63,7 +63,7 @@ if ($read_count_consistency_check_requested)
     $validate_pipeline->request_for_read_count_consistency_evaluation(1);
 }
 
-$validate_pipeline->list_all_missing_lanes(1) if $list_all_missing_lanes_requested;
+$validate_pipeline->no_pending_lanes(1) if $no_pending_lanes;
 
 my $pipeline_report  = $validate_pipeline->report();
 
