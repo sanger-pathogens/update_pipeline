@@ -43,16 +43,20 @@ sub populate
 {
   my($self) = @_;
   
-  unless ((!defined($self->file_meta_data->study_ssid))   ||
-  (!defined($self->file_meta_data->sample_ssid))  ||
-  (!defined($self->file_meta_data->library_ssid)) ||
-  (!defined($self->file_meta_data->library_name)))
+  if(defined($self->file_meta_data->study_ssid)  
+    && defined($self->file_meta_data->sample_ssid)  
+    && defined($self->file_meta_data->library_ssid) 
+    && defined($self->file_meta_data->library_name) 
+    && $self->file_meta_data->lane_manual_qc ne '-' 
+    && $self->file_meta_data->lane_manual_qc ne 'pending'
+  )
   {
    return 1 ; 
   }
 
   $self->_split_file_name;
   $self->_populate_from_npg_information_table;
+  $self->_populate_manual_qc_from_npg_information_table;
   1;
 }
 
@@ -77,6 +81,35 @@ sub _populate_from_npg_information_table
         $self->file_meta_data->sample_ssid($study_warehouse_details[1])  if(!defined($self->file_meta_data->sample_ssid));
         $self->file_meta_data->library_ssid($study_warehouse_details[2]) if(!defined($self->file_meta_data->library_ssid));
         $self->file_meta_data->library_name($study_warehouse_details[3]) if(!defined($self->file_meta_data->library_name));
+      }
+    }
+  }
+}
+
+sub _populate_manual_qc_from_npg_information_table
+{
+  my($self) = @_;
+  if(defined($self->_id_run) && defined($self->_position) )
+  {
+    my $id_run = $self->_id_run;
+    my $position = $self->_position;
+    
+    my $sql = qq[select manual_qc from npg_information where id_run = "$id_run" AND position = $position limit 1;];
+    my $sth = $self->_dbh->prepare($sql);
+    $sth->execute;
+    my @study_warehouse_details  = $sth->fetchrow_array;
+    if(@study_warehouse_details > 0)
+    {
+      my $npg_manual_qc_flag = $study_warehouse_details[0];
+      return unless(defined($npg_manual_qc_flag));
+      
+      if($npg_manual_qc_flag == 1)
+      {
+        $self->file_meta_data->lane_manual_qc('pass');
+      }
+      else
+      {
+        $self->file_meta_data->lane_manual_qc('fail');
       }
     }
   }
