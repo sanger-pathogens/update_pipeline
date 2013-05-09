@@ -47,7 +47,7 @@ sub populate
     && defined($self->file_meta_data->sample_ssid)  
     && defined($self->file_meta_data->library_ssid) 
     && defined($self->file_meta_data->library_name) 
-    && $self->file_meta_data->lane_manual_qc ne '-'
+    && ($self->file_meta_data->lane_manual_qc ne '-' || $self->file_meta_data->lane_manual_qc ne 'pending')
   )
   {
    return 1 ; 
