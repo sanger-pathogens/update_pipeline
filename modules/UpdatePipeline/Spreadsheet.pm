@@ -46,6 +46,7 @@ use Digest::MD5;
 use UpdatePipeline::Exceptions;
 use UpdatePipeline::Spreadsheet::Parser;
 use UpdatePipeline::Spreadsheet::SpreadsheetMetaData;
+use Bio::SeqIO::fastq;
 extends "UpdatePipeline::UpdateAllMetaData";
 
 has 'filename'                => ( is => 'ro', isa => 'Str',      required => 1 );
@@ -248,15 +249,67 @@ sub import_sequencing_files_to_pipeline
    $self->_copy_files(\@files_source_and_dest);
    $self->_vrtrack->{_dbh}->{mysql_auto_reconnect} = 1;
    
-   for my $sequencing_experiment (@{$self->_spreadsheet_metadata->_sequencing_experiments})
-   {
-     my $vlane = VRTrack::Lane->new_by_name( $self->_vrtrack, $self->_spreadsheet_metadata->_file_name_without_extension($sequencing_experiment->filename,'fastq.gz'));
-     $vlane->is_processed('import',1);
-     $vlane->update();
-   }
+   $self->_update_lanes_metadata_after_import;
    
    return 1;
 }
+
+sub _update_lanes_metadata_after_import
+{
+   my ($self) = @_;
+   my $pm = new Parallel::ForkManager($self->parallel_processes);
+   for my $sequencing_experiment (@{$self->_spreadsheet_metadata->_sequencing_experiments})
+   {
+       $pm->start and next; # do the fork
+
+       my $vlane = VRTrack::Lane->new_by_name( $self->_vrtrack, $self->_spreadsheet_metadata->_file_name_without_extension($sequencing_experiment->filename,'fastq.gz'));
+       my $lane_dir = join('/',$self->pipeline_base_directory,$self->_vrtrack->hierarchy_path_of_lane($vlane,$self->hierarchy_template));
+       my $fastq_1 = $sequencing_experiment->pipeline_filename;
+       my $fastq_2 = $sequencing_experiment->pipeline_mate_filename;
+
+       my ($raw_reads,$raw_bases) = $self->_get_fastqs_readcount($lane_dir,$fastq_1,$fastq_2);
+       my $read_len = int( $raw_bases/$raw_reads );
+       
+       $vlane->raw_reads($raw_reads);
+       $vlane->raw_bases($raw_bases);
+       $vlane->read_len($read_len);
+       $vlane->is_processed('import',1);
+       $vlane->update();
+
+       $pm->finish; # do the exit in the child process
+   }
+   $pm->wait_all_children;
+
+}
+
+
+sub _get_fastqs_readcount
+{
+    my ($self,$lane_dir,$fastq_1,$fastq_2) = @_;
+    my $tot_number_sequences = 0;
+    my $tot_sequence_len = 0;
+
+    for my $fastq ($fastq_1,$fastq_2)
+    {
+        next unless defined($fastq); # $fastq_2 undefined for single-ended
+        my $fastq_file = join('/',$lane_dir,$fastq);
+        open(my $fh, qq[zcat $fastq_file |]) or UpdatePipeline::Exceptions::InvalidSpreadsheet->throw( error => "Failed to open $fastq_file: $!");
+        my $fastq_in = Bio::SeqIO->new(-format => 'fastq', -fh => $fh);
+        my $first_seq = $fastq_in->next_seq;
+        close($fh);
+
+        my $lines_in_file = qx/zcat $fastq_file | wc -l/; # use wc for linecount
+        UpdatePipeline::Exceptions::InvalidSpreadsheet->throw( error => "Failed to get line count from $fastq_file") unless defined $lines_in_file ;
+        my $number_of_sequences = $lines_in_file/4;
+
+        $tot_number_sequences += $number_of_sequences;
+        $tot_sequence_len += $first_seq->length * $number_of_sequences;
+    }
+
+    return($tot_number_sequences,$tot_sequence_len);
+}
+
+
 
 sub _copy_files
 {
