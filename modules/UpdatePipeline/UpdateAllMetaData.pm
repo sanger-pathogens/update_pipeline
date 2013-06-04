@@ -108,6 +108,7 @@ sub update
 sub _update_lane
 {
   my ($self, $file_metadata) = @_;
+
   eval {
     my $vproject = UpdatePipeline::VRTrack::Project->new(name => $file_metadata->study_name, external_id => $file_metadata->study_ssid, _vrtrack => $self->_vrtrack)->vr_project();
     if(defined($file_metadata->study_accession_number))
@@ -135,6 +136,11 @@ sub _update_lane
       fragment_size_to   => $file_metadata->fragment_size_to,
       _vrtrack           => $self->_vrtrack,
       _vr_sample         => $vr_sample)->vr_library();
+
+    # update seq tech and center if defined
+    $vr_library->seq_tech($file_metadata->sequencing_technology) if defined($file_metadata->sequencing_technology);
+    $vr_library->seq_centre($file_metadata->sequencing_centre)   if defined($file_metadata->sequencing_centre);
+    $vr_library->update();
 
     my $vr_lane = UpdatePipeline::VRTrack::Lane->new(
       name          => $file_metadata->file_name_without_extension,
