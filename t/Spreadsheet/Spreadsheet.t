@@ -125,4 +125,5 @@ sub delete_test_data
   $vrtrack->{_dbh}->do('delete from file');
   $vrtrack->{_dbh}->do('delete from study');
   $vrtrack->{_dbh}->do('delete from individual');
+  $vrtrack->{_dbh}->do('delete from seq_tech');
 }
