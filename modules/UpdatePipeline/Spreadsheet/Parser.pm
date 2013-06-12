@@ -125,8 +125,8 @@ sub _set_sequencing_technology
         }
         else
         {
-            # Unknown sequencing technology
-            UpdatePipeline::Exceptions::InvalidSpreadsheet->throw( error => "Error: Sequencing technology set to '".$header->{'sequencing_technology'}."'\n" );
+            # Unknown sequencing technology defaults to SLX
+            $header->{'sequencing_technology'} = 'SLX';
         }
     }
 

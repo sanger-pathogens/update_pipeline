@@ -111,6 +111,21 @@ ok $spreadsheet_454->update(); # update db again
 ok my $vlane_454 = VRTrack::Lane->new_by_name( $vrtrack, 'myfile'), 'retrieve the lane object';
 is $vrtrack->hierarchy_path_of_lane($vlane_454,"genus:species-subspecies:TRACKING:projectssid:sample:technology:library:lane"), 'Some/Common_Name/TRACKING/123/1/454/L5_AB_12_2011/myfile', 'Lane path generated correctly for 454 data';
 
+# Check defaults to SLX for unknown sequencing method
+delete_test_data($vrtrack); # clear test data
+$vrtrack->{_dbh}->do("INSERT INTO `project` (`project_id`,`ssid`,`name`, `hierarchy_name`,`study_id`,`changed`,`latest`) VALUES	(1,123,'My Study Name','My_Study_Name',1,NOW(),1)"); # set study ssid again.
+ok my $spreadsheet_xxx = UpdatePipeline::Spreadsheet->new(
+  filename                => 't/data/external_unknown_data_example.xls',
+  _vrtrack                => $vrtrack,
+  study_names             => [],
+  dont_use_warehouse      => 1,
+  common_name_required    => 0,
+  pipeline_base_directory => 't/data/pipeline_base_directory',
+  files_base_directory    => 't/data/path/to/sequencing'
+), 'initialise spreadsheet driver class for unknown sequencing tech.';
+ok $spreadsheet_xxx->_files_metadata, 'generate the files metadata for unknown sequencing tech.';
+is $spreadsheet_xxx->_files_metadata->[0]->sequencing_technology, 'SLX', 'sequencing tech defaults to SLX';
+
 done_testing();
 rmtree('t/data/pipeline_base_directory');
 delete_test_data($vrtrack);
