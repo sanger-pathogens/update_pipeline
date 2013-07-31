@@ -46,6 +46,9 @@ sub _build_header_metadata
     data_to_be_kept_until          => $self->_worksheet_parser->get_cell( 7, 1 ) ? $self->_worksheet_parser->get_cell( 7, 1 )->value() : undef,
   );
 
+  # Set seq_tech
+  $self->_set_sequencing_technology(\%raw_header);
+
   return \%raw_header;
 }
 
@@ -105,6 +108,29 @@ sub _convert_hash_values_empty_strings_to_undef
      }
    }
    return $input_hash;
+}
+
+sub _set_sequencing_technology
+{
+    my ($self,$header) = @_;
+    my %sequence_tech = ( 'Illumina' => 'SLX',
+                          'SLX'      => 'SLX',
+                          '454'      => '454' );
+
+    if(defined($header->{'sequencing_technology'}))
+    {
+        if(exists $sequence_tech{$header->{'sequencing_technology'}})
+        {
+            $header->{'sequencing_technology'} = $sequence_tech{$header->{'sequencing_technology'}};
+        }
+        else
+        {
+            # Unknown sequencing technology defaults to SLX
+            $header->{'sequencing_technology'} = 'SLX';
+        }
+    }
+
+    return;
 }
 
 __PACKAGE__->meta->make_immutable;

@@ -108,6 +108,7 @@ sub update
 sub _update_lane
 {
   my ($self, $file_metadata) = @_;
+
   eval {
     my $vproject = UpdatePipeline::VRTrack::Project->new(name => $file_metadata->study_name, external_id => $file_metadata->study_ssid, _vrtrack => $self->_vrtrack)->vr_project();
     if(defined($file_metadata->study_accession_number))
@@ -128,13 +129,18 @@ sub _update_lane
       _vrtrack => $self->_vrtrack,
       _vr_project => $vproject)->vr_sample();
       
-    my $vr_library = UpdatePipeline::VRTrack::Library->new(
-      name => $file_metadata->library_name,
-      external_id        => $file_metadata->library_ssid,
-      fragment_size_from => $file_metadata->fragment_size_from,
-      fragment_size_to   => $file_metadata->fragment_size_to,
-      _vrtrack           => $self->_vrtrack,
-      _vr_sample         => $vr_sample)->vr_library();
+    my %vr_library_param = ( name               => $file_metadata->library_name,
+                             external_id        => $file_metadata->library_ssid,
+                             fragment_size_from => $file_metadata->fragment_size_from,
+                             fragment_size_to   => $file_metadata->fragment_size_to,
+                             _vrtrack           => $self->_vrtrack,
+                             _vr_sample         => $vr_sample );
+
+    # add seq tech and center if defined
+    $vr_library_param{sequencing_technology} = $file_metadata->sequencing_technology if defined($file_metadata->sequencing_technology);
+    $vr_library_param{sequencing_centre}     = $file_metadata->sequencing_centre     if defined($file_metadata->sequencing_centre);
+
+    my $vr_library = UpdatePipeline::VRTrack::Library->new(\%vr_library_param)->vr_library();
 
     my $vr_lane = UpdatePipeline::VRTrack::Lane->new(
       name          => $file_metadata->file_name_without_extension,
