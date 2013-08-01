@@ -17,13 +17,13 @@ sub _build_valid_header
 {
     my ($self) = @_;
     my %header = ( 'supplier_name'                 => $self->_supplier_name,
-		   'supplier_organisation'         => $self->_supplier_organisation,
-		   'internal_contact'              => $self->_internal_contact,
-		   'sequencing_technology'         => $self->_sequencing_technology,
-		   'study_name'                    => $self->_study_name,
-		   'study_accession_number'        => $self->_study_accession_number,
-		   'total_size_of_files_in_gbytes' => $self->_total_size_of_files_in_gbytes,
-		   'data_to_be_kept_until'         => $self->_data_to_be_kept_until );
+                   'supplier_organisation'         => $self->_supplier_organisation,
+                   'internal_contact'              => $self->_internal_contact,
+                   'sequencing_technology'         => $self->_sequencing_technology,
+                   'study_name'                    => $self->_study_name,
+                   'study_accession_number'        => $self->_study_accession_number,
+                   'total_size_of_files_in_gbytes' => $self->_total_size_of_files_in_gbytes,
+                   'data_to_be_kept_until'         => $self->_data_to_be_kept_until );
     return \%header;
 }
 
@@ -31,13 +31,13 @@ sub _build__cell
 {
     my ($self) = @_;
     my %cell = ( 'supplier_name'                 => 'Supplier Name',
-		 'supplier_organisation'         => 'Supplier Organisation',
-		 'internal_contact'              => 'Sanger Contact Name',
-		 'sequencing_technology'         => 'Sequencing Technology',
-		 'study_name'                    => 'Study Name',
-		 'study_accession_number'        => 'Study Accession number',
-		 'total_size_of_files_in_gbytes' => 'Total size of files in GBytes',
-		 'data_to_be_kept_until'         => 'Data to be kept until' );
+                 'supplier_organisation'         => 'Supplier Organisation',
+                 'internal_contact'              => 'Sanger Contact Name',
+                 'sequencing_technology'         => 'Sequencing Technology',
+                 'study_name'                    => 'Study Name',
+                 'study_accession_number'        => 'Study Accession number',
+                 'total_size_of_files_in_gbytes' => 'Total size of files in GBytes',
+                 'data_to_be_kept_until'         => 'Data to be kept until' );
     return \%cell;
 }
 

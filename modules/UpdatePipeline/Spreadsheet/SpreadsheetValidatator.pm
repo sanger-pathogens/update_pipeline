@@ -26,8 +26,8 @@ sub _build_valid_rows_metadata
     my @valid_rows_metadata;
     for my $expt (@{$self->_rows_metadata})
     {
-	my $row_validator = UpdatePipeline::Spreadsheet::SpreadsheetValidatator::SequencingExperiment->new( experiment_row => $expt );
-	push @valid_rows_metadata, $row_validator->valid_experiment_row();
+        my $row_validator = UpdatePipeline::Spreadsheet::SpreadsheetValidatator::SequencingExperiment->new( experiment_row => $expt );
+        push @valid_rows_metadata, $row_validator->valid_experiment_row();
     }
     return \@valid_rows_metadata;
 }

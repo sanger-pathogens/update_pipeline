@@ -18,15 +18,15 @@ sub _build_valid_experiment_row
 {
     my ($self) = @_;
     my %experiment_row = ( 'filename'                => $self->_filename,
-			   'mate_filename'           => $self->_mate_filename,
-			   'sample_name'             => $self->_sample_name,
-			   'sample_accession_number' => $self->_sample_accession_number,
-			   'taxon_id'                => $self->_taxon_id,
-			   'library_name'            => $self->_library_name,
-			   'fragment_size'           => $self->_fragment_size,
-			   'raw_read_count'          => $self->_raw_read_count,
-			   'raw_base_count'          => $self->_raw_base_count,
-			   'comments'                => $self->_comments );
+                           'mate_filename'           => $self->_mate_filename,
+                           'sample_name'             => $self->_sample_name,
+                           'sample_accession_number' => $self->_sample_accession_number,
+                           'taxon_id'                => $self->_taxon_id,
+                           'library_name'            => $self->_library_name,
+                           'fragment_size'           => $self->_fragment_size,
+                           'raw_read_count'          => $self->_raw_read_count,
+                           'raw_base_count'          => $self->_raw_base_count,
+                           'comments'                => $self->_comments );
     return \%experiment_row;
 }
 
