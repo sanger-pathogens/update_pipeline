@@ -1,8 +1,11 @@
 package UpdatePipeline::Spreadsheet::SpreadsheetValidatator::SequencingExperiment;
 use Moose;
+use Scalar::Util qw(looks_like_number);
 
 has 'experiment_row'           => ( is => 'ro', isa => 'HashRef',    required => 1);
 has 'valid_experiment_row'     => ( is => 'ro', isa => 'HashRef',    lazy_build => 1);
+has '_cell_title'              => ( is => 'ro', isa => 'HashRef',    lazy_build => 1);
+has '_cell_allowed_status'     => ( is => 'ro', isa => 'HashRef',    lazy_build => 1);
 has '_filename'                => ( is => 'ro', isa => 'Str',        lazy_build => 1);
 has '_mate_filename'           => ( is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
 has '_sample_name'             => ( is => 'ro', isa => 'Str',        lazy_build => 1);
@@ -30,64 +33,180 @@ sub _build_valid_experiment_row
     return \%experiment_row;
 }
 
+sub _build__cell_title
+{
+    my ($self) = @_;
+    my %cell = ( 'filename'                => 'Filename',
+                 'mate_filename'           => 'Mate File',
+                 'sample_name'             => 'Sample Name',
+                 'sample_accession_number' => 'Sample Accession number',
+                 'taxon_id'                => 'Taxon ID',
+                 'library_name'            => 'Library Name',
+                 'fragment_size'           => 'Fragment Size',
+                 'raw_read_count'          => 'Read Count',
+                 'raw_base_count'          => 'Base Count',
+                 'comments'                => 'Comments' );
+    return \%cell;
+}
+
+
+sub _build__cell_allowed_status
+{
+    my ($self) = @_;
+    my %cell = ( 'filename'                => ['string'],
+                 'mate_filename'           => ['string','blank'],
+                 'sample_name'             => ['string'],
+                 'sample_accession_number' => ['string'],
+                 'taxon_id'                => ['integer'],
+                 'library_name'            => ['string'],
+                 'fragment_size'           => ['integer','blank'],
+                 'raw_read_count'          => ['integer','blank'],
+                 'raw_base_count'          => ['integer','blank'],
+                 'comments'                => ['string'] );
+    return \%cell;
+}
+
 sub _build__filename
 {
     my ($self) = @_;
-    return $self->experiment_row->{'filename'};
+    $self->_process_cell('filename');
+    return $self->_process_filename('filename');
 }
 
 sub _build__mate_filename
 {
     my ($self) = @_;
-    return $self->experiment_row->{'mate_filename'};
+    $self->_process_cell('mate_filename');
+    return $self->_process_filename('mate_filename') unless $self->experiment_row->{'sample_name'} eq '';
 }
 
 sub _build__sample_name
 {
     my ($self) = @_;
+    $self->_process_cell('sample_name');
     return $self->experiment_row->{'sample_name'};
 }
 
 sub _build__sample_accession_number
 {
     my ($self) = @_;
+    $self->_process_cell('sample_accession_number');
     return $self->experiment_row->{'sample_accession_number'};
 }
 
 sub _build__taxon_id
 {
     my ($self) = @_;
+    $self->_process_cell('taxon_id');
     return $self->experiment_row->{'taxon_id'};
 }
 
 sub _build__library_name
 {
     my ($self) = @_;
+    $self->_process_cell('library_name');
     return $self->experiment_row->{'library_name'};
 }
 
 sub _build__fragment_size
 {
     my ($self) = @_;
+    $self->_process_cell('fragment_size');
     return $self->experiment_row->{'fragment_size'};
 }
 
 sub _build__raw_read_count
 {
     my ($self) = @_;
+    $self->_process_cell('raw_read_count');
     return $self->experiment_row->{'raw_read_count'};
 }
 
 sub _build__raw_base_count
 {
     my ($self) = @_;
+    $self->_process_cell('raw_base_count');
     return $self->experiment_row->{'raw_base_count'};
 }
 
 sub _build__comments
 {
     my ($self) = @_;
+    $self->_process_cell('comments');
     return $self->experiment_row->{'comments'};
+}
+
+sub _get_cell_status
+{
+    my ($self,$cell) = @_;
+
+    my $status = '';
+    if(! exists  $self->experiment_row->{$cell})
+    { 
+        $status = "absent"; 
+    }
+    elsif(! defined $self->experiment_row->{$cell})
+    { 
+        $status = "undefined"; 
+    }
+    elsif($self->experiment_row->{$cell} eq '' )
+    { 
+        $status = "blank"; 
+    }
+    elsif( looks_like_number $self->experiment_row->{$cell} )
+    { 
+        $status = "number";
+        $status = "integer" if $self->experiment_row->{$cell} =~ m/^\d+$/;
+        $status = "zero"    if $self->experiment_row->{$cell} == 0;
+    }
+    elsif( $self->experiment_row->{$cell} =~ m/^\d{2}\.\d{2}\.\d{4}$/ )
+    {
+        $status = "date"; 
+    }
+    else
+    {
+        $status = "string";
+    }
+
+    return $status;
+}
+
+sub _process_cell
+{
+    my ($self,$cell) = @_;
+
+    my $title   = $self->_cell_title->{$cell};
+    my $status  = $self->_get_cell_status($cell);
+    my %allowed = map { $_ => 1 } @{$self->_cell_allowed_status->{$cell}};
+
+    my $passed  = $allowed{$status} ? 'ok':'error' ;
+    printf "%s is %s %s\n",$title,$status,$passed;
+
+    return $allowed{$status};
+}
+
+sub _process_filename
+{
+    my ($self,$cell) = @_;
+    my $file = $self->experiment_row->{$cell};
+
+    if($file =~ m/^\s+|\s+$/gi)
+    {
+        print " Removing leading/trailing whitespace from '$file'\n";
+        $file =~ s/^\s+|\s+$//gi;
+    }
+
+    if($file =~ m/\//gi)
+    {
+        print " Removing path from '$file'\n";
+        my @path = split(/\//,$file);
+        $file = pop @path;
+        print " Filename is '$file'\n";
+    }
+
+    print " Error: No filename found in cell\n" if $file eq '';
+
+    return $file;
 }
 
 __PACKAGE__->meta->make_immutable;
