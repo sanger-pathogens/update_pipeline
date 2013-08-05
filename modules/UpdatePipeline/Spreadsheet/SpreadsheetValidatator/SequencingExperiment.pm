@@ -37,9 +37,9 @@ sub _build__cell_title
 {
     my ($self) = @_;
     my %cell = ( 'filename'                => 'Filename',
-                 'mate_filename'           => 'Mate File',
+                 'mate_filename'           => 'Mate Filename',
                  'sample_name'             => 'Sample Name',
-                 'sample_accession_number' => 'Sample Accession number',
+                 'sample_accession_number' => 'Sample Accession',
                  'taxon_id'                => 'Taxon ID',
                  'library_name'            => 'Library Name',
                  'fragment_size'           => 'Fragment Size',
@@ -62,13 +62,14 @@ sub _build__cell_allowed_status
                  'fragment_size'           => ['integer','blank'],
                  'raw_read_count'          => ['integer','blank'],
                  'raw_base_count'          => ['integer','blank'],
-                 'comments'                => ['string'] );
+                 'comments'                => ['string','blank'] );
     return \%cell;
 }
 
 sub _build__filename
 {
     my ($self) = @_;
+    print "\n";
     $self->_process_cell('filename');
     return $self->_process_filename('filename');
 }
@@ -180,7 +181,7 @@ sub _process_cell
     my %allowed = map { $_ => 1 } @{$self->_cell_allowed_status->{$cell}};
 
     my $passed  = $allowed{$status} ? 'ok':'error' ;
-    printf "%s is %s %s\n",$title,$status,$passed;
+    printf "%-22s is %-9s %s\n",$title,$status,$passed;
 
     return $allowed{$status};
 }

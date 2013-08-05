@@ -37,9 +37,9 @@ sub _build__cell_title
                  'internal_contact'              => 'Sanger Contact Name',
                  'sequencing_technology'         => 'Sequencing Technology',
                  'study_name'                    => 'Study Name',
-                 'study_accession_number'        => 'Study Accession number',
-                 'total_size_of_files_in_gbytes' => 'Total size of files in GBytes',
-                 'data_to_be_kept_until'         => 'Data to be kept until' );
+                 'study_accession_number'        => 'Study Accession Number',
+                 'total_size_of_files_in_gbytes' => 'Size of files (GBytes)',
+                 'data_to_be_kept_until'         => 'Data retained until' );
     return \%cell;
 }
 
@@ -161,7 +161,7 @@ sub _process_cell
     my %allowed = map { $_ => 1 } @{$self->_cell_allowed_status->{$cell}};
 
     my $passed  = $allowed{$status} ? 'ok':'error' ;
-    printf "%s is %s %s\n",$title,$status,$passed;
+    printf "%-22s is %-9s %s\n",$title,$status,$passed;
 
     return $allowed{$status};
 }
