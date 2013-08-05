@@ -44,7 +44,7 @@ use File::Path qw(make_path  );
 use Parallel::ForkManager;
 use Digest::MD5;
 use UpdatePipeline::Exceptions;
-use UpdatePipeline::Spreadsheet::Parser;
+use UpdatePipeline::Spreadsheet::SpreadsheetValidatator;
 use UpdatePipeline::Spreadsheet::SpreadsheetMetaData;
 use Bio::SeqIO::fastq;
 extends "UpdatePipeline::UpdateAllMetaData";
