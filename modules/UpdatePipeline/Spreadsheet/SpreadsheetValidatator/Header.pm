@@ -7,10 +7,10 @@ has 'valid_header'                   => ( is => 'ro', isa => 'HashRef',    lazy_
 has '_cell_title'                    => ( is => 'ro', isa => 'HashRef',    lazy_build => 1);
 has '_cell_allowed_status'           => ( is => 'ro', isa => 'HashRef',    lazy_build => 1);
 has '_supplier_name'                 => ( is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
-has '_supplier_organisation'         => ( is => 'ro', isa => 'Str',        lazy_build => 1);
-has '_internal_contact'              => ( is => 'ro', isa => 'Str',        lazy_build => 1);
-has '_sequencing_technology'         => ( is => 'ro', isa => 'Str',        lazy_build => 1);
-has '_study_name'                    => ( is => 'ro', isa => 'Str',        lazy_build => 1);
+has '_supplier_organisation'         => ( is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
+has '_internal_contact'              => ( is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
+has '_sequencing_technology'         => ( is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
+has '_study_name'                    => ( is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
 has '_study_accession_number'        => ( is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
 has '_total_size_of_files_in_gbytes' => ( is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
 has '_data_to_be_kept_until'         => ( is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
@@ -46,36 +46,42 @@ sub _build__cell_title
 sub _build__cell_allowed_status
 {
     my ($self) = @_;
-    my %cell = ( 'supplier_name'                 => ['string'],
-                 'supplier_organisation'         => ['string'],
-                 'internal_contact'              => ['string'],
+    my %cell = ( 'supplier_name'                 => ['string','blank','empty'],
+                 'supplier_organisation'         => ['string','blank','empty'],
+                 'internal_contact'              => ['string','blank','empty'],
                  'sequencing_technology'         => ['string'],
                  'study_name'                    => ['string'],
-                 'study_accession_number'        => ['integer'],
-                 'total_size_of_files_in_gbytes' => ['number','integer'],
-                 'data_to_be_kept_until'         => ['date'] );
+                 'study_accession_number'        => ['integer','undefined'],
+                 'total_size_of_files_in_gbytes' => ['number','integer','empty','undefined'],
+                 'data_to_be_kept_until'         => ['date','integer','empty','undefined'] );
     return \%cell;
 }
 
 sub _build__supplier_name
 {
     my ($self) = @_;
-    $self->_process_cell('supplier_name');
-    return $self->header->{'supplier_name'};
+    return $self->header->{'supplier_name'} if $self->_process_cell('supplier_name');
+
+    print " setting supplier name to empty string\n";
+    return '';
 }
 
 sub _build__supplier_organisation
 {
     my ($self) = @_;
-    $self->_process_cell('supplier_organisation');
-    return $self->header->{'supplier_organisation'};
+    return $self->header->{'supplier_organisation'} if $self->_process_cell('supplier_organisation');
+
+    print " setting supplier name to empty string\n";
+    return '';
 }
 
 sub _build__internal_contact
 {
     my ($self) = @_;
-    $self->_process_cell('internal_contact');
-    return $self->header->{'internal_contact'};
+    return $self->header->{'internal_contact'} if $self->_process_cell('internal_contact');
+    
+    print " setting internal contact to empty string\n";
+    return '';
 }
 
 sub _build__sequencing_technology
@@ -85,7 +91,8 @@ sub _build__sequencing_technology
 
     if( $self->header->{'sequencing_technology'} !~ m/illumina|454|slx/gi )
     {
-        print " Error: Sequencing technology '",$self->header->{'sequencing_technology'},"' not recognised.\n";
+        print " error: sequencing technology '",$self->header->{'sequencing_technology'},"' not recognised.\n";
+	print " sequencing technology defaults to ilumina/slx\n";
     }
 
     return $self->header->{'sequencing_technology'};
@@ -94,13 +101,19 @@ sub _build__sequencing_technology
 sub _build__study_name
 {
     my ($self) = @_;
-    return $self->header->{'study_name'};
+    return $self->header->{'study_name'} if $self->_process_cell('study_name');
+
+    print " fatal error: study name not supplied\n";
+    return undef; 
 }
 
 sub _build__study_accession_number
 {
     my ($self) = @_;
-    return $self->header->{'study_accession_number'};
+    return $self->header->{'study_accession_number'} if $self->_process_cell('study_accession_number');
+
+    print " setting study accession to undef\n";
+    return undef;
 }
 
 sub _build__total_size_of_files_in_gbytes
@@ -131,6 +144,10 @@ sub _get_cell_status
         $status = "undefined"; 
     }
     elsif($self->header->{$cell} eq '' )
+    { 
+        $status = "empty"; 
+    }
+    elsif($self->header->{$cell} =~ m/^\s+$/ )
     { 
         $status = "blank"; 
     }
