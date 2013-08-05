@@ -54,7 +54,7 @@ sub _build__cell_allowed_status
 {
     my ($self) = @_;
     my %cell = ( 'filename'                => ['string'],
-                 'mate_filename'           => ['string','undefined','blank'],
+                 'mate_filename'           => ['string','undefined','empty'],
                  'sample_name'             => ['string','integer'],
                  'sample_accession_number' => ['string','undefined'],
                  'taxon_id'                => ['integer'],
@@ -62,7 +62,7 @@ sub _build__cell_allowed_status
                  'fragment_size'           => ['integer','zero','undefined'],
                  'raw_read_count'          => ['integer','undefined'],
                  'raw_base_count'          => ['integer','undefined'],
-                 'comments'                => ['string', 'undefined','blank'] );
+                 'comments'                => ['string', 'undefined','blank','empty'] );
     return \%cell;
 }
 
@@ -95,8 +95,8 @@ sub _build__sample_name
 sub _build__sample_accession_number
 {
     my ($self) = @_;
-    $self->_process_cell('sample_accession_number');
-    return $self->experiment_row->{'sample_accession_number'};
+    return $self->experiment_row->{'sample_accession_number'} if $self->_process_cell('sample_accession_number');
+    return undef;
 }
 
 sub _build__taxon_id
@@ -138,15 +138,15 @@ sub _build__fragment_size
 sub _build__raw_read_count
 {
     my ($self) = @_;
-    $self->_process_cell('raw_read_count');
-    return $self->experiment_row->{'raw_read_count'};
+    return $self->experiment_row->{'raw_read_count'} if $self->_process_cell('raw_read_count');
+    return undef;
 }
 
 sub _build__raw_base_count
 {
     my ($self) = @_;
-    $self->_process_cell('raw_base_count');
-    return $self->experiment_row->{'raw_base_count'};
+    return $self->experiment_row->{'raw_base_count'} if $self->_process_cell('raw_base_count');
+    return undef;
 }
 
 sub _build__comments
@@ -170,6 +170,10 @@ sub _get_cell_status
         $status = "undefined"; 
     }
     elsif($self->experiment_row->{$cell} eq '' )
+    { 
+        $status = "empty"; 
+    }
+    elsif($self->experiment_row->{$cell} =~ m/^\s+$/ )
     { 
         $status = "blank"; 
     }
