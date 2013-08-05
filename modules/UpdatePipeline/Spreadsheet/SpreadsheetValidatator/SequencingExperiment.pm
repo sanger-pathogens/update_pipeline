@@ -6,12 +6,12 @@ has 'experiment_row'           => ( is => 'ro', isa => 'HashRef',    required =>
 has 'valid_experiment_row'     => ( is => 'ro', isa => 'HashRef',    lazy_build => 1);
 has '_cell_title'              => ( is => 'ro', isa => 'HashRef',    lazy_build => 1);
 has '_cell_allowed_status'     => ( is => 'ro', isa => 'HashRef',    lazy_build => 1);
-has '_filename'                => ( is => 'ro', isa => 'Str',        lazy_build => 1);
+has '_filename'                => ( is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
 has '_mate_filename'           => ( is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
-has '_sample_name'             => ( is => 'ro', isa => 'Str',        lazy_build => 1);
+has '_sample_name'             => ( is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
 has '_sample_accession_number' => ( is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
-has '_taxon_id'                => ( is => 'ro', isa => 'Int',        lazy_build => 1);
-has '_library_name'            => ( is => 'ro', isa => 'Str',        lazy_build => 1);
+has '_taxon_id'                => ( is => 'ro', isa => 'Maybe[Int]', lazy_build => 1);
+has '_library_name'            => ( is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
 has '_fragment_size'           => ( is => 'ro', isa => 'Maybe[Int]', lazy_build => 1);
 has '_raw_read_count'          => ( is => 'ro', isa => 'Maybe[Int]', lazy_build => 1);
 has '_raw_base_count'          => ( is => 'ro', isa => 'Maybe[Int]', lazy_build => 1);
@@ -54,15 +54,15 @@ sub _build__cell_allowed_status
 {
     my ($self) = @_;
     my %cell = ( 'filename'                => ['string'],
-                 'mate_filename'           => ['string','blank'],
-                 'sample_name'             => ['string'],
-                 'sample_accession_number' => ['string'],
+                 'mate_filename'           => ['string','undefined','blank'],
+                 'sample_name'             => ['string','integer'],
+                 'sample_accession_number' => ['string','undefined'],
                  'taxon_id'                => ['integer'],
-                 'library_name'            => ['string'],
-                 'fragment_size'           => ['integer','blank'],
-                 'raw_read_count'          => ['integer','blank'],
-                 'raw_base_count'          => ['integer','blank'],
-                 'comments'                => ['string','blank'] );
+                 'library_name'            => ['string', 'integer'],
+                 'fragment_size'           => ['integer','zero','undefined'],
+                 'raw_read_count'          => ['integer','undefined'],
+                 'raw_base_count'          => ['integer','undefined'],
+                 'comments'                => ['string', 'undefined','blank'] );
     return \%cell;
 }
 
@@ -78,13 +78,17 @@ sub _build__mate_filename
 {
     my ($self) = @_;
     $self->_process_cell('mate_filename');
-    return $self->_process_filename('mate_filename') unless $self->experiment_row->{'sample_name'} eq '';
+    return $self->_process_filename('mate_filename') if defined $self->experiment_row->{'mate_filename'};
+
+    return undef; # no mate filename
 }
 
 sub _build__sample_name
 {
     my ($self) = @_;
-    $self->_process_cell('sample_name');
+    return $self->experiment_row->{'sample_name'} if $self->_process_cell('sample_name');
+
+    print " fatal error: sample name not present.\n" unless defined $self->experiment_row->{'sample_name'};
     return $self->experiment_row->{'sample_name'};
 }
 
@@ -98,22 +102,37 @@ sub _build__sample_accession_number
 sub _build__taxon_id
 {
     my ($self) = @_;
-    $self->_process_cell('taxon_id');
-    return $self->experiment_row->{'taxon_id'};
+    return $self->experiment_row->{'taxon_id'} if $self->_process_cell('taxon_id');
+    
+    print " fatal error: taxon id is not an integer.\n";
+    return undef;
 }
 
 sub _build__library_name
 {
     my ($self) = @_;
-    $self->_process_cell('library_name');
+    return $self->experiment_row->{'library_name'} if $self->_process_cell('library_name');
+
+    print " fatal error: library name not present.\n" unless defined $self->experiment_row->{'library_name'};
     return $self->experiment_row->{'library_name'};
 }
 
 sub _build__fragment_size
 {
     my ($self) = @_;
-    $self->_process_cell('fragment_size');
-    return $self->experiment_row->{'fragment_size'};
+    return $self->experiment_row->{'fragment_size'} if $self->_process_cell('fragment_size');
+
+    my $fragment_size = $self->experiment_row->{'fragment_size'};
+    print ' fragment size is ',$fragment_size;
+    if($self->_get_cell_status('fragment_size') eq 'string')
+    {
+        $fragment_size =~ s/\s+//gi; # remove space
+        $fragment_size =~ s/bp$//gi; # remove bp
+    }
+    $fragment_size = undef if $fragment_size eq '';
+    print ' - fragment size set to ',defined($fragment_size) ? $fragment_size:'undef',"\n";
+
+    return $fragment_size;
 }
 
 sub _build__raw_read_count
@@ -193,19 +212,19 @@ sub _process_filename
 
     if($file =~ m/^\s+|\s+$/gi)
     {
-        print " Removing leading/trailing whitespace from '$file'\n";
+        print " removing leading/trailing whitespace from '$file'\n";
         $file =~ s/^\s+|\s+$//gi;
     }
 
     if($file =~ m/\//gi)
     {
-        print " Removing path from '$file'\n";
+        print " removing path from '$file'\n";
         my @path = split(/\//,$file);
         $file = pop @path;
         print " Filename is '$file'\n";
     }
 
-    print " Error: No filename found in cell\n" if $file eq '';
+    print " error: no filename found in cell\n" if $file eq '';
 
     return $file;
 }
