@@ -1,11 +1,10 @@
 package UpdatePipeline::Spreadsheet::SpreadsheetValidatator::Header;
 use Moose;
-use Scalar::Util qw(looks_like_number);
+
+extends 'UpdatePipeline::Spreadsheet::SpreadsheetValidatator::Common';
 
 has 'header'                         => ( is => 'ro', isa => 'HashRef',    required => 1);
 has 'valid_header'                   => ( is => 'ro', isa => 'HashRef',    lazy_build => 1);
-has '_cell_title'                    => ( is => 'ro', isa => 'HashRef',    lazy_build => 1);
-has '_cell_allowed_status'           => ( is => 'ro', isa => 'HashRef',    lazy_build => 1);
 has '_supplier_name'                 => ( is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
 has '_supplier_organisation'         => ( is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
 has '_internal_contact'              => ( is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
@@ -27,6 +26,12 @@ sub _build_valid_header
                    'total_size_of_files_in_gbytes' => $self->_total_size_of_files_in_gbytes,
                    'data_to_be_kept_until'         => $self->_data_to_be_kept_until );
     return \%header;
+}
+
+sub _build__cell_data
+{
+    my ($self) = @_;
+    return $self->header;
 }
 
 sub _build__cell_title
@@ -60,7 +65,7 @@ sub _build__cell_allowed_status
 sub _build__supplier_name
 {
     my ($self) = @_;
-    return $self->header->{'supplier_name'} if $self->_process_cell('supplier_name');
+    return $self->_cell_data->{'supplier_name'} if $self->_process_cell('supplier_name');
 
     print " setting supplier name to empty string\n";
     return '';
@@ -69,7 +74,7 @@ sub _build__supplier_name
 sub _build__supplier_organisation
 {
     my ($self) = @_;
-    return $self->header->{'supplier_organisation'} if $self->_process_cell('supplier_organisation');
+    return $self->_cell_data->{'supplier_organisation'} if $self->_process_cell('supplier_organisation');
 
     print " setting supplier name to empty string\n";
     return '';
@@ -78,7 +83,7 @@ sub _build__supplier_organisation
 sub _build__internal_contact
 {
     my ($self) = @_;
-    return $self->header->{'internal_contact'} if $self->_process_cell('internal_contact');
+    return $self->_cell_data->{'internal_contact'} if $self->_process_cell('internal_contact');
     
     print " setting internal contact to empty string\n";
     return '';
@@ -89,19 +94,19 @@ sub _build__sequencing_technology
     my ($self) = @_;
     $self->_process_cell('sequencing_technology');
 
-    if( $self->header->{'sequencing_technology'} !~ m/illumina|454|slx/gi )
+    if( $self->_cell_data->{'sequencing_technology'} !~ m/illumina|454|slx/gi )
     {
-        print " error: sequencing technology '",$self->header->{'sequencing_technology'},"' not recognised.\n";
+        print " error: sequencing technology '",$self->_cell_data->{'sequencing_technology'},"' not recognised.\n";
 	print " sequencing technology defaults to ilumina/slx\n";
     }
 
-    return $self->header->{'sequencing_technology'};
+    return $self->_cell_data->{'sequencing_technology'};
 }
 
 sub _build__study_name
 {
     my ($self) = @_;
-    return $self->header->{'study_name'} if $self->_process_cell('study_name');
+    return $self->_cell_data->{'study_name'} if $self->_process_cell('study_name');
 
     print " fatal error: study name not supplied\n";
     return undef; 
@@ -110,7 +115,7 @@ sub _build__study_name
 sub _build__study_accession_number
 {
     my ($self) = @_;
-    return $self->header->{'study_accession_number'} if $self->_process_cell('study_accession_number');
+    return $self->_cell_data->{'study_accession_number'} if $self->_process_cell('study_accession_number');
 
     print " setting study accession to undef\n";
     return undef;
@@ -120,67 +125,14 @@ sub _build__total_size_of_files_in_gbytes
 {
     my ($self) = @_;
     $self->_process_cell('total_size_of_files_in_gbytes');
-    return $self->header->{'total_size_of_files_in_gbytes'};
+    return $self->_cell_data->{'total_size_of_files_in_gbytes'};
 }
 
 sub _build__data_to_be_kept_until
 {
     my ($self) = @_;
     $self->_process_cell('data_to_be_kept_until');
-    return $self->header->{'data_to_be_kept_until'};
-}
-
-sub _get_cell_status
-{
-    my ($self,$cell) = @_;
-
-    my $status = '';
-    if(! exists  $self->header->{$cell})
-    { 
-        $status = "absent"; 
-    }
-    elsif(! defined $self->header->{$cell})
-    { 
-        $status = "undefined"; 
-    }
-    elsif($self->header->{$cell} eq '' )
-    { 
-        $status = "empty"; 
-    }
-    elsif($self->header->{$cell} =~ m/^\s+$/ )
-    { 
-        $status = "blank"; 
-    }
-    elsif( looks_like_number $self->header->{$cell} )
-    { 
-        $status = "number";
-        $status = "integer" if $self->header->{$cell} =~ m/^\d+$/;
-        $status = "zero"    if $self->header->{$cell} == 0;
-    }
-    elsif( $self->header->{$cell} =~ m/^\d{2}\.\d{2}\.\d{4}$/ )
-    {
-        $status = "date"; 
-    }
-    else
-    {
-        $status = "string";
-    }
-
-    return $status;
-}
-
-sub _process_cell
-{
-    my ($self,$cell) = @_;
-
-    my $title   = $self->_cell_title->{$cell};
-    my $status  = $self->_get_cell_status($cell);
-    my %allowed = map { $_ => 1 } @{$self->_cell_allowed_status->{$cell}};
-
-    my $passed  = $allowed{$status} ? 'ok':'error' ;
-    printf "%-22s is %-9s %s\n",$title,$status,$passed;
-
-    return $allowed{$status};
+    return $self->_cell_data->{'data_to_be_kept_until'};
 }
 
 __PACKAGE__->meta->make_immutable;

@@ -1,11 +1,10 @@
 package UpdatePipeline::Spreadsheet::SpreadsheetValidatator::SequencingExperiment;
 use Moose;
-use Scalar::Util qw(looks_like_number);
+
+extends 'UpdatePipeline::Spreadsheet::SpreadsheetValidatator::Common';
 
 has 'experiment_row'           => ( is => 'ro', isa => 'HashRef',    required => 1);
 has 'valid_experiment_row'     => ( is => 'ro', isa => 'HashRef',    lazy_build => 1);
-has '_cell_title'              => ( is => 'ro', isa => 'HashRef',    lazy_build => 1);
-has '_cell_allowed_status'     => ( is => 'ro', isa => 'HashRef',    lazy_build => 1);
 has '_filename'                => ( is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
 has '_mate_filename'           => ( is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
 has '_sample_name'             => ( is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
@@ -33,6 +32,12 @@ sub _build_valid_experiment_row
     return \%experiment_row;
 }
 
+sub _build__cell_data
+{
+    my ($self) = @_;
+    return $self->experiment_row;
+}
+
 sub _build__cell_title
 {
     my ($self) = @_;
@@ -48,7 +53,6 @@ sub _build__cell_title
                  'comments'                => 'Comments' );
     return \%cell;
 }
-
 
 sub _build__cell_allowed_status
 {
@@ -78,7 +82,7 @@ sub _build__mate_filename
 {
     my ($self) = @_;
     $self->_process_cell('mate_filename');
-    return $self->_process_filename('mate_filename') if defined $self->experiment_row->{'mate_filename'};
+    return $self->_process_filename('mate_filename') if defined $self->_cell_data->{'mate_filename'};
 
     return undef; # no mate filename
 }
@@ -86,23 +90,23 @@ sub _build__mate_filename
 sub _build__sample_name
 {
     my ($self) = @_;
-    return $self->experiment_row->{'sample_name'} if $self->_process_cell('sample_name');
+    return $self->_cell_data->{'sample_name'} if $self->_process_cell('sample_name');
 
-    print " fatal error: sample name not present.\n" unless defined $self->experiment_row->{'sample_name'};
-    return $self->experiment_row->{'sample_name'};
+    print " fatal error: sample name not present.\n" unless defined $self->_cell_data->{'sample_name'};
+    return $self->_cell_data->{'sample_name'};
 }
 
 sub _build__sample_accession_number
 {
     my ($self) = @_;
-    return $self->experiment_row->{'sample_accession_number'} if $self->_process_cell('sample_accession_number');
+    return $self->_cell_data->{'sample_accession_number'} if $self->_process_cell('sample_accession_number');
     return undef;
 }
 
 sub _build__taxon_id
 {
     my ($self) = @_;
-    return $self->experiment_row->{'taxon_id'} if $self->_process_cell('taxon_id');
+    return $self->_cell_data->{'taxon_id'} if $self->_process_cell('taxon_id');
     
     print " fatal error: taxon id is not an integer.\n";
     return undef;
@@ -111,18 +115,18 @@ sub _build__taxon_id
 sub _build__library_name
 {
     my ($self) = @_;
-    return $self->experiment_row->{'library_name'} if $self->_process_cell('library_name');
+    return $self->_cell_data->{'library_name'} if $self->_process_cell('library_name');
 
-    print " fatal error: library name not present.\n" unless defined $self->experiment_row->{'library_name'};
-    return $self->experiment_row->{'library_name'};
+    print " fatal error: library name not present.\n" unless defined $self->_cell_data->{'library_name'};
+    return $self->_cell_data->{'library_name'};
 }
 
 sub _build__fragment_size
 {
     my ($self) = @_;
-    return $self->experiment_row->{'fragment_size'} if $self->_process_cell('fragment_size');
+    return $self->_cell_data->{'fragment_size'} if $self->_process_cell('fragment_size');
 
-    my $fragment_size = $self->experiment_row->{'fragment_size'};
+    my $fragment_size = $self->_cell_data->{'fragment_size'};
     print ' fragment size is ',$fragment_size;
     if($self->_get_cell_status('fragment_size') eq 'string')
     {
@@ -138,14 +142,14 @@ sub _build__fragment_size
 sub _build__raw_read_count
 {
     my ($self) = @_;
-    return $self->experiment_row->{'raw_read_count'} if $self->_process_cell('raw_read_count');
+    return $self->_cell_data->{'raw_read_count'} if $self->_process_cell('raw_read_count');
     return undef;
 }
 
 sub _build__raw_base_count
 {
     my ($self) = @_;
-    return $self->experiment_row->{'raw_base_count'} if $self->_process_cell('raw_base_count');
+    return $self->_cell_data->{'raw_base_count'} if $self->_process_cell('raw_base_count');
     return undef;
 }
 
@@ -153,66 +157,13 @@ sub _build__comments
 {
     my ($self) = @_;
     $self->_process_cell('comments');
-    return $self->experiment_row->{'comments'};
-}
-
-sub _get_cell_status
-{
-    my ($self,$cell) = @_;
-
-    my $status = '';
-    if(! exists  $self->experiment_row->{$cell})
-    { 
-        $status = "absent"; 
-    }
-    elsif(! defined $self->experiment_row->{$cell})
-    { 
-        $status = "undefined"; 
-    }
-    elsif($self->experiment_row->{$cell} eq '' )
-    { 
-        $status = "empty"; 
-    }
-    elsif($self->experiment_row->{$cell} =~ m/^\s+$/ )
-    { 
-        $status = "blank"; 
-    }
-    elsif( looks_like_number $self->experiment_row->{$cell} )
-    { 
-        $status = "number";
-        $status = "integer" if $self->experiment_row->{$cell} =~ m/^\d+$/;
-        $status = "zero"    if $self->experiment_row->{$cell} == 0;
-    }
-    elsif( $self->experiment_row->{$cell} =~ m/^\d{2}\.\d{2}\.\d{4}$/ )
-    {
-        $status = "date"; 
-    }
-    else
-    {
-        $status = "string";
-    }
-
-    return $status;
-}
-
-sub _process_cell
-{
-    my ($self,$cell) = @_;
-
-    my $title   = $self->_cell_title->{$cell};
-    my $status  = $self->_get_cell_status($cell);
-    my %allowed = map { $_ => 1 } @{$self->_cell_allowed_status->{$cell}};
-
-    my $passed  = $allowed{$status} ? 'ok':'error' ;
-    printf "%-22s is %-9s %s\n",$title,$status,$passed;
-
-    return $allowed{$status};
+    return $self->_cell_data->{'comments'};
 }
 
 sub _process_filename
 {
     my ($self,$cell) = @_;
-    my $file = $self->experiment_row->{$cell};
+    my $file = $self->_cell_data->{$cell};
 
     if($file =~ m/^\s+|\s+$/gi)
     {
