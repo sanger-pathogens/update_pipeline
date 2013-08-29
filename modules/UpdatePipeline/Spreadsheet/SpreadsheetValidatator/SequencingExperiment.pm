@@ -73,7 +73,7 @@ sub _build__cell_allowed_status
 sub _build__filename
 {
     my ($self) = @_;
-    print "\n";
+    print "\n",$self->_cell_data->{'filename'},"\n";
     $self->_process_cell('filename');
     return $self->_process_filename('filename');
 }

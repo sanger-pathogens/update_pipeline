@@ -110,6 +110,7 @@ ok my $row_validator = UpdatePipeline::Spreadsheet::SpreadsheetValidatator::Sequ
 ok my $expt_row_out = $row_validator->valid_experiment_row();
 
 $expected_stdout = qq[
+file
 Filename               is string    ok
 Mate Filename          is string    ok
 Sample Name            is string    ok
@@ -153,6 +154,7 @@ ok $row_validator = UpdatePipeline::Spreadsheet::SpreadsheetValidatator::Sequenc
 ok $expt_row_out = $row_validator->valid_experiment_row();
 
 $expected_stdout = qq[
+/path/to/file
 Filename               is string    ok
  removing path from '/path/to/file'
  Filename is 'file'
