@@ -33,7 +33,10 @@ ok my $spreadsheet = UpdatePipeline::Spreadsheet->new(
   pipeline_base_directory => 't/data/pipeline_base_directory',
   files_base_directory    => 't/data/path/to/sequencing'
 ), 'initialise spreadsheet driver class';
+my $copy_stdout;
+open($copy_stdout, ">&STDOUT"); close(STDOUT); open(STDOUT, ">", "/dev/null"); # copy stdout
 ok $spreadsheet->_files_metadata, 'generate the files metadata';
+close(STDOUT); open(STDOUT, ">&", $copy_stdout); # restore stdout
 
 is $spreadsheet->_files_metadata->[0]->file_name,'myfile_1.fastq.gz', 'filename returned correctly';
 
@@ -104,7 +107,9 @@ ok my $spreadsheet_454 = UpdatePipeline::Spreadsheet->new(
   pipeline_base_directory => 't/data/pipeline_base_directory',
   files_base_directory    => 't/data/path/to/sequencing'
 ), 'initialise spreadsheet driver class';
+open($copy_stdout, ">&STDOUT"); close(STDOUT); open(STDOUT, ">", "/dev/null"); # copy stdout
 ok $spreadsheet_454->_files_metadata, 'generate the 454 files metadata';
+close(STDOUT); open(STDOUT, ">&", $copy_stdout); # restore stdout
 is $spreadsheet_454->_files_metadata->[0]->sequencing_technology, '454', 'sequencing tech set to 454';
 
 ok $spreadsheet_454->update(); # update db again
@@ -123,7 +128,9 @@ ok my $spreadsheet_xxx = UpdatePipeline::Spreadsheet->new(
   pipeline_base_directory => 't/data/pipeline_base_directory',
   files_base_directory    => 't/data/path/to/sequencing'
 ), 'initialise spreadsheet driver class for unknown sequencing tech.';
+open($copy_stdout, ">&STDOUT"); close(STDOUT); open(STDOUT, ">", "/dev/null"); # copy stdout
 ok $spreadsheet_xxx->_files_metadata, 'generate the files metadata for unknown sequencing tech.';
+close(STDOUT); open(STDOUT, ">&", $copy_stdout); # restore stdout
 is $spreadsheet_xxx->_files_metadata->[0]->sequencing_technology, 'SLX', 'sequencing tech defaults to SLX';
 
 done_testing();
