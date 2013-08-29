@@ -16,7 +16,15 @@ my $stdout;
 open(my $copy_stdout, ">&STDOUT");
 close(STDOUT); open(STDOUT, ">", \$stdout);
 
+# check validator
+ok my $validator = UpdatePipeline::Spreadsheet::SpreadsheetValidatator->new(filename => 't/data/external_data_example.xls'), 'open example spreadsheet';
+ok $validator->validate(), 'example spreadsheet is valid';
 
+throws_ok(sub { UpdatePipeline::Spreadsheet::SpreadsheetValidatator->new(filename => 'file_that_does_not_exist') } , qr/file does not exist/, 'parsing non-existent file throws an error');
+close(STDOUT); $stdout = ''; open(STDOUT, ">", \$stdout);
+
+
+# check header
 my $header_in = { supplier_name                  => 'name',
 		  supplier_organisation          => 'organisation',
 		  internal_contact               => 'contact',
@@ -86,6 +94,7 @@ is $stdout, $expected_stdout, 'got expected output';
 is_deeply $header_out, $expected_out, 'corrected header returned';
 close(STDOUT); $stdout = ''; open(STDOUT, ">", \$stdout);
 
+# check sequencing experiment metadata
 my $expt_row_in = { filename                => 'file', 
 		    mate_filename           => 'mate',
 		    sample_name             => 'abc',

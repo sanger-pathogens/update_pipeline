@@ -1,5 +1,6 @@
 package UpdatePipeline::Spreadsheet::SpreadsheetValidatator;
 use Moose;
+use Moose::Util::TypeConstraints;
 
 use UpdatePipeline::Spreadsheet::Parser;
 use UpdatePipeline::Spreadsheet::SpreadsheetValidatator::Header;
@@ -7,11 +8,12 @@ use UpdatePipeline::Spreadsheet::SpreadsheetValidatator::SequencingExperiment;
 use UpdatePipeline::Spreadsheet::Validate::Header;
 use UpdatePipeline::Spreadsheet::Validate::SequencingExperiments;
 
-has 'filename'              => ( is => 'ro', isa => 'Str',            required   => 1 );
-has 'valid_header_metadata' => ( is => 'ro', isa => 'HashRef',        lazy_build => 1 );
-has 'valid_rows_metadata'   => ( is => 'ro', isa => 'ArrayRef',       lazy_build => 1 );
-has '_header_metadata'      => ( is => 'ro', isa => 'HashRef',        lazy_build => 1 );
-has '_rows_metadata'        => ( is => 'rw', isa => 'Maybe[ArrayRef]'                 );
+has 'filename'              => ( is => 'ro', isa => 'FileName', required   => 1 );
+has 'valid_header_metadata' => ( is => 'ro', isa => 'HashRef',  lazy_build => 1 );
+has 'valid_rows_metadata'   => ( is => 'ro', isa => 'ArrayRef', lazy_build => 1 );
+has '_header_metadata'      => ( is => 'ro', isa => 'HashRef',  lazy_build => 1 );
+has '_rows_metadata'        => ( is => 'ro', isa => 'ArrayRef', lazy_build => 1 );
+has '_parser'               => ( is => 'ro', isa => 'UpdatePipeline::Spreadsheet::Parser', lazy_build => 1 );
 
 sub _build_valid_header_metadata
 {
@@ -35,10 +37,19 @@ sub _build_valid_rows_metadata
 sub _build__header_metadata
 {
     my ($self) = @_;
-    my $parser = UpdatePipeline::Spreadsheet::Parser->new(filename => $self->filename);
+    return $self->_parser->header_metadata;
+}
 
-    $self->_rows_metadata($parser->rows_metadata); # builds _rows_metadata
-    return $parser->header_metadata;
+sub _build__rows_metadata
+{
+    my ($self) = @_;
+    return $self->_parser->rows_metadata;
+}
+
+sub _build__parser
+{
+    my ($self) = @_;
+    return UpdatePipeline::Spreadsheet::Parser->new(filename => $self->filename);
 }
 
 # basic function confirms valid
