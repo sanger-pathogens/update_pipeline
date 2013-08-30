@@ -65,7 +65,7 @@ $header_in       = { supplier_name                  => undef,
 my $expected_out = { supplier_name                  => '',
 		     supplier_organisation          => '',
 		     internal_contact               => '',
-		     sequencing_technology          => 'magic',
+		     sequencing_technology          => 'Illumina',
 		     study_name                     => undef,
 		     study_accession_number         => undef,
 		     total_size_of_files_in_gbytes  => 'lots',
@@ -82,7 +82,7 @@ Sanger Contact Name    is undefined error
  setting internal contact to empty string
 Sequencing Technology  is string    ok
  error: sequencing technology 'magic' not recognised.
- sequencing technology defaults to ilumina/slx
+ setting sequencing technology to default, 'Illumina'
 Study Name             is undefined error
  fatal error: study name not supplied
 Study Accession Number is string    error
