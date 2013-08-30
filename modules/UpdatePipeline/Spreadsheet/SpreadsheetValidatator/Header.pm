@@ -97,7 +97,7 @@ sub _build__sequencing_technology
     if( $self->_cell_data->{'sequencing_technology'} !~ m/illumina|454|slx/gi )
     {
         print " error: sequencing technology '",$self->_cell_data->{'sequencing_technology'},"' not recognised.\n";
-	print " setting sequencing technology to default, 'Illumina'\n";
+        print " setting sequencing technology to default, 'Illumina'\n";
         return 'Illumina';
     }
 

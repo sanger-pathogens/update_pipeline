@@ -7,6 +7,7 @@ BEGIN { unshift(@INC, './modules') }
 BEGIN {
     use Test::Most;
     use_ok('UpdatePipeline::Spreadsheet::SpreadsheetValidatator');
+    use_ok('UpdatePipeline::Spreadsheet::SpreadsheetValidatator::Common');
     use_ok('UpdatePipeline::Spreadsheet::SpreadsheetValidatator::Header');
     use_ok('UpdatePipeline::Spreadsheet::SpreadsheetValidatator::SequencingExperiment');
 }
