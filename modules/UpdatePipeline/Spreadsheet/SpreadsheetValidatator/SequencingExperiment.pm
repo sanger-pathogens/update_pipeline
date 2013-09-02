@@ -133,7 +133,7 @@ sub _build__fragment_size
         $fragment_size =~ s/\s+//gi; # remove space
         $fragment_size =~ s/bp$//gi; # remove bp
     }
-    $fragment_size = undef if $fragment_size eq '';
+    $fragment_size = undef unless $fragment_size =~ m/^\d+$/;
     print ' - fragment size set to ',defined($fragment_size) ? $fragment_size:'undef',"\n";
 
     return $fragment_size;

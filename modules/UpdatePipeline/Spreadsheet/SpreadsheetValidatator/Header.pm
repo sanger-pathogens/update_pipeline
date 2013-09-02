@@ -54,7 +54,7 @@ sub _build__cell_allowed_status
     my %cell = ( 'supplier_name'                 => ['string','blank','empty'],
                  'supplier_organisation'         => ['string','blank','empty'],
                  'internal_contact'              => ['string','blank','empty'],
-                 'sequencing_technology'         => ['string'],
+                 'sequencing_technology'         => ['string','integer'],
                  'study_name'                    => ['string'],
                  'study_accession_number'        => ['integer','undefined'],
                  'total_size_of_files_in_gbytes' => ['number','integer','empty','undefined'],
