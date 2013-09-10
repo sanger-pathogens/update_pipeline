@@ -66,6 +66,7 @@ if ($read_count_consistency_check_requested)
 $validate_pipeline->no_pending_lanes(1) if $no_pending_lanes;
 
 my $pipeline_report  = $validate_pipeline->report();
+my $problematic_lanes = 0;
 
 print "\n\nProblematic lanes\n";
 
@@ -73,18 +74,21 @@ if($validate_pipeline->inconsistent_files->{inconsistent_sample_name_in_tracking
 {
   print "\n\nCritical: Wrong sample assosicated with lane.\n";
   print join("\n", @{$validate_pipeline->inconsistent_files->{inconsistent_sample_name_in_tracking}});
+  $problematic_lanes += @{$validate_pipeline->inconsistent_files->{inconsistent_sample_name_in_tracking}};
 }
 
 if($validate_pipeline->inconsistent_files->{inconsistent_number_of_reads_in_tracking} && @{$validate_pipeline->inconsistent_files->{inconsistent_number_of_reads_in_tracking}} > 0)
 {
   print "\n\nCritical: Total reads are inconsistent. This is a symptom of multiple different critical errors in the pipelines.\n";
   print join("\n", @{$validate_pipeline->inconsistent_files->{inconsistent_number_of_reads_in_tracking}});
+  $problematic_lanes += @{$validate_pipeline->inconsistent_files->{inconsistent_number_of_reads_in_tracking}};
 }
 
 if($validate_pipeline->inconsistent_files->{inconsistent_study_name_in_tracking} &&  @{$validate_pipeline->inconsistent_files->{inconsistent_study_name_in_tracking}} > 0 )
 {
   print "\n\nLow Priority: Wrong Study assosicated with lane.\n";
   print join("\n", @{$validate_pipeline->inconsistent_files->{inconsistent_study_name_in_tracking}});
+  $problematic_lanes += @{$validate_pipeline->inconsistent_files->{inconsistent_study_name_in_tracking}};
 }
 
 
@@ -92,6 +96,7 @@ if($validate_pipeline->inconsistent_files->{files_missing_from_tracking} && @{$v
 {
   print "\n\nFiles in IRODS but missing from Tracking Database.\n";
   print join("\n", @{$validate_pipeline->inconsistent_files->{files_missing_from_tracking}});
+  $problematic_lanes += @{$validate_pipeline->inconsistent_files->{files_missing_from_tracking}};
 }
 
 
@@ -99,4 +104,8 @@ if($validate_pipeline->inconsistent_files->{read_count_discrepancy_between_irods
 {
   print "\n\nTotal read count in IRODS differs from the total read count on VRTrack's file-system.\n";
   print join("\n", @{$validate_pipeline->inconsistent_files->{read_count_discrepancy_between_irods_and_vrtrack_filesystem}});
+  $problematic_lanes += @{$validate_pipeline->inconsistent_files->{read_count_discrepancy_between_irods_and_vrtrack_filesystem}};
 }
+
+print "\n\nHealth check complete\n";
+print $problematic_lanes ? $problematic_lanes." problematic lanes found.\n":"No errors found.\n";
