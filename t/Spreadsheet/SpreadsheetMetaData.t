@@ -94,6 +94,7 @@ my $expected_file_metadata_mate_pair = UpdatePipeline::FileMetaData->new(
          mate_file_name                    => 'myfile_2.fastq.gz',
          fragment_size_from                => 200,
          fragment_size_to                  => 200,
+         sequencing_technology             => 'Illumina',
 );
        
 my $expected_file_metadata_single_ended = UpdatePipeline::FileMetaData->new(
@@ -114,6 +115,7 @@ my $expected_file_metadata_single_ended = UpdatePipeline::FileMetaData->new(
          mate_file_name_without_extension  => undef,
          mate_file_name                    => undef,
          mate_file_type                    => undef,
+         sequencing_technology             => 'Illumina',
 );
 
 my @files_metadata = @{$valid_spreadsheet->files_metadata};
