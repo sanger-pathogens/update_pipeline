@@ -25,6 +25,7 @@ for my $err (@{ $spreadsheet_processor->_experiment_error })
     print $err->cell, " ", $err->description(), "\n"
 }
 
-
+# try writing report
+$spreadsheet_processor->report();
 
 done_testing();

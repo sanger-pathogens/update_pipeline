@@ -3,7 +3,8 @@ package UpdatePipeline::Spreadsheet::SpreadsheetProcessing;
 use Moose;
 use UpdatePipeline::Spreadsheet::Parser;
 use UpdatePipeline::Spreadsheet::SpreadsheetProcessing::Validator;
-
+use UpdatePipeline::Spreadsheet::SpreadsheetProcessing::Reporter;
+    
 has 'filename'          => ( is => 'ro', isa => 'FileName', required   => 1 );
 has 'header_metadata'   => ( is => 'ro', isa => 'HashRef',  lazy_build => 1 );
 has 'rows_metadata'     => ( is => 'ro', isa => 'ArrayRef', lazy_build => 1 );
@@ -29,6 +30,18 @@ sub _build__parser
     return UpdatePipeline::Spreadsheet::Parser->new(filename => $self->filename);
 }
 
+sub full_error_list
+{
+    my ($self) = @_;
+
+    $self->validate(); # update error list
+    my @all_error = ();
+    push @all_error, @{$self->_header_error };
+    push @all_error, @{$self->_experiment_error };
+
+    return \@all_error;
+}
+
 sub validate
 {
     my ($self) = @_;
@@ -43,7 +56,16 @@ sub validate
 
 sub report
 {
-    # write report to report file or stdout    
+    my ($self, $filename) = @_;
+
+    # write report to report file or stdout
+    # write to stdout for now
+    my $reporter = UpdatePipeline::Spreadsheet::SpreadsheetProcessing::Reporter->new( filehandle => \*STDOUT,
+                                                                                      header_error     => $self->_header_error,
+                                                                                      experiment_error => $self->_experiment_error );
+    $reporter->full_report;
+
+    return 1;
 }
 
 sub fix
