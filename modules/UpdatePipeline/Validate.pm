@@ -56,6 +56,15 @@ sub _build__warehouse_dbh
   Warehouse::Database->new(settings => $self->_database_settings->{warehouse})->connect;
 }
 
+sub _set_database_auto_reconnect
+{
+  my ($self) = @_;
+  # set mysql_auto_reconnect for warehouse and tracking database
+  # required for validating large databases
+  $self->_warehouse_dbh->{mysql_auto_reconnect}   = 1;
+  $self->_vrtrack->{_dbh}->{mysql_auto_reconnect} = 1;
+}
+
 sub _build_report
 {
   my ($self) = @_;
@@ -67,6 +76,8 @@ sub _build_report
   $report{num_inconsistent} = 0;
   $inconsistent_files{files_missing_from_tracking} = ();
   
+  $self->_set_database_auto_reconnect;
+
   for my $file_metadata (@{$self->_files_metadata})
   {
     
