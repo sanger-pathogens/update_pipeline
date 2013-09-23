@@ -18,7 +18,7 @@ sub _build_error_list
     if($self->cell_data =~ m/^\W+$/)
     {
         # non-word in accession
-        push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::SampleAccessionFormat->new();
+        push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::SampleAccessionFormat->new( row => $self->row );
     }
     
     return \@error_list;

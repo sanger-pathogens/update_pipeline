@@ -15,7 +15,7 @@ sub _build_error_list
     unless( defined $self->cell_data )
     {
         # not defined
-        push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::FilenameMissing->new();
+        push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::FilenameMissing->new( row => $self->row );
         return \@error_list;
     }
     

@@ -16,14 +16,14 @@ sub _build_error_list
     unless( defined $self->cell_data)
     {
         # not defined
-        push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Warning::ReadCountMissing->new();
+        push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Warning::ReadCountMissing->new( row => $self->row );
         return \@error_list;
     }
     
     if( $self->cell_data !~ m/^\d+$/ )
     {
         # not integer
-        push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::ReadCountFormat->new();        
+        push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::ReadCountFormat->new( row => $self->row );        
     }
     
     return \@error_list;

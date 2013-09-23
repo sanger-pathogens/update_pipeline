@@ -13,17 +13,18 @@ sub _build_error_list
     my ($self) = @_;
     my @error_list = ();
 
+    print "expt ROW = ",$self->row,"\n";
     unless( defined $self->cell_data)
     {
         # not defined
-        push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Warning::BaseCountMissing->new();
+        push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Warning::BaseCountMissing->new( row => $self->row );
         return \@error_list;
     }
     
     if( $self->cell_data !~ m/^\d+$/ )
     {
         # not integer
-        push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::BaseCountFormat->new();        
+        push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::BaseCountFormat->new( row => $self->row );        
     }
     
     return \@error_list;

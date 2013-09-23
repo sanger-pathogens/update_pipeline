@@ -72,7 +72,7 @@ sub _get_expt_error_output_row
     my ($type,$location,$cell,$description,$fixable);
     
     $type         = $self->_is_error($err) ? 'Error':'Warning';
-    $location     = $err->row ? 'NA' : $err->row + 1;
+    $location     = $err->row ? $err->row : 'NA';
     $cell         = defined $err->cell ? $err->cell : 'NA';
     $description  = $err->description;
     $fixable      = $self->_is_fixable_error($err) ? 'fixable error':'';
