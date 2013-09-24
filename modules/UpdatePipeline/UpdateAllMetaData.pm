@@ -106,7 +106,7 @@ sub update
 		delete $self->vrtrack_lanes->{$file_metadata->file_name_without_extension};
 	}	
   }
-  if ( $self->vrtrack_lanes && keys %{$self->vrtrack_lanes} > 0 ) {
+  if ( $self->vrtrack_lanes && keys %{$self->vrtrack_lanes} > 0 && scalar @{$self->_files_metadata} > 0 && $self->_check_irods_is_up ) {
 	  $self->_withdraw_lanes;
   }
   $self->_exception_handler->print_report($self->verbose_output);
@@ -184,6 +184,7 @@ sub _withdraw_lanes
 {
 	#Subroutine that withdraws lanes that have been deleted from iRODS, but remain in the database.
 	#This can only called if the -wdr flag is set on the command lane explicitly.
+	print "We are withdrawing.......\n";
 	my ($self) = @_;
   	foreach my $lane ( keys %{$self->vrtrack_lanes} ) {
 		my $lane_to_withdraw = VRTrack::Lane->new($self->_vrtrack, $self->vrtrack_lanes->{$lane});
@@ -191,6 +192,16 @@ sub _withdraw_lanes
 		$lane_to_withdraw->update;	
 		print "The lane $lane has been withdrawn as it has been deleted from iRODS\n";
 	}
+}
+
+#
+# Just to double check iRODS in case it went down part way through loading the file metadata
+#
+sub _check_irods_is_up
+{
+	my ($self) = @_;
+	my $irods_ils_cmd = `ils /seq 2>&1`;
+	return $irods_ils_cmd !~ m/ERROR/g ;
 }
 
 __PACKAGE__->meta->make_immutable;

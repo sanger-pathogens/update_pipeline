@@ -39,6 +39,7 @@ GetOptions(
     'tax|taxon_id=i'            => \$taxon_id,
     'sup|use_supplier_name'     => \$use_supplier_name,
     'run|specific_run_id=i'     => \$specific_run_id,
+    'min|specific_min_run=i'     => \$specific_min_run,    
     'nop|no_pending_lanes'      => \$no_pending_lanes,
     'md5|override_md5'          => \$override_md5,
     'wdr|withdraw_del'          => \$withdraw_del,
