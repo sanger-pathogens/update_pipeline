@@ -30,7 +30,7 @@ has '_database_settings'            => ( is => 'rw', isa => 'HashRef', lazy_buil
 
 has '_consistency_evaluator'        => ( is => 'rw', isa => 'UpdatePipeline::CheckReadConsistency', lazy_build => 1 );
 has 'request_for_read_count_consistency_evaluation' => (is => 'rw', isa => 'Bool', default => undef);
-has 'list_all_missing_lanes' => (is => 'rw', isa => 'Bool', default => 0);
+has 'no_pending_lanes'    => ( is => 'rw', isa => 'Bool', default => 0 );
 
 sub _build__config_settings
 {
@@ -56,6 +56,15 @@ sub _build__warehouse_dbh
   Warehouse::Database->new(settings => $self->_database_settings->{warehouse})->connect;
 }
 
+sub _set_database_auto_reconnect
+{
+  my ($self) = @_;
+  # set mysql_auto_reconnect for warehouse and tracking database
+  # required for validating large databases
+  $self->_warehouse_dbh->{mysql_auto_reconnect}   = 1;
+  $self->_vrtrack->{_dbh}->{mysql_auto_reconnect} = 1;
+}
+
 sub _build_report
 {
   my ($self) = @_;
@@ -67,6 +76,8 @@ sub _build_report
   $report{num_inconsistent} = 0;
   $inconsistent_files{files_missing_from_tracking} = ();
   
+  $self->_set_database_auto_reconnect;
+
   for my $file_metadata (@{$self->_files_metadata})
   {
     
@@ -97,7 +108,7 @@ sub _build_report
     else
     {
       # file missing from tracking database
-      if($file_metadata->total_reads > 10000 && ($file_metadata->lane_manual_qc ne 'pending' || $self->list_all_missing_lanes))
+      if($file_metadata->total_reads > 10000 && !($file_metadata->lane_manual_qc eq 'pending' && $self->no_pending_lanes))
       {
         push(@{$inconsistent_files{files_missing_from_tracking}}, $file_metadata->file_name_without_extension);
       }
