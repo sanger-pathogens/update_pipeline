@@ -18,7 +18,39 @@ sub _build_error_list
         push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::FilenameMissing->new( row => $self->row );
         return \@error_list;
     }
+
+    # Filename format
+    my $filename = $self->cell_data;
+    if( $filename =~ m/\// )
+    {
+        # filename contains path
+        push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::FilenamePath->new( row => $self->row );
+        # remove path
+        my @path = split /\//, $filename;
+        $filename = shift @path;                
+    }
     
+    if( $filename eq '' ) 
+    {
+        # No filename after path removal
+        push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::FilenameMissing->new( row => $self->row );
+        return \@error_list;
+
+    }    
+
+    if($filename =~ m/^s+/ || $filename =~ m/\s+$/)
+    {
+        # leading/trailing space
+        push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::FilenameLeadTrailSpace->new( row => $self->row );
+        $filename =~ s/^\s+|\s+$//g; # remove so not counted twice
+    }
+
+    if($filename =~ m/[^\w\#\.]/)
+    {
+        # invalid character
+        push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::FilenameFormat->new( row => $self->row );
+    }
+
     return \@error_list;
 }
 
