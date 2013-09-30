@@ -19,9 +19,9 @@ sub _build_error_list
         # not defined
         push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Warning::DateMissing->new();
     }
-    elsif( $self->cell_data !~ m/^\d{2}\.\d{2}\.\d{4}$/ )
+    elsif( $self->cell_data !~ m/^\d{2}\D\d{2}\D\d{4}$/ && $self->cell_data !~ m/^\d{4}\D\d{2}\D\d{2}$/ )
     {
-        # expected format from excel is dd.mm.yyyy
+        # expected format from excel is either dd.mm.yyyy or yyyy-mm-dd
         push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::DateFormat->new();
     }
     
