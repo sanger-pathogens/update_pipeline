@@ -13,7 +13,6 @@ sub _build_error_list
     my ($self) = @_;
     my @error_list = ();
 
-    print "expt ROW = ",$self->row,"\n";
     unless( defined $self->cell_data)
     {
         # not defined
