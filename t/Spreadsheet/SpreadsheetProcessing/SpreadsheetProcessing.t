@@ -28,4 +28,11 @@ for my $err (@{ $spreadsheet_processor->_experiment_error })
 # try writing report
 $spreadsheet_processor->report();
 
+# try running fix
+$spreadsheet_processor->fix();
+
+# write second report
+$spreadsheet_processor->report();
+
+
 done_testing();
