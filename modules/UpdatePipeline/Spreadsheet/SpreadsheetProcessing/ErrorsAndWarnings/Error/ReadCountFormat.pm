@@ -13,7 +13,7 @@ override 'autofix' => sub {
     # remove lead trail space
     $cell_data =~ s/^\s+|\s+$//;
         
-    # unset basecount if not integer
+    # unset read count if not integer
     $cell_data = 0 unless $cell_data =~ m/^\d+$/;    
     
     return $cell_data;

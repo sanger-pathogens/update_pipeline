@@ -54,6 +54,21 @@ sub _fix_head
 
 sub _fix_expt
 {
+    my ($self) = @_;
+    
+    for my $err (@{ $self->experiment_error })
+    {
+        if( $self->_is_fixable_error($err) )
+        {
+            my $row  = $err->row - 1; 
+            my $cell = $err->cell; 
+            my $cell_data = $self->rows_metadata->[$row]->{$cell};
+            print "ROW $row\n","CELL $cell\n","DATA $cell_data\n";
+            my $updated_cell_data = $err->autofix($cell_data);
+            print "FIX $updated_cell_data\n\n";
+            $self->rows_metadata->[$row]->{$cell} = $updated_cell_data unless $err->fatal(); # update metadata if fix is OK.
+        }
+    }
 
 }
 
@@ -62,7 +77,7 @@ sub fix_errors
     my ($self) = @_;
     
     $self->_fix_head();
-#    $self->_fix_expt();
+    $self->_fix_expt();
     
     return;
 }

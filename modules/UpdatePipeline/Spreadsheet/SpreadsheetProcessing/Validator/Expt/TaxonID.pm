@@ -3,6 +3,7 @@ package UpdatePipeline::Spreadsheet::SpreadsheetProcessing::Validator::Expt::Tax
 use Moose;
 use UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::TaxonIDMissing;
 use UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::TaxonIDFormat;
+use UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::TaxonIDZero;
 
 extends 'UpdatePipeline::Spreadsheet::SpreadsheetProcessing::Validator::Expt::Common';
 

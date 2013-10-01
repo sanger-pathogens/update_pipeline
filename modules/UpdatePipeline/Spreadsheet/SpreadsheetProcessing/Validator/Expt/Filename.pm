@@ -2,6 +2,9 @@ package UpdatePipeline::Spreadsheet::SpreadsheetProcessing::Validator::Expt::Fil
 
 use Moose;
 use UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::FilenameMissing;
+use UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::FilenamePath;
+use UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::FilenameLeadTrailSpace;
+use UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::FilenameFormat;
 
 extends 'UpdatePipeline::Spreadsheet::SpreadsheetProcessing::Validator::Expt::Common';
 
@@ -27,7 +30,7 @@ sub _build_error_list
         push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::FilenamePath->new( row => $self->row );
         # remove path
         my @path = split /\//, $filename;
-        $filename = shift @path;                
+        $filename = pop @path;                
     }
     
     if( $filename eq '' ) 
