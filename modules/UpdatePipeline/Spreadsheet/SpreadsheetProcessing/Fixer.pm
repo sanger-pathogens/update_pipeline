@@ -63,9 +63,7 @@ sub _fix_expt
             my $row  = $err->row - 1; 
             my $cell = $err->cell; 
             my $cell_data = $self->rows_metadata->[$row]->{$cell};
-            print "ROW $row\n","CELL $cell\n","DATA $cell_data\n";
             my $updated_cell_data = $err->autofix($cell_data);
-            print "FIX $updated_cell_data\n\n";
             $self->rows_metadata->[$row]->{$cell} = $updated_cell_data unless $err->fatal(); # update metadata if fix is OK.
         }
     }

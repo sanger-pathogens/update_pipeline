@@ -1,6 +1,7 @@
 package UpdatePipeline::Spreadsheet::SpreadsheetProcessing::Validator::Expt;
 
 use Moose;
+use UpdatePipeline::Spreadsheet::SpreadsheetProcessing::Validator::Expt::Hierarchy;
 use UpdatePipeline::Spreadsheet::SpreadsheetProcessing::Validator::Expt::Filename;
 use UpdatePipeline::Spreadsheet::SpreadsheetProcessing::Validator::Expt::MateFilename;
 use UpdatePipeline::Spreadsheet::SpreadsheetProcessing::Validator::Expt::SampleName;
@@ -33,7 +34,8 @@ sub _build_error_list
     my ($self) = @_;
     my @error_list = ();
 
-
+    # check hierarchy
+    push @error_list, @{ UpdatePipeline::Spreadsheet::SpreadsheetProcessing::Validator::Expt::Hierarchy->new( rows_metadata => $self->rows_metadata )->error_list };
 
     # check individual rows
     my $row = 0;
