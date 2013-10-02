@@ -17,18 +17,6 @@ use UpdatePipeline::Spreadsheet::SpreadsheetProcessing::Validator::Expt::Comment
 has 'rows_metadata' => ( is => 'ro', isa => 'ArrayRef', required   => 1 );
 has 'error_list'    => ( is => 'ro', isa => 'ArrayRef', lazy_build => 1 );
 
-# Cells 
-# 'filename'               
-# 'mate_filename'          
-# 'sample_name'            
-# 'sample_accession_number'
-# 'taxon_id'               
-# 'library_name'           
-# 'fragment_size'          
-# 'raw_read_count'         
-# 'raw_base_count'         
-# 'comments'               
-
 sub _build_error_list
 {
     my ($self) = @_;
