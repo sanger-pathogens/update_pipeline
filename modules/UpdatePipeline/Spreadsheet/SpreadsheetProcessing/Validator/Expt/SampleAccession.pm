@@ -3,7 +3,7 @@ package UpdatePipeline::Spreadsheet::SpreadsheetProcessing::Validator::Expt::Sam
 use Moose;
 use UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::SampleAccessionFormat;
 
-extends 'UpdatePipeline::Spreadsheet::SpreadsheetProcessing::Validator::Head::Common';
+extends 'UpdatePipeline::Spreadsheet::SpreadsheetProcessing::Validator::Expt::Common';
 
 has 'cell' => ( is => 'ro', isa => 'Str', default => 'sample_accession' );
 

@@ -2,7 +2,7 @@ package UpdatePipeline::Spreadsheet::SpreadsheetProcessing::Validator::Expt::Com
 
 use Moose;
 
-extends 'UpdatePipeline::Spreadsheet::SpreadsheetProcessing::Validator::Head::Common';
+extends 'UpdatePipeline::Spreadsheet::SpreadsheetProcessing::Validator::Expt::Common';
 
 has 'cell' => ( is => 'ro', isa => 'Str', default => 'comments' );
 
