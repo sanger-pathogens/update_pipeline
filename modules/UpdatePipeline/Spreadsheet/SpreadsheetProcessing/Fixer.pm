@@ -77,7 +77,7 @@ sub fix_errors
     $self->_fix_head();
     $self->_fix_expt();
     
-    return;
+    return 1;
 }
 
 __PACKAGE__->meta->make_immutable;
