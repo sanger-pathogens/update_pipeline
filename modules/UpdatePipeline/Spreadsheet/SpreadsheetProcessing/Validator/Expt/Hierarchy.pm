@@ -48,7 +48,8 @@ sub _unique_fastq
             }
         }
     }
-    
+
+    @error_list = sort {$a->row <=> $b->row } @error_list;
     return \@error_list;
 }
 
@@ -70,9 +71,10 @@ sub _library_to_sample
     my @error_list = ();
     for my $library (sort keys %library_to_sample)
     {
-        for my $sample ( sort keys %{ $library_to_sample{$library} } )
+        if ( scalar keys %{ $library_to_sample{$library} } > 1 )
         {
-            if( @{ $library_to_sample{$library}{$sample} } > 1 )
+            # library maps to more than one sample
+            for my $sample ( sort keys %{ $library_to_sample{$library} } )
             {
                 for my $row_num (@{ $library_to_sample{$library}{$sample} })
                 {
@@ -82,6 +84,7 @@ sub _library_to_sample
         }
     }
 
+    @error_list = sort {$a->row <=> $b->row } @error_list;
     return \@error_list;
 }
 
@@ -103,9 +106,10 @@ sub _sample_to_taxon
     my @error_list = ();
     for my $sample (sort keys %sample_to_taxon)
     {
-        for my $taxon_id ( sort keys %{ $sample_to_taxon{$sample} } )
+        if( scalar keys %{ $sample_to_taxon{$sample} } > 1 )
         {
-            if( @{ $sample_to_taxon{$sample}{$taxon_id} } > 1 )
+            # sample maps to more than one taxon id
+            for my $taxon_id ( sort keys %{ $sample_to_taxon{$sample} } )
             {
                 for my $row_num (@{ $sample_to_taxon{$sample}{$taxon_id} })
                 {
@@ -115,6 +119,7 @@ sub _sample_to_taxon
         }
     }
 
+    @error_list = sort {$a->row <=> $b->row } @error_list;
     return \@error_list;
 }
 
@@ -136,9 +141,10 @@ sub _sample_to_accession
     my @error_list = ();
     for my $sample (sort keys %sample_to_accession)
     {
-        for my $accession ( sort keys %{ $sample_to_accession{$sample} } )
+        if ( scalar keys %{ $sample_to_accession{$sample} } > 1 )
         {
-            if( @{ $sample_to_accession{$sample}{$accession} } > 1 )
+            # sample maps to more than one accession
+            for my $accession ( sort keys %{ $sample_to_accession{$sample} } )
             {
                 for my $row_num (@{ $sample_to_accession{$sample}{$accession} })
                 {
@@ -148,6 +154,7 @@ sub _sample_to_accession
         }
     }
 
+    @error_list = sort {$a->row <=> $b->row } @error_list;
     return \@error_list;
 }
 
