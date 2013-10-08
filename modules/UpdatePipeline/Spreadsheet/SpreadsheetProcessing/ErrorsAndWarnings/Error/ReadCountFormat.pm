@@ -11,7 +11,7 @@ override 'autofix' => sub {
     my ($self, $cell_data) = @_;
     
     # remove lead trail space
-    $cell_data =~ s/^\s+|\s+$//;
+    $cell_data =~ s/^\s+|\s+$//g;
         
     # unset read count if not integer
     $cell_data = 0 unless $cell_data =~ m/^\d+$/;    

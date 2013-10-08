@@ -11,9 +11,10 @@ has 'fatal'       => ( is => 'rw', isa => 'Bool',       default => 0 );
 override 'autofix' => sub {
     my ($self, $cell_data) = @_;
 
-    my @path = split(/\//,$cell_data);
+    my @path = split(/\//,$cell_data,-1);
     my $filename = pop @path;
 
+    return undef if $filename eq '';
     return $filename;
 };
 

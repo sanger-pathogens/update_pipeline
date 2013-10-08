@@ -15,7 +15,7 @@ override 'autofix' => sub {
     $cell_data =~ s/bases|bp//;
     
     # remove lead trail space
-    $cell_data =~ s/^\s+|\s+$//;
+    $cell_data =~ s/^\s+|\s+$//g;
         
     # unset basecount if not integer
     $cell_data = 0 unless $cell_data =~ m/^\d+$/;    

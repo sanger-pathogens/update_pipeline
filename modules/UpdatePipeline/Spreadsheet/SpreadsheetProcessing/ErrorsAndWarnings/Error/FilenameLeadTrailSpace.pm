@@ -10,7 +10,7 @@ has 'fatal'       => ( is => 'rw', isa => 'Bool',       default => 0 );
 # remove trailing/leading spaces
 override 'autofix' => sub {
     my ($self, $cell_data) = @_;
-    $cell_data =~ s/^\s+|\s+$//;
+    $cell_data =~ s/^\s+|\s+$//g;
     return $cell_data;
 };
 
