@@ -24,16 +24,15 @@ sub _build_error_list
         # filename contains path
         push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::MateFilenamePath->new( row => $self->row );
         # remove path
-        my @path = split /\//, $filename;
+        my @path = split /\//, $filename, -1;
         $filename = pop @path;                
     }
-    
-    if( $filename eq '' ) 
+
+    if( $filename eq '' )
     {
         # No filename after path removal
         push @error_list, UpdatePipeline::Spreadsheet::SpreadsheetProcessing::ErrorsAndWarnings::Error::MateFilenameMissing->new( row => $self->row );
         return \@error_list;
-
     }    
 
     if($filename =~ m/^s+/ || $filename =~ m/\s+$/)
