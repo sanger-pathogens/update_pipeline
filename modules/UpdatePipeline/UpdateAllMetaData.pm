@@ -22,7 +22,6 @@ use UpdatePipeline::VRTrack::Study;
 use UpdatePipeline::ExceptionHandler;
 use Pathogens::ConfigSettings;
 
-
 extends 'UpdatePipeline::CommonMetaDataManipulation';
 
 
@@ -37,7 +36,10 @@ has 'update_if_changed'     => ( is => 'rw', default    => 0,            isa => 
 has 'dont_use_warehouse'    => ( is => 'ro', default    => 0,            isa => 'Bool');
 has 'use_supplier_name'     => ( is => 'ro', default    => 0,            isa => 'Bool');
 has 'no_pending_lanes'      => ( is => 'ro', default    => 0,            isa => 'Bool');
+has 'override_md5'          => ( is => 'ro', default    => 0,            isa => 'Bool');
+has 'add_raw_reads'         => ( is => 'ro', default    => 0,            isa => 'Bool');
 has 'specific_run_id'       => ( is => 'ro', default    => 0,            isa => 'Int');
+has 'specific_min_run'      => ( is => 'ro', default    => 0,            isa => 'Int');
                            
 has '_warehouse_dbh'        => ( is => 'rw', lazy_build => 1 );
 has 'minimum_run_id'        => ( is => 'rw', default    => 1,            isa => 'Int' );
@@ -45,7 +47,7 @@ has 'environment'           => ( is => 'rw', default    => 'production', isa => 
 has 'common_name_required'  => ( is => 'rw', default    => 1,            isa => 'Bool');
 has 'taxon_id'              => ( is => 'rw', default    => 0,            isa => 'Int' );
 has 'species_name'          => ( is => 'ro',                             isa => 'Maybe[Str]' );
-
+has 'vrtrack_lanes'         => ( is => 'ro',                             isa => 'Maybe[HashRef]' );
 
 sub _build__config_settings
 {
@@ -92,13 +94,20 @@ sub update
           $self->_post_populate_file_metadata($file_metadata) unless($self->dont_use_warehouse);
 		  my $filter_pending = ( !$self->no_pending_lanes || ( $self->no_pending_lanes && defined $file_metadata->lane_manual_qc && $file_metadata->lane_manual_qc ne 'pending' ) );
 		  my $filter_id_run = ( !$self->specific_run_id || ( $self->specific_run_id && defined $file_metadata->id_run && $self->specific_run_id == $file_metadata->id_run));
-          $self->_update_lane($file_metadata) unless ( !$filter_pending  || !$filter_id_run );
+		  my $filter_min_run = ( !$self->specific_min_run || ( $self->specific_min_run && defined $file_metadata->id_run && $self->specific_min_run < $file_metadata->id_run));
+          $self->_update_lane($file_metadata) unless ( !$filter_pending  || !$filter_id_run || !$filter_min_run );
       }
     };
     if(my $exception = Exception::Class->caught())
     {
       $self->_exception_handler->add_exception($exception,$file_metadata->file_name_without_extension);
     }
+    if ( $self->vrtrack_lanes && $self->vrtrack_lanes->{$file_metadata->file_name_without_extension} ) {
+		delete $self->vrtrack_lanes->{$file_metadata->file_name_without_extension};
+	}	
+  }
+  if ( $self->vrtrack_lanes && keys %{$self->vrtrack_lanes} > 0 && scalar @{$self->_files_metadata} > 0 && $self->_check_irods_is_up ) {
+	  $self->_withdraw_lanes;
   }
   $self->_exception_handler->print_report($self->verbose_output);
 
@@ -140,10 +149,20 @@ sub _update_lane
       name          => $file_metadata->file_name_without_extension,
       paired        => $file_metadata->lane_is_paired_read,
       npg_qc_status => $file_metadata->lane_manual_qc,
+      raw_reads     => $file_metadata->total_reads, 
+      add_raw_reads => $self->add_raw_reads, 
       _vrtrack      => $self->_vrtrack,
       _vr_library   => $vr_library)->vr_lane();
 
-    UpdatePipeline::VRTrack::File->new(name => $file_metadata->file_name ,file_type => $file_metadata->file_type_number($file_metadata->file_type), md5 => $file_metadata->file_md5 ,_vrtrack => $self->_vrtrack,_vr_lane => $vr_lane)->vr_file();
+
+    UpdatePipeline::VRTrack::File->new(
+      name => $file_metadata->file_name,
+      file_type => $file_metadata->file_type_number($file_metadata->file_type), 
+      md5 => $file_metadata->file_md5 , 
+      override_md5 => $self->override_md5, 
+      _vrtrack => $self->_vrtrack,
+      _vr_lane => $vr_lane)->vr_file();
+      
     if(defined($file_metadata->mate_file_name))
     {
       UpdatePipeline::VRTrack::File->new(name => $file_metadata->mate_file_name ,file_type => $file_metadata->mate_file_type_number($file_metadata->mate_file_type), md5 => $file_metadata->mate_file_md5 ,_vrtrack => $self->_vrtrack,_vr_lane => $vr_lane)->vr_file();
@@ -159,6 +178,30 @@ sub _post_populate_file_metadata
 {
   my ($self, $file_metadata) = @_;
   Warehouse::FileMetaDataPopulation->new(file_meta_data => $file_metadata, _dbh => $self->_warehouse_dbh)->post_populate();
+}
+
+sub _withdraw_lanes
+{
+	#Subroutine that withdraws lanes that have been deleted from iRODS, but remain in the database.
+	#This can only called if the -wdr flag is set on the command lane explicitly.
+	print "We are withdrawing.......\n";
+	my ($self) = @_;
+  	foreach my $lane ( keys %{$self->vrtrack_lanes} ) {
+		my $lane_to_withdraw = VRTrack::Lane->new($self->_vrtrack, $self->vrtrack_lanes->{$lane});
+		$lane_to_withdraw->is_withdrawn(1);
+		$lane_to_withdraw->update;	
+		print "The lane $lane has been withdrawn as it has been deleted from iRODS\n";
+	}
+}
+
+#
+# Just to double check iRODS in case it went down part way through loading the file metadata
+#
+sub _check_irods_is_up
+{
+	my ($self) = @_;
+	my $irods_ils_cmd = `ils /seq 2>&1`;
+	return $irods_ils_cmd !~ m/ERROR/g ;
 }
 
 __PACKAGE__->meta->make_immutable;

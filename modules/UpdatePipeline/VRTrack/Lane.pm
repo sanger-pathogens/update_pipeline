@@ -25,6 +25,8 @@ use Moose;
 has 'name'          => ( is => 'rw', isa => 'Str',  required   => 1 );
 has 'npg_qc_status' => ( is => 'rw', isa => 'Str',  default    => '-' );
 has 'paired'        => ( is => 'rw', isa => 'Bool', default    => 1 );
+has 'raw_reads'     => ( is => 'rw', isa => 'Int',  default    => 0 );
+has 'add_raw_reads' => ( is => 'rw', isa => 'Bool', default    => 0 );
 has '_vrtrack'      => ( is => 'rw',                required   => 1 );
 has '_vr_library'   => ( is => 'rw',                required   => 1 );
 
@@ -47,7 +49,8 @@ sub _build_vr_lane
     $vlane->library_id($self->_vr_library->id);
   }
   
-  $vlane->raw_reads(0) if(not defined($vlane->raw_reads));
+  my $raw_reads = $self->add_raw_reads ? $self->raw_reads : 0;
+  $vlane->raw_reads($raw_reads) if(not defined($vlane->raw_reads));
   $vlane->raw_bases(0) if(not defined($vlane->raw_bases));
   
   $vlane->npg_qc_status( $self->npg_qc_status );

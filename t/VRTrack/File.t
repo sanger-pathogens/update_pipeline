@@ -5,7 +5,7 @@ use Data::Dumper;
 
 BEGIN { unshift(@INC, './modules') }
 BEGIN {
-    use Test::Most tests => 10;
+    use Test::Most tests => 13;
     use_ok('UpdatePipeline::VRTrack::File');
     use VRTrack::VRTrack;
     use UpdatePipeline::VRTrack::Project;
@@ -44,6 +44,10 @@ is undef, UpdatePipeline::VRTrack::File->new(name => 'myfile2.bam',md5 => 'abc12
 ok my $vrfile_4 = UpdatePipeline::VRTrack::File->new(name => 'myfile.bam',md5 => 'new_md5_for_file',_vrtrack => $vrtrack,_vr_lane => $vr_lane), 'find file with different md5';
 throws_ok { $vrfile_4->vr_file() } qr/MD5 changed from/, 'Throw an exception if the MD5 of a file has changed';
 
+# if MD5 changes, but the override is set then update md5
+ok my $file5 = UpdatePipeline::VRTrack::File->new(name => 'myfile.bam',md5 => 'cde3456675232432432',_vrtrack => $vrtrack,_vr_lane => $vr_lane, override_md5 => 1), 'find file with different md5';
+ok my $vr_file5 = $file5->vr_file(), 'build vr file';
+is $vr_file5->md5, 'cde3456675232432432', 'MD5 has been successfully updated';
 
 delete_test_data($vrtrack);
 
