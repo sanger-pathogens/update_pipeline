@@ -96,6 +96,20 @@ sub fix
     return $self->validate;
 }
 
+sub report_to_screen
+{
+    my ($self) = @_;
+
+    # write report to screen
+    my $reporter = UpdatePipeline::Spreadsheet::SpreadsheetProcessing::Reporter->new( filehandle       => \*STDOUT,
+                                                                                      header_error     => $self->_header_error,
+                                                                                      experiment_error => $self->_experiment_error );
+    $reporter->report_to_screen;
+
+    return 1;
+}
+
+
 __PACKAGE__->meta->make_immutable;
 
 no Moose;

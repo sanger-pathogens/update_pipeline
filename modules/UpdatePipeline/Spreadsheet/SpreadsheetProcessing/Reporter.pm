@@ -191,6 +191,33 @@ sub summary_report
     return 1;
 }
 
+sub report_to_screen
+{
+    my ($self) = @_;
+    my @head_errors = @{$self->_get_all_header};
+    my @expt_errors = @{$self->_get_all_experiment};
+
+    print "Header:";
+    print scalar @head_errors ? "\n":"      No errors found\n";
+    for my $err (@head_errors)
+    {
+        printf "%-7s      %s",$err->[0],$err->[3];
+        printf " (%s)",$err->[4] if $err->[4];
+        print "\n";
+    }
+
+    print "Experiment:";
+    print scalar @expt_errors ? "\n":"  No errors found\n";
+    for my $err (@expt_errors)
+    {
+        printf "%-7s %3d  %s",$err->[0],$err->[1],$err->[3];
+        printf " (%s)",$err->[4] if $err->[4];
+        print "\n";
+    }
+
+    return 1;
+}
+
 __PACKAGE__->meta->make_immutable;
 no Moose;
 1;

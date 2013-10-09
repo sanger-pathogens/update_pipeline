@@ -80,7 +80,7 @@ sub _build__files_metadata
   try{
     $parser = UpdatePipeline::Spreadsheet::SpreadsheetProcessing->new(filename => $self->filename);
     $parser->validate();
-    $parser->report();
+    $parser->report_to_screen();
     $parser->fix();
   }
   catch

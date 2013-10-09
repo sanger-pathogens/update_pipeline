@@ -26,6 +26,9 @@ my $expected_report_summary = qq["header errors",2\r\n"header warnings",1\r\n"ex
 
 my $expected_report_full = qq[Type,Location,Cell,Description,Fixable\r\nError,Header,cell_a,error,"fixable error"\r\nError,Header,cell_b,error,\r\nWarning,Header,cell_c,warning,\r\nError,1,cell_a,error,"fixable error"\r\nError,2,cell_b,error,\r\nWarning,3,cell_c,warning,\r\n"header errors",2\r\n"header warnings",1\r\n"experiment errors",2\r\n"experiment warnings",1\r\n];
 
+my $expected_report_to_screen = qq[Header:\nError        error (fixable error)\nError        error\nWarning      warning\nExperiment:\nError     1  error (fixable error)\nError     2  error\nWarning   3  warning\n];
+
+
 # open filehandle to variable
 my $report = '';
 open( my $report_fh, '>', \$report );
@@ -42,5 +45,15 @@ close $report_fh; $report = ''; open( $report_fh, '>', \$report ); # reset outpu
 
 ok $reporter->full_report, 'wrote full report';
 is $report, $expected_report_full, 'full report text';
+
+# check report to screen
+my $report_to_screen = '';
+open(my $copy_stdout, ">&STDOUT"); close(STDOUT); open(STDOUT, ">", \$report_to_screen); # copy stdout
+
+ok $reporter->report_to_screen, 'wrote report to screen';
+is $report_to_screen, $expected_report_to_screen, 'screen report text';
+
+close(STDOUT); open(STDOUT, ">&", $copy_stdout); # restore stdout
+
 
 done_testing();
