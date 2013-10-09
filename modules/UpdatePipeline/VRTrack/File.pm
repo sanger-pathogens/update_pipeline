@@ -21,22 +21,24 @@ package UpdatePipeline::VRTrack::File;
 use VRTrack::File;
 use Moose;
 
-has 'name'        => ( is => 'rw', isa => 'Str', required   => 1 );
-has 'md5'         => ( is => 'rw', isa => 'Maybe[Str]');
-has '_vrtrack'    => ( is => 'rw',               required   => 1 );
-has '_vr_lane'    => ( is => 'rw',               required   => 1 );
-has 'file_type'   => ( is => 'rw', isa => 'Int', default    => 4 );
+has 'name'         => ( is => 'rw', isa => 'Str', required   => 1 );
+has 'md5'          => ( is => 'rw', isa => 'Maybe[Str]');
+has '_vrtrack'     => ( is => 'rw',               required   => 1 );
+has '_vr_lane'     => ( is => 'rw',               required   => 1 );
+has 'file_type'    => ( is => 'rw', isa => 'Int', default    => 4 );
+has 'override_md5' => ( is => 'ro', isa => 'Bool', default   => 0 );
 
-has 'vr_file'     => ( is => 'rw',               lazy_build => 1 );
+has 'vr_file'      => ( is => 'rw',               lazy_build => 1 );
 
 sub _build_vr_file
 {
   my ($self) = @_;
 
   my $vfile;
-  return $vfile if ($self->_vr_lane->is_processed( 'import'));
-
-  $vfile = $self->_vr_lane->get_file_by_name($self->name);
+  
+  return $vfile if ($self->_vr_lane->is_processed('import') && !$self->override_md5);
+  
+  $vfile = $self->_vr_lane->get_file_by_name($self->name); 
   unless(defined($vfile))
   {
     # see if the file exists but with a different lane_id
@@ -57,7 +59,12 @@ sub _build_vr_file
   {
     if(defined($vfile->md5) && $vfile->md5 ne "")
     {
-      UpdatePipeline::Exceptions::FileMD5Changed->throw( error => "File ".$self->name." MD5 changed from ".$vfile->md5." to ".$self->md5." so need to reimport\n" ) if($self->md5 ne $vfile->md5);
+      if ($self->override_md5) {
+		$vfile->md5($self->md5);
+	  } 
+	  else {
+		  UpdatePipeline::Exceptions::FileMD5Changed->throw( error => "File ".$self->name." MD5 changed from ".$vfile->md5." to ".$self->md5." so need to reimport\n" ) if($self->md5 ne $vfile->md5);
+	  }	  
     }
     else
     {
