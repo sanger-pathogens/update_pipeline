@@ -111,6 +111,7 @@ sub _build_files_metadata
       sample_common_name               => NCBI::TaxonLookup->new(taxon_id => $sequencing_experiment->taxon_id)->common_name,
       study_name                       => $self->_header->study_name,
       study_accession_number           => $self->_header->study_accession_number,
+      sequencing_technology            => $self->_header->sequencing_technology,
     );
     push(@files_metadata, $file_metadata);
   }

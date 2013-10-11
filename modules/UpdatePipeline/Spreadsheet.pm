@@ -44,7 +44,7 @@ use File::Path qw(make_path  );
 use Parallel::ForkManager;
 use Digest::MD5;
 use UpdatePipeline::Exceptions;
-use UpdatePipeline::Spreadsheet::Parser;
+use UpdatePipeline::Spreadsheet::SpreadsheetValidatator;
 use UpdatePipeline::Spreadsheet::SpreadsheetMetaData;
 use Bio::SeqIO::fastq;
 extends "UpdatePipeline::UpdateAllMetaData";
@@ -74,11 +74,12 @@ sub _build__rsync
 sub _build__files_metadata
 {
   my ($self) = @_;
-  my $parser;
+  my $validator;
   my $spreadsheet_metadata;
   
   try{
-    $parser = UpdatePipeline::Spreadsheet::Parser->new(filename => $self->filename);
+    $validator = UpdatePipeline::Spreadsheet::SpreadsheetValidatator->new(filename => $self->filename);
+    $validator->validate(); # confirm valid
   }
   catch
   {
@@ -87,8 +88,8 @@ sub _build__files_metadata
   
   try{
     $spreadsheet_metadata = UpdatePipeline::Spreadsheet::SpreadsheetMetaData->new(
-      input_header         => $parser->header_metadata,
-      raw_rows             => $parser->rows_metadata,
+      input_header         => $validator->valid_header_metadata,
+      raw_rows             => $validator->valid_rows_metadata,
       files_base_directory => $self->files_base_directory
     );
   }
