@@ -20,6 +20,7 @@ has 'lane_meta_data'       => ( is => 'ro', isa => "Maybe[HashRef]");
 has 'file_meta_data'       => ( is => 'ro', isa => 'UpdatePipeline::FileMetaData',   required => 1 );
 
 has 'common_name_required'  => ( is => 'ro', isa => 'Bool', default => 1);
+has 'check_file_md5s'       => ( is => 'ro', default => 0, isa => 'Bool');
 
 sub update_required
 {
@@ -73,6 +74,7 @@ sub _differences_between_file_and_lane_meta_data
   }
 
   my @fields_to_check_file_defined_and_not_equal =  $self->common_name_required ? ("study_name", "library_name","sample_common_name", "study_accession_number","sample_accession_number","library_ssid", "lane_is_paired_read","lane_manual_qc", "study_ssid","sample_ssid") : ("study_name", "library_name", "study_accession_number","sample_accession_number","library_ssid", "lane_is_paired_read","lane_manual_qc", "study_ssid","sample_ssid");
+  push(@fields_to_check_file_defined_and_not_equal, 'file_md5') if $self->check_file_md5s;
   for my $field_name (@fields_to_check_file_defined_and_not_equal)
   {
     if( $self->_file_defined_and_not_equal($self->file_meta_data->$field_name, $self->lane_meta_data->{$field_name}) )
@@ -89,7 +91,6 @@ sub _differences_between_file_and_lane_meta_data
   {
     UpdatePipeline::Exceptions::TotalReadsMismatch->throw( error => $self->file_meta_data->file_name_without_extension );
   }
-
 
   return 0; 
 }
