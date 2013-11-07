@@ -88,6 +88,7 @@ sub update
           lane_meta_data => $self->_lanes_metadata->{$file_metadata->file_name_without_extension},
           file_meta_data => $file_metadata,
           common_name_required => $self->common_name_required,
+          check_file_md5s => $self->override_md5
           )->update_required
         )
       {
