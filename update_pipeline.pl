@@ -37,6 +37,7 @@ GetOptions(
     'u|update_if_changed'       => \$update_if_changed,
     'w|dont_use_warehouse'      => \$dont_use_warehouse,
     'tax|taxon_id=i'            => \$taxon_id,
+    'spe|species=s'             => \$species_name,
     'sup|use_supplier_name'     => \$use_supplier_name,
     'run|specific_run_id=i'     => \$specific_run_id,
     'min|specific_min_run=i'     => \$specific_min_run,    
@@ -62,6 +63,7 @@ Usage: $0
   -u|--update_if_changed       <optionally delete lane & file entries, if metadata changes, for reimport>
   -w|--dont_use_warehouse      <dont use the warehouse to fill in missing data>
   -tax|--taxon_id              <optionally provide taxon id to overwrite species info in bam file common name>
+  -spe|--species                     <optionally provide the species name, which in combination with -tax avoids an NCBI lookup>
   -sup|--use_supplier_name     <optionally use the supplier name from the warehouse to populate name and hierarchy name of the individual table>
   -run|--specific_run_id       <optionally provide a specfic run id for a study>
   -min|--specific_min_run      <optionally provide a specfic minimum run id for a study to import>  
@@ -120,14 +122,16 @@ else
   $study_names = \@studyname;
 }
 
-eval{
-  $species_name = $taxon_id ? NCBI::SimpleLookup->new( taxon_id => $taxon_id )->common_name : undef;
-};
-if ($@) {  
-  eval {
-	$species_name = $taxon_id ? NCBI::TaxonLookup->new( taxon_id => $taxon_id )->common_name : undef;
-  };
-  die "Unable to retrieve taxonomic data from NCBI.\n" if ($@);	
+unless ($species_name) {
+    eval{
+      $species_name = $taxon_id ? NCBI::SimpleLookup->new( taxon_id => $taxon_id )->common_name : undef;
+    };
+    if ($@) {  
+      eval {
+    	$species_name = $taxon_id ? NCBI::TaxonLookup->new( taxon_id => $taxon_id )->common_name : undef;
+      };
+      die "Unable to retrieve taxonomic data from NCBI.\n" if ($@);	
+    }
 }
 
 if($parallel_processes == 1)
