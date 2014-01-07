@@ -45,7 +45,7 @@ sub add_exception
   }
   $self->_exception_reporter->add_exception($exception);
 
-  if($exception->isa("UpdatePipeline::Exceptions::PathToLaneChanged") && $self->update_if_changed == 1)
+  if($self->update_if_changed == 1 && ($exception->isa("UpdatePipeline::Exceptions::PathToLaneChanged") || $exception->isa("UpdatePipeline::Exceptions::TotalReadsMismatch")))
   {
     $self->_delete_lane($exception);
     $self->_delete_files($exception);
