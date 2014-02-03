@@ -51,7 +51,7 @@ is @{$exception_handler->_exception_reporter->_unclassified_exceptions}, 2, 'unc
 my @expected_undef_common_names = ("sample_123");
 is_deeply $exception_handler->_exception_reporter->_undefined_common_names, \@expected_undef_common_names, 'undefined common names';
 
-my @expected_bad_irods_records = ("9999_8");
+my @expected_bad_irods_records = ("undefined sample name in irods 9999_8");
 is_deeply $exception_handler->_exception_reporter->_bad_irods_records, \@expected_bad_irods_records, 'bad irods records';
 
 

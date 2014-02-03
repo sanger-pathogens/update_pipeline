@@ -25,8 +25,9 @@ $vrtrack->{_dbh}->do(qq[insert into individual (name, hierarchy_name) values ('S
 
 # the sample should be created okay
 ok my $vr_sample = UpdatePipeline::VRTrack::Sample->new(name => 'My name',common_name => 'SomeBacteria',accession => "ABC123", _vrtrack => $vrtrack,_vr_project => $vproject)->vr_sample(),'sample created okay';
-is $vr_sample->individual()->name, 'My name', 'name should be same as sample';
-isnt( ($vr_sample->individual()->hierarchy_name), 'My_name', 'hierarchy name can be something different sample');
+is $vr_sample->individual()->name, 'Some other name', 'name should be same as sample';
+is( ($vr_sample->individual()->hierarchy_name), 'My_name', 'hierarchy name can be something different sample');
+
 
 done_testing();
 delete_test_data($vrtrack);

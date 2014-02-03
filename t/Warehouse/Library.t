@@ -30,12 +30,6 @@ ok my $fm_ssid_multiplexed_library_tube = UpdatePipeline::FileMetaData->new(file
 ok (Warehouse::Library->new(file_meta_data => $fm_ssid_multiplexed_library_tube, _dbh => $dbh)->populate());
 is $fm_ssid_multiplexed_library_tube->library_name, "Multiplexed library tube name", 'library name should be populated from multiplexed table';
 
-### pass in an ssid for a pulldown multiplexed library tube
-ok my $fm_ssid_pulldown_multiplexed_library_tube = UpdatePipeline::FileMetaData->new(file_name => '1234_5#6.bam', file_name_without_extension =>  '1234_5#6', library_ssid => 3333), 'create file metadata with pulldown multiplexed library tube ssid';
-ok (Warehouse::Library->new(file_meta_data => $fm_ssid_pulldown_multiplexed_library_tube, _dbh => $dbh)->populate());
-is $fm_ssid_pulldown_multiplexed_library_tube->library_name, "Pulldown multiplexed library tube name", 'library name should be populated from pulldown multiplexed table';
-
-
 ### pass in a name for a library tube
 ok my $fm_name_library_tube = UpdatePipeline::FileMetaData->new(file_name => '1234_5#6.bam', file_name_without_extension =>  '1234_5#6', library_name => "Library tube name"), 'create file metadata with library tube name';
 ok (Warehouse::Library->new(file_meta_data => $fm_name_library_tube, _dbh => $dbh)->populate());
@@ -45,11 +39,6 @@ is $fm_name_library_tube->library_ssid, 1111, 'library ssid should be populated'
 ok my $fm_name_multiplexed_library_tube = UpdatePipeline::FileMetaData->new(file_name => '1234_5#6.bam', file_name_without_extension =>  '1234_5#6', library_name => "Multiplexed library tube name"), 'create file metadata with multiplexed library tube name';
 ok (Warehouse::Library->new(file_meta_data => $fm_name_multiplexed_library_tube, _dbh => $dbh)->populate());
 is $fm_name_multiplexed_library_tube->library_ssid, 2222, 'library ssid should be populated from multiplexed table';
-
-### pass in a name for a pulldown multiplexed library tube
-ok my $fm_name_pulldown_multiplexed_library_tube = UpdatePipeline::FileMetaData->new(file_name => '1234_5#6.bam', file_name_without_extension =>  '1234_5#6', library_name => "Pulldown multiplexed library tube name"), 'create file metadata with pulldown multiplexed library tube name';
-ok (Warehouse::Library->new(file_meta_data => $fm_name_pulldown_multiplexed_library_tube, _dbh => $dbh)->populate());
-is $fm_name_pulldown_multiplexed_library_tube->library_ssid, 3333, 'library ssid should be populated from pulldown multiplexed table';
 
 # populate the fragment sizes based on the library ssid.
 ok (Warehouse::Library->new(file_meta_data => $fm_ssid_library_tube, _dbh => $dbh)->post_populate());
