@@ -49,6 +49,9 @@ has 'taxon_id'              => ( is => 'rw', default    => 0,            isa => 
 has 'species_name'          => ( is => 'ro',                             isa => 'Maybe[Str]' );
 has 'vrtrack_lanes'         => ( is => 'ro',                             isa => 'Maybe[HashRef]' );
 
+has 'bin_directory' => (isa => 'Str', is => 'rw', default => '/software/irods/icommands/bin/');
+
+
 sub _build__config_settings
 {
    my ($self) = @_;
@@ -201,8 +204,17 @@ sub _withdraw_lanes
 sub _check_irods_is_up
 {
 	my ($self) = @_;
-	my $irods_ils_cmd = `ils /seq 2>&1`;
-	return $irods_ils_cmd !~ m/ERROR/g ;
+	
+	my $cmd = $self->bin_directory . "ils /seq 2>&1 ";
+  open(my $irods_ils_fh, '-|', $cmd);
+  while(<$irods_ils_fh>)
+  {
+    if(m/ERROR/g )
+    {
+      return 0;
+    }
+  }
+  return 1;
 }
 
 __PACKAGE__->meta->make_immutable;
