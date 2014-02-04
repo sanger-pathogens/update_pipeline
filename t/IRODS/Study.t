@@ -4,7 +4,7 @@ use warnings;
 
 BEGIN { unshift(@INC, './modules') }
 BEGIN {
-    use Test::Most tests => 5;
+    use Test::Most;
     use_ok('IRODS::Study');
 }
 
@@ -18,3 +18,4 @@ ok my $invalid_study = IRODS::Study->new( name => 'My Study', file_containing_ir
 my @expected_invalid_output = ();
 is_deeply $invalid_study->file_locations(), \@expected_invalid_output, "Invalid stream should return empty array";
 
+done_testing();
