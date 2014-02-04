@@ -73,7 +73,7 @@ sub _build_vr_sample
         }
     }
   }
-  if (not defined $vsample->individual || $vr_individual->id != $vsample->individual_id) {
+  if (! defined $vsample->individual_id || $vr_individual->id != $vsample->individual_id) {
     $vsample->individual_id($vr_individual->id);
   }
   $self->_populate_individual($vr_individual);
