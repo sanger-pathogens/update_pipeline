@@ -17,11 +17,10 @@ Take in the name of a study and lookup metadata from the aliquots table, study, 
 use Moose;
 use UpdatePipeline::LibraryMetaData;
 
-has 'study_name' => ( is => 'rw', isa => 'Str', required => 1 );
-has '_dbh' => ( is => 'rw', required => 1 );
+has 'study_name'         => ( is => 'ro', isa => 'Str', required => 1 );
+has '_dbh'               => ( is => 'rw', required => 1 );
 has 'libraries_metadata' => ( is => 'ro', isa => 'ArrayRef', lazy => 1, builder => '_build_libraries_metadata' );
-
-has 'receptacle_type' => ( is => 'rw', isa => 'Str', default => 'pac_bio_library_tube' );
+has 'receptacle_type'    => ( is => 'rw', isa => 'Str', default => 'pac_bio_library_tube' );
 
 sub _construct_query {
     my ($self) = @_;
@@ -31,12 +30,9 @@ sub _construct_query {
   left join current_aliquots as aliquots on aliquots.study_internal_id = study.internal_id
   left join current_samples as sample on sample.internal_id = aliquots.sample_internal_id
   left join current_'
-      . $self->receptacle_type
-      . 's as library_tubes on library_tubes.internal_id =  aliquots.receptacle_internal_id
+      . $self->receptacle_type . 's as library_tubes on library_tubes.internal_id =  aliquots.receptacle_internal_id
   where study.name like "'
-      . $self->study_name
-      . '"  and aliquots.receptacle_type like "'
-      . $self->receptacle_type . '"';
+      . $self->study_name . '"  and aliquots.receptacle_type like "' . $self->receptacle_type . '"';
 }
 
 sub _build_libraries_metadata {

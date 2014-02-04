@@ -19,7 +19,7 @@ use File::Spec;
 use File::Basename;
 extends 'IRODS::Common';
 
-has 'file_location'                 => ( is => 'rw', isa => 'Str',  required   => 1 );
+has 'file_location'                 => ( is => 'ro', isa => 'Str',  required   => 1 );
 
 has 'file_attributes'               => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
 has 'file_name'                     => ( is => 'rw', isa => 'Str', lazy_build => 1 );
