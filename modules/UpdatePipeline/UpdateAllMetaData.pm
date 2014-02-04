@@ -79,7 +79,9 @@ sub update
 {
   my ($self) = @_;
 
+  my %current_lane_names;
   for my $file_metadata (@{$self->_files_metadata}) {
+    $current_lane_names{$file_metadata->file_name_without_extension} = 1;
     if ($self->taxon_id && defined $self->species_name) {
     	$file_metadata->sample_common_name($self->species_name);
     }
@@ -109,6 +111,9 @@ sub update
   }
   if ( $self->vrtrack_lanes && keys %{$self->vrtrack_lanes} > 0 && scalar @{$self->_files_metadata} > 0 && $self->_check_irods_is_up ) {
 	  $self->_withdraw_lanes;
+  }
+  if ( $self->vrtrack_lanes && keys %{$self->vrtrack_lanes} < keys %current_lane_names ) {
+      $self->_unwithdraw_lanes(\%current_lane_names);
   }
   $self->_exception_handler->print_report($self->verbose_output);
 
@@ -193,6 +198,18 @@ sub _withdraw_lanes
 		$lane_to_withdraw->update;	
 		print "The lane $lane has been withdrawn as it has been deleted from iRODS\n";
 	}
+}
+
+sub _unwithdraw_lanes
+{
+    print "We are unwithdrawing.......\n";
+    my ($self, $current_lane_names) = @_;
+    foreach my $lane ( keys %{$current_lane_names} ) {
+        my $lane_to_unwithdraw = VRTrack::Lane->new_by_name($self->_vrtrack, $lane);
+        $lane_to_unwithdraw->is_withdrawn(0);
+        $lane_to_unwithdraw->update;  
+        print "The lane $lane has been unwithdrawn as it has reappeared in iRODS\n";
+    }
 }
 
 #
