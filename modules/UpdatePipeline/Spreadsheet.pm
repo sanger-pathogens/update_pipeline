@@ -44,7 +44,7 @@ use File::Path qw(make_path  );
 use Parallel::ForkManager;
 use Digest::MD5;
 use UpdatePipeline::Exceptions;
-use UpdatePipeline::Spreadsheet::Parser;
+use UpdatePipeline::Spreadsheet::SpreadsheetProcessing;
 use UpdatePipeline::Spreadsheet::SpreadsheetMetaData;
 use Bio::SeqIO::fastq;
 extends "UpdatePipeline::UpdateAllMetaData";
@@ -78,12 +78,17 @@ sub _build__files_metadata
   my $spreadsheet_metadata;
   
   try{
-    $parser = UpdatePipeline::Spreadsheet::Parser->new(filename => $self->filename);
+    $parser = UpdatePipeline::Spreadsheet::SpreadsheetProcessing->new(filename => $self->filename);
+    $parser->validate();
+    $parser->report_to_screen();
+    $parser->fix();
   }
   catch
   {
     UpdatePipeline::Exceptions::InvalidSpreadsheet->throw( error =>  "Couldnt parse the input spreadsheet");
   };
+  
+  UpdatePipeline::Exceptions::InvalidSpreadsheet->throw( error =>  "Spreadsheet validation failed\n" ) unless $parser->validate();
   
   try{
     $spreadsheet_metadata = UpdatePipeline::Spreadsheet::SpreadsheetMetaData->new(
