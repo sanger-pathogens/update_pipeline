@@ -30,6 +30,7 @@ has '_vr_project' => ( is => 'ro',               required   => 1 );
 has 'accession'   => ( is => 'ro', isa => 'Maybe[Str]' );
 has 'external_id' => ( is => 'ro', isa => 'Maybe[Int]' );
 has 'supplier_name' => ( is => 'ro', isa => 'Maybe[Str]' );
+has 'public_name' => ( is => 'ro', isa => 'Maybe[Str]' );
 
 has 'common_name_required' => ( is => 'rw', default    => 1, isa => 'Bool');
 has 'use_supplier_name' => ( is => 'ro', default    => 0, isa => 'Bool');
@@ -72,6 +73,10 @@ sub _build_vr_sample
           $vr_individual = $vsample->add_individual($self->name);
         }
     }
+  }
+  if (defined $self->public_name) {
+    $vr_individual->alias($self->public_name);
+    $vr_individual->update;
   }
   if (! defined $vsample->individual_id || $vr_individual->id != $vsample->individual_id) {
     $vsample->individual_id($vr_individual->id);
