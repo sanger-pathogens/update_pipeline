@@ -80,6 +80,7 @@ sub update
   my ($self) = @_;
 
   my %current_lane_names;
+  my $num_lanes_in_vrtrack = $self->vrtrack_lanes ? keys %{$self->vrtrack_lanes} : 0;
   for my $file_metadata (@{$self->_files_metadata}) {
     $current_lane_names{$file_metadata->file_name_without_extension} = 1;
     if ($self->taxon_id && defined $self->species_name) {
@@ -90,7 +91,8 @@ sub update
           lane_meta_data => $self->_lanes_metadata->{$file_metadata->file_name_without_extension},
           file_meta_data => $file_metadata,
           common_name_required => $self->common_name_required,
-          check_file_md5s => $self->override_md5
+          check_file_md5s => $self->override_md5,
+          use_supplier_name => $self->use_supplier_name
           )->update_required
         )
       {
@@ -112,7 +114,7 @@ sub update
   if ( $self->vrtrack_lanes && keys %{$self->vrtrack_lanes} > 0 && scalar @{$self->_files_metadata} > 0 && $self->_check_irods_is_up ) {
 	  $self->_withdraw_lanes;
   }
-  if ( $self->vrtrack_lanes && keys %{$self->vrtrack_lanes} < keys %current_lane_names ) {
+  if ( $num_lanes_in_vrtrack <= keys %current_lane_names ) {
       $self->_unwithdraw_lanes(\%current_lane_names);
   }
   $self->_exception_handler->print_report($self->verbose_output);
@@ -139,6 +141,7 @@ sub _update_lane
       accession => $file_metadata->sample_accession_number,
       supplier_name => $file_metadata->supplier_name,
       use_supplier_name => $self->use_supplier_name,
+      public_name => $file_metadata->public_name,
       taxon_id => $self->taxon_id,
       _vrtrack => $self->_vrtrack,
       _vr_project => $vproject)->vr_sample();
@@ -190,7 +193,6 @@ sub _withdraw_lanes
 {
 	#Subroutine that withdraws lanes that have been deleted from iRODS, but remain in the database.
 	#This can only called if the -wdr flag is set on the command lane explicitly.
-	print "We are withdrawing.......\n";
 	my ($self) = @_;
   	foreach my $lane ( keys %{$self->vrtrack_lanes} ) {
 		my $lane_to_withdraw = VRTrack::Lane->new($self->_vrtrack, $self->vrtrack_lanes->{$lane});
@@ -202,13 +204,14 @@ sub _withdraw_lanes
 
 sub _unwithdraw_lanes
 {
-    print "We are unwithdrawing.......\n";
     my ($self, $current_lane_names) = @_;
     foreach my $lane ( keys %{$current_lane_names} ) {
         my $lane_to_unwithdraw = VRTrack::Lane->new_by_name($self->_vrtrack, $lane);
-        $lane_to_unwithdraw->is_withdrawn(0);
-        $lane_to_unwithdraw->update;  
-        print "The lane $lane has been unwithdrawn as it has reappeared in iRODS\n";
+        if ($lane_to_unwithdraw->is_withdrawn) {
+            $lane_to_unwithdraw->is_withdrawn(0);
+            $lane_to_unwithdraw->update;  
+            print "The lane $lane has been unwithdrawn as it has reappeared in iRODS\n";
+        }
     }
 }
 
