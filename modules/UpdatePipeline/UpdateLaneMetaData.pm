@@ -21,6 +21,7 @@ has 'file_meta_data'       => ( is => 'ro', isa => 'UpdatePipeline::FileMetaData
 
 has 'common_name_required'  => ( is => 'ro', isa => 'Bool', default => 1);
 has 'check_file_md5s'       => ( is => 'ro', default => 0, isa => 'Bool');
+has 'use_supplier_name' => ( is => 'ro', default    => 0, isa => 'Bool');
 
 sub update_required
 {
@@ -91,7 +92,18 @@ sub _differences_between_file_and_lane_meta_data
   {
     UpdatePipeline::Exceptions::TotalReadsMismatch->throw( error => $self->file_meta_data->file_name_without_extension );
   }
-
+  
+  # check to see if the individual name has changed
+  my $individual_name_method = $self->use_supplier_name ? 'supplier_name' : 'sample_name';
+  if( $self->_file_defined_and_not_equal($self->_normalise_sample_name($self->file_meta_data->$individual_name_method), $self->_normalise_sample_name($self->lane_meta_data->{individual_name})))
+  {
+    return 1;
+  }
+  if( $self->_file_defined_and_not_equal($self->_normalise_sample_name($self->file_meta_data->public_name), $self->_normalise_sample_name($self->lane_meta_data->{individual_alias})))
+  {
+    return 1;
+  }
+  
   return 0; 
 }
 
