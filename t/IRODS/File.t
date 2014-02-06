@@ -4,7 +4,7 @@ use warnings;
 
 BEGIN { unshift(@INC, './modules') }
 BEGIN {
-    use Test::Most tests => 9;
+    use Test::Most tests => 12;
     use_ok('IRODS::File');
 }
 
@@ -72,7 +72,7 @@ my %expected_output2 = (
 is_deeply $file->file_attributes(), \%expected_output2, "parsed valid irods file with non human";
 
 # retrieve md5 if missing from bam metadata
-ok $file = IRODS::File->new( file_location => "/seq/7434/7434_6#82.bam", file_containing_irods_output => 't/data/irods_file_metadata_no_md5'), 'Initialise with valid file that has md5 missing from metadata';
+ok $file = IRODS::File->new( bin_directory => 't/bin/', file_location => "/seq/7434/7434_6#82.bam", file_containing_irods_output => 't/data/irods_file_metadata_no_md5'), 'Initialise with valid file that has md5 missing from metadata';
 my %expected_output3 = (
   md5 => '5af75053efd18b7f26e874b5e553bde0',
   type => 'bam',
