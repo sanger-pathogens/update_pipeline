@@ -90,6 +90,7 @@ sub _build__vr_species
 {
   my ($self) = @_;
   
+  return if($self->common_name_required ==0 && !defined($self->common_name));
   my $vr_species = VRTrack::Species->new_by_name( $self->_vrtrack, $self->common_name);
 	  
   if((not defined($vr_species) )&& $self->common_name_required ==0)
@@ -109,7 +110,7 @@ sub _populate_individual
   return unless defined($vr_individual);
 
   # if there is no species defined, only attach one thats already defined, dont create one.
-  if(not defined $vr_individual->species)
+  if((not defined $vr_individual->species) && (defined($self->_vr_species)))
   {
     $vr_individual->species_id($self->_vr_species->id);
   }
