@@ -20,7 +20,7 @@ sub _stream_location
     return $self->file_containing_irods_output;
   }
 
-  return $self->bin_directory . "imeta qu -z seq -d study = '".$self->name."' and target = 1 and total_reads != 0 |";
+  return $self->irods_query;
 }
 
 
