@@ -35,7 +35,8 @@ has 'specific_min_run'          => ( is => 'rw', isa => 'Int', default => 0 );
 has 'no_pending_lanes'          => ( is => 'rw', isa => 'Bool', default => 1 );
 has 'override_md5'              => ( is => 'rw', isa => 'Bool', default => 0 );
 has 'withdraw_del'              => ( is => 'rw', isa => 'Bool', default => 0 );
-has 'total_reads'               => ( is => 'rw', isa => 'Bool', default => 0 );
+has 'total_reads'               => ( is => 'rw', isa => 'Int', default => 0 );
+has 'common_name_required'               => ( is => 'rw', isa => 'Bool', default => 1 );
 has 'environment'               => ( is => 'rw', isa => 'Str', default => 'production' );
 has 'lock_file'                 => ( is => 'rw', isa => 'Str' );
 
@@ -46,7 +47,7 @@ sub BUILD {
         $parallel_processes,    $verbose_output,    $errors_min_run_id,         $database,
         $input_study_name,      $update_if_changed, $dont_use_warehouse,        $taxon_id,
         $overwrite_common_name, $use_supplier_name,        $specific_min_run,
-        $no_pending_lanes,  $species_name,              $override_md5,
+        $no_pending_lanes,  $species_name,              $override_md5, $common_name_not_required,
         $withdraw_del,          $vrtrack_lanes,     $total_reads,$environment
     );
 
@@ -68,6 +69,7 @@ sub BUILD {
         'nop|no_pending_lanes'    => \$no_pending_lanes,
         'md5|override_md5'        => \$override_md5,
         'wdr|withdraw_del'        => \$withdraw_del,
+        'ncn|common_name_not_required' => \$common_name_not_required,
         'trd|include_total_reads' => \$total_reads,
         'l|lock_file=s'           => \$lock_file,
         'e|environment=s'         => \$environment,
@@ -93,6 +95,7 @@ sub BUILD {
     $self->total_reads($total_reads)                             if ( defined($total_reads) );
     $self->lock_file($lock_file)                                 if ( defined($lock_file) );
     $self->environment($environment)                             if ( defined($environment));
+    $self->common_name_required(0)                               if ( defined($common_name_not_required));
     $self->help($help)                                           if ( defined($help) );
 
 
@@ -144,6 +147,7 @@ sub run {
         species_name              => $self->species_name,
         use_supplier_name         => $self->use_supplier_name,
         specific_min_run          => $self->specific_min_run,
+        common_name_required      => $self->common_name_required,
         no_pending_lanes          => $self->no_pending_lanes,
         override_md5              => $self->override_md5,
         vrtrack_lanes             => undef,
