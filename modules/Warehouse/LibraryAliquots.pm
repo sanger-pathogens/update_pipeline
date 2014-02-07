@@ -32,7 +32,7 @@ sub _construct_query {
   left join current_'
       . $self->receptacle_type . 's as library_tubes on library_tubes.internal_id =  aliquots.receptacle_internal_id
   where study.name like "'
-      . $self->study_name . '"  and aliquots.receptacle_type like "' . $self->receptacle_type . '"';
+      . $self->study_name . '"  and aliquots.receptacle_type like "' . $self->receptacle_type . '" and sample.common_name is not NULL';
 }
 
 sub _build_libraries_metadata {
