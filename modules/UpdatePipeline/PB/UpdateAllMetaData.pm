@@ -93,7 +93,7 @@ sub update
 
   for my $study_name (@{$self->study_names})
   {
-    for my $file_metadata (@{$self->_generate_study_files_metadata}) {
+    for my $file_metadata (@{$self->_generate_study_files_metadata($study_name )}) {
       if ($self->taxon_id && defined $self->species_name) {
       	$file_metadata->sample_common_name($self->species_name);
       }
@@ -147,9 +147,9 @@ sub _update_lane
 
 
     UpdatePipeline::VRTrack::File->new(
-      name => $file_metadata->file_name,
-      file_type => $file_metadata->file_type_number(5), 
-      md5 => $file_metadata->file_md5 , 
+      name => $file_metadata->file_location,
+      file_type => 5, 
+      md5 => $file_metadata->md5 , 
       override_md5 => $self->override_md5, 
       _vrtrack => $self->_vrtrack,
       _vr_lane => $vr_lane)->vr_file();
@@ -157,7 +157,7 @@ sub _update_lane
   };
   if(my $exception = Exception::Class->caught())
   {
-    $self->_exception_handler->add_exception($exception, $file_metadata->file_name_without_extension);
+    $self->_exception_handler->add_exception($exception, $file_metadata->lane_name);
   }
 }
 

@@ -31,13 +31,13 @@ has 'dont_use_warehouse'        => ( is => 'rw', isa => 'Bool', default => 0 );
 has 'taxon_id'                  => ( is => 'rw', isa => 'Int', default => 0 );
 has 'species_name'              => ( is => 'rw', isa => 'Str', );
 has 'use_supplier_name'         => ( is => 'rw', isa => 'Bool', default => 0 );
-has 'specific_run_id'           => ( is => 'rw', isa => 'Int', );
 has 'specific_min_run'          => ( is => 'rw', isa => 'Int', default => 0 );
 has 'no_pending_lanes'          => ( is => 'rw', isa => 'Bool', default => 1 );
 has 'override_md5'              => ( is => 'rw', isa => 'Bool', default => 0 );
 has 'withdraw_del'              => ( is => 'rw', isa => 'Bool', default => 0 );
 has 'total_reads'               => ( is => 'rw', isa => 'Bool', default => 0 );
-has 'lock_file'                 => ( is => 'rw', isa => 'Str', default => '.lock_file' );
+has 'environment'               => ( is => 'rw', isa => 'Str', default => 'production' );
+has 'lock_file'                 => ( is => 'rw', isa => 'Str' );
 
 sub BUILD {
     my ($self) = @_;
@@ -45,9 +45,9 @@ sub BUILD {
         $studyfile,             $help,              $number_of_files_to_return, $lock_file,
         $parallel_processes,    $verbose_output,    $errors_min_run_id,         $database,
         $input_study_name,      $update_if_changed, $dont_use_warehouse,        $taxon_id,
-        $overwrite_common_name, $use_supplier_name, $specific_run_id,           $specific_min_run,
-        $common_name_required,  $no_pending_lanes,  $species_name,              $override_md5,
-        $withdraw_del,          $vrtrack_lanes,     $total_reads
+        $overwrite_common_name, $use_supplier_name,        $specific_min_run,
+        $no_pending_lanes,  $species_name,              $override_md5,
+        $withdraw_del,          $vrtrack_lanes,     $total_reads,$environment
     );
 
     GetOptionsFromArray(
@@ -64,13 +64,13 @@ sub BUILD {
         'tax|taxon_id=i'          => \$taxon_id,
         'spe|species=s'           => \$species_name,
         'sup|use_supplier_name'   => \$use_supplier_name,
-        'run|specific_run_id=i'   => \$specific_run_id,
         'min|specific_min_run=i'  => \$specific_min_run,
         'nop|no_pending_lanes'    => \$no_pending_lanes,
         'md5|override_md5'        => \$override_md5,
         'wdr|withdraw_del'        => \$withdraw_del,
         'trd|include_total_reads' => \$total_reads,
         'l|lock_file=s'           => \$lock_file,
+        'e|environment=s'         => \$environment,
         'h|help'                  => \$help,
     );
 
@@ -86,22 +86,32 @@ sub BUILD {
     $self->taxon_id($taxon_id)                                   if ( defined($taxon_id) );
     $self->species_name($species_name)                           if ( defined($species_name) );
     $self->use_supplier_name($use_supplier_name)                 if ( defined($use_supplier_name) );
-    $self->specific_run_id($specific_run_id)                     if ( defined($specific_run_id) );
     $self->specific_min_run($specific_min_run)                   if ( defined($specific_min_run) );
     $self->no_pending_lanes($no_pending_lanes)                   if ( defined($no_pending_lanes) );
     $self->override_md5($override_md5)                           if ( defined($override_md5) );
     $self->withdraw_del($withdraw_del)                           if ( defined($withdraw_del) );
     $self->total_reads($total_reads)                             if ( defined($total_reads) );
     $self->lock_file($lock_file)                                 if ( defined($lock_file) );
+    $self->environment($environment)                             if ( defined($environment));
     $self->help($help)                                           if ( defined($help) );
 
+
+    if( (!defined($self->studyfile))  && (!defined($self->input_study_name)))
+    {
+      $self->_error_message("A file of study names or the name of a study must be passed in");
+    }
+    
+    if( !defined($self->database))
+    {
+      $self->_error_message("A database must be specified");
+    }
 }
 
 sub run {
     my ($self) = @_;
 
     ( !$self->help ) or die $self->usage_text;
-    if ( defined( $self->_error_message ) ) {
+    if ( defined( $self->_error_message )  ) {
         print $self->_error_message . "\n";
         die $self->usage_text;
     }
@@ -121,6 +131,7 @@ sub run {
     {
       $self->create_lock($self->lock_file);
     }
+    
     my $update_pipeline = UpdatePipeline::PB::UpdateAllMetaData->new(
         study_names               => $study_names,
         _vrtrack                  => $vrtrack,
@@ -129,16 +140,15 @@ sub run {
         minimum_run_id            => $self->errors_min_run_id,
         update_if_changed         => $self->update_if_changed,
         dont_use_warehouse        => $self->dont_use_warehouse,
-        common_name_required      => $self->common_name_required,
         taxon_id                  => $self->taxon_id,
         species_name              => $self->species_name,
         use_supplier_name         => $self->use_supplier_name,
-        specific_run_id           => $self->specific_run_id,
         specific_min_run          => $self->specific_min_run,
         no_pending_lanes          => $self->no_pending_lanes,
         override_md5              => $self->override_md5,
         vrtrack_lanes             => undef,
         add_raw_reads             => $self->total_reads,
+        environment               => $self->environment
     );
     $update_pipeline->update();
     
@@ -166,7 +176,7 @@ sub create_lock
         if ( !($pid=~/^\d+$/) ) { print(qq[Broken lock file $lock? Expected number, found "$pid".\n]); }
 
         # Is it still running? (Will work only when both are running on the same host.)
-        my ($running) = `ps h $pid`;
+        my ($running) = `ps h $pid | grep -v COMMAND`;
         if ( $running ) { die "Another process already running: $pid\n"; }
     }
 
