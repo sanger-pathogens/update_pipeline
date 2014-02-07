@@ -117,6 +117,7 @@ sub _file_defined_and_not_equal
 sub _normalise_sample_name
 {
   my ($self, $sample_name) = @_;
+  $sample_name || return;
   $sample_name =~ s/\W/_/g;
   return $sample_name;
 }
