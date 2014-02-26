@@ -63,7 +63,45 @@ CREATE TABLE `aliquots` (
   KEY `index_aliquots_on_sample_internal_id` (`sample_internal_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-
+CREATE TABLE `current_aliquots` (
+  `uuid` binary(16) NOT NULL,
+  `internal_id` int(11) NOT NULL,
+  `receptacle_uuid` binary(16) DEFAULT NULL,
+  `receptacle_internal_id` int(11) DEFAULT NULL,
+  `study_uuid` binary(16) DEFAULT NULL,
+  `study_internal_id` int(11) DEFAULT NULL,
+  `project_uuid` binary(16) DEFAULT NULL,
+  `project_internal_id` int(11) DEFAULT NULL,
+  `library_uuid` binary(16) DEFAULT NULL,
+  `library_internal_id` int(11) DEFAULT NULL,
+  `sample_uuid` binary(16) DEFAULT NULL,
+  `sample_internal_id` int(11) DEFAULT NULL,
+  `tag_uuid` binary(16) DEFAULT NULL,
+  `tag_internal_id` int(11) DEFAULT NULL,
+  `receptacle_type` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `library_type` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `insert_size_from` int(11) DEFAULT NULL,
+  `insert_size_to` int(11) DEFAULT NULL,
+  `is_current` tinyint(1) NOT NULL,
+  `checked_at` datetime NOT NULL,
+  `last_updated` datetime DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `inserted_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  `current_from` datetime NOT NULL,
+  `current_to` datetime DEFAULT NULL,
+  `bait_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `bait_target_species` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `bait_supplier_identifier` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `bait_supplier_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  UNIQUE KEY `internal_id_idx` (`internal_id`),
+  UNIQUE KEY `uuid_idx` (`uuid`),
+  KEY `library_internal_id_study_internal_id_idx` (`library_internal_id`,`study_internal_id`),
+  KEY `library_uuid_and_receptacle_type_idx` (`library_uuid`,`receptacle_type`),
+  KEY `receptacle_internal_id_idx` (`receptacle_internal_id`),
+  KEY `sample_internal_id_receptacle_internal_id_idx` (`sample_internal_id`,`receptacle_internal_id`),
+  KEY `study_internal_id_receptacle_internal_id_idx` (`study_internal_id`,`receptacle_internal_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 # Dump of table current_library_tubes
 # ------------------------------------------------------------
@@ -106,6 +144,36 @@ CREATE TABLE `current_library_tubes` (
   `inserted_at` datetime DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+
+CREATE TABLE `current_pac_bio_library_tubes` (
+  `uuid` binary(16) NOT NULL,
+  `internal_id` int(11) NOT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `barcode_prefix` varchar(2) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `barcode` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `closed` tinyint(1) DEFAULT NULL,
+  `state` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `two_dimensional_barcode` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `volume` decimal(5,2) DEFAULT NULL,
+  `concentration` decimal(5,2) DEFAULT NULL,
+  `scanned_in_date` date DEFAULT NULL,
+  `public_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `prep_kit_barcode` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `binding_kit_barcode` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `smrt_cells_available` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `movie_length` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `protocol` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `is_current` tinyint(1) NOT NULL,
+  `checked_at` datetime NOT NULL,
+  `last_updated` datetime DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `inserted_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  `current_from` datetime NOT NULL,
+  `current_to` datetime DEFAULT NULL,
+  UNIQUE KEY `internal_id_idx` (`internal_id`),
+  UNIQUE KEY `uuid_idx` (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 # Dump of table current_multiplexed_library_tubes
