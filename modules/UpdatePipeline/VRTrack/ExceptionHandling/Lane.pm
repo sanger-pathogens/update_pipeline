@@ -24,7 +24,10 @@ has '_vrtrack'  => ( is => 'rw', required => 1 );
 sub delete_lane
 {
   my($self)= @_;
-  my $search_query = $self->name;  
+  my $search_query = $self->name;
+  if ($search_query =~ /^Mismatched data for (\S+)/) {
+    $search_query = $1;
+  }
   my $lane_sql = qq[update latest_lane set latest = 0 where name="$search_query" or hierarchy_name="$search_query" limit 1];
   $self->_vrtrack->{_dbh}->do($lane_sql);
 }
