@@ -22,6 +22,9 @@ has 'file_meta_data'       => ( is => 'ro', isa => 'UpdatePipeline::FileMetaData
 has 'common_name_required'  => ( is => 'ro', isa => 'Bool', default => 1);
 has 'check_file_md5s'       => ( is => 'ro', default => 0, isa => 'Bool');
 
+has 'minimum_reads_to_import' => ( is => 'rw', default => 100, isa => 'Num');
+
+
 sub update_required
 {
   my($self) = @_;
@@ -34,7 +37,7 @@ sub _differences_between_file_and_lane_meta_data
   my ($self) = @_;
   
   # ignore files where there are only a few reads, its usually bad data
-  return 0 if (defined($self->file_meta_data->total_reads ) && $self->file_meta_data->total_reads < 10000);
+  return 0 if (defined($self->file_meta_data->total_reads ) && $self->file_meta_data->total_reads < $self->minimum_reads_to_import);
   
   # to stop exception being thrown where the common name is missing from the file metadata, but is not required
   $self->file_meta_data->sample_common_name('default') if (! $self->common_name_required && not defined $self->file_meta_data->sample_common_name);
@@ -87,7 +90,7 @@ sub _differences_between_file_and_lane_meta_data
   {
     return 1;
   }
-  elsif( defined($self->file_meta_data->total_reads ) && $self->file_meta_data->total_reads > 10000 && $self->lane_meta_data->{lane_processed} > 0 &&   !( $self->file_meta_data->total_reads >= $self->lane_meta_data->{total_reads}*0.95  && $self->file_meta_data->total_reads <= $self->lane_meta_data->{total_reads}*1.05 ) )
+  elsif( defined($self->file_meta_data->total_reads ) && $self->file_meta_data->total_reads > $self->minimum_reads_to_import && $self->lane_meta_data->{lane_processed} > 0 &&   !( $self->file_meta_data->total_reads >= $self->lane_meta_data->{total_reads}*0.95  && $self->file_meta_data->total_reads <= $self->lane_meta_data->{total_reads}*1.05 ) )
   {
     UpdatePipeline::Exceptions::TotalReadsMismatch->throw( error => $self->file_meta_data->file_name_without_extension );
   }
