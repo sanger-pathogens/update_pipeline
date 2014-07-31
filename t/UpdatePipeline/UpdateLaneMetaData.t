@@ -278,6 +278,7 @@ is 0, UpdatePipeline::UpdateLaneMetaData->new(lane_meta_data => $lane_metadata, 
 
 # Total reads inconsistent
 $lane_metadata->{lane_processed} = 1;
+$lane_metadata->{total_reads} = 100000;
 ok my $file_total_reads_problem = UpdatePipeline::FileMetaData->new(
   study_name              => 'My project',
   file_md5                => 'abc1231343432432432',
