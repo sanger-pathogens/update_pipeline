@@ -21,6 +21,7 @@ has 'file_meta_data'       => ( is => 'ro', isa => 'UpdatePipeline::FileMetaData
 
 has 'common_name_required'  => ( is => 'ro', isa => 'Bool', default => 1);
 has 'check_file_md5s'       => ( is => 'ro', default => 0, isa => 'Bool');
+has 'use_supplier_name' => ( is => 'ro', default    => 0, isa => 'Bool');
 
 has 'minimum_reads_to_import' => ( is => 'rw', default => 100, isa => 'Num');
 
@@ -90,11 +91,22 @@ sub _differences_between_file_and_lane_meta_data
   {
     return 1;
   }
-  elsif( defined($self->file_meta_data->total_reads ) && $self->file_meta_data->total_reads > $self->minimum_reads_to_import && $self->lane_meta_data->{lane_processed} > 0 &&   !( $self->file_meta_data->total_reads >= $self->lane_meta_data->{total_reads}*0.95  && $self->file_meta_data->total_reads <= $self->lane_meta_data->{total_reads}*1.05 ) )
+  elsif( defined($self->file_meta_data->total_reads ) && $self->file_meta_data->total_reads > $self->minimum_reads_to_import && $self->lane_meta_data->{lane_processed} > 0 && $self->lane_meta_data->{total_reads} > 0 && !( $self->file_meta_data->total_reads >= $self->lane_meta_data->{total_reads}*0.95  && $self->file_meta_data->total_reads <= $self->lane_meta_data->{total_reads}*1.05 ) )
   {
     UpdatePipeline::Exceptions::TotalReadsMismatch->throw( error => $self->file_meta_data->file_name_without_extension );
   }
-
+  
+  # check to see if the individual name has changed
+  my $individual_name_method = $self->use_supplier_name ? 'supplier_name' : 'sample_name';
+  if( $self->_file_defined_and_not_equal($self->_normalise_sample_name($self->file_meta_data->$individual_name_method), $self->_normalise_sample_name($self->lane_meta_data->{individual_name})))
+  {
+    return 1;
+  }
+  if( $self->_file_defined_and_not_equal($self->_normalise_sample_name($self->file_meta_data->public_name), $self->_normalise_sample_name($self->lane_meta_data->{individual_alias})))
+  {
+    return 1;
+  }
+  
   return 0; 
 }
 
@@ -108,6 +120,7 @@ sub _file_defined_and_not_equal
 sub _normalise_sample_name
 {
   my ($self, $sample_name) = @_;
+  $sample_name || return;
   $sample_name =~ s/\W/_/g;
   return $sample_name;
 }

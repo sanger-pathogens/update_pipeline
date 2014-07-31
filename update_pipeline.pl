@@ -139,9 +139,10 @@ if($parallel_processes == 1)
   my $vrtrack = VertRes::Utils::VRTrackFactory->instantiate(database => $db,mode     => 'rw');
   unless ($vrtrack) { die "Can't connect to tracking database: $db \n";}
   if ( $withdraw_del ) {
+    $vrtrack_lanes = {};
     foreach my $study (@$study_names) {
 	  foreach my $lane ( $vrtrack->get_lanes(project => [$study]) ) {
-	    $vrtrack_lanes->{ $lane->name } = $lane->id; 
+	    $vrtrack_lanes->{ $lane->name } = $lane->id;
 	  }
 	}
   }   
