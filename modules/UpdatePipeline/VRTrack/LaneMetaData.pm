@@ -46,7 +46,9 @@ sub _build_lane_attributes
   lane.processed as lane_processed,
   library.fragment_size_from as fragment_size_from,
   library.fragment_size_to as fragment_size_to,
-  file.md5 as file_md5
+  file.md5 as file_md5,
+  individual.name as individual_name,
+  individual.alias as individual_alias
   from latest_lane as lane
   left join latest_file as file on file.lane_id = lane.lane_id
   left join latest_library as library on library.library_id = lane.library_id 

@@ -50,7 +50,7 @@ sub _build_vr_lane
   }
   
   my $raw_reads = $self->add_raw_reads ? $self->raw_reads : 0;
-  $vlane->raw_reads($raw_reads) if(not defined($vlane->raw_reads));
+  $vlane->raw_reads($raw_reads) unless $vlane->raw_reads;
   $vlane->raw_bases(0) if(not defined($vlane->raw_bases));
   
   $vlane->npg_qc_status( $self->npg_qc_status );
