@@ -27,6 +27,7 @@ has 'npg_qc_status' => ( is => 'rw', isa => 'Str',  default    => '-' );
 has 'paired'        => ( is => 'rw', isa => 'Bool', default    => 1 );
 has 'raw_reads'     => ( is => 'rw', isa => 'Maybe[Int]',  default    => 0 );
 has 'add_raw_reads' => ( is => 'rw', isa => 'Bool', default    => 0 );
+has 'ebi_run_acc'   => ( is => 'rw', isa => 'Maybe[Str]' );
 has '_vrtrack'      => ( is => 'rw',                required   => 1 );
 has '_vr_library'   => ( is => 'rw',                required   => 1 );
 
@@ -55,6 +56,7 @@ sub _build_vr_lane
   
   $vlane->npg_qc_status( $self->npg_qc_status );
   $vlane->is_paired( $self->paired );
+  $vlane->acc($self->ebi_run_acc);
   $vlane->hierarchy_name( $self->name );
   $vlane->update;
   

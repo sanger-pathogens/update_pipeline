@@ -5,7 +5,7 @@ use Data::Dumper;
 
 BEGIN { unshift(@INC, './modules') }
 BEGIN {
-    use Test::Most tests => 36;
+    use Test::Most;
     use_ok('UpdatePipeline::UpdateLaneMetaData');
     use VRTrack::VRTrack;
     use UpdatePipeline::VRTrack::Project;
@@ -296,11 +296,27 @@ ok my $file_total_reads_problem = UpdatePipeline::FileMetaData->new(
 
 throws_ok {UpdatePipeline::UpdateLaneMetaData->new(lane_meta_data => $lane_metadata, file_meta_data => $file_total_reads_problem )->update_required } qr/myfile/, 'Total Reads inconsistent';
 
+ok my $accession_needs_updating = UpdatePipeline::FileMetaData->new(
+  study_name              => 'My project',
+  file_md5                => 'abc1231343432432432',
+  file_name               => 'myfile.bam',
+  file_name_without_extension  => 'myfile',
+  library_name            => 'My library name',
+  library_ssid            => 123,
+  total_reads             => 100000,
+  sample_name             => 'My name',
+  sample_accession_number => "ABC123",
+  study_accession_number  => "EFG456",
+  study_ssid              => 1234,
+  sample_common_name      => "SomeBacteria",
+  ebi_run_acc             => 'ERR1234'
+), 'file meta data with new accession';
 
-# lane has been previously imported so ignore file md5 etc...
 
+is 1, UpdatePipeline::UpdateLaneMetaData->new(lane_meta_data => $lane_metadata, file_meta_data => $accession_needs_updating )->update_required(), 'Accession needs to be updated';
 
 delete_test_data($vrtrack);
+done_testing();
 
 sub delete_test_data
 {

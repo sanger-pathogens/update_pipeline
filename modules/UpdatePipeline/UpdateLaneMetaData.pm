@@ -77,7 +77,7 @@ sub _differences_between_file_and_lane_meta_data
     UpdatePipeline::Exceptions::PathToLaneChanged->throw( error => $error_message );
   }
 
-  my @fields_to_check_file_defined_and_not_equal =  $self->common_name_required ? ("study_name", "library_name","sample_common_name", "study_accession_number","sample_accession_number","library_ssid", "lane_is_paired_read","lane_manual_qc", "study_ssid","sample_ssid") : ("study_name", "library_name", "study_accession_number","sample_accession_number","library_ssid", "lane_is_paired_read","lane_manual_qc", "study_ssid","sample_ssid");
+  my @fields_to_check_file_defined_and_not_equal =  $self->common_name_required ? ("study_name", "library_name","sample_common_name", "study_accession_number","sample_accession_number","library_ssid", "lane_is_paired_read","lane_manual_qc", "study_ssid","sample_ssid","ebi_run_acc") : ("study_name", "library_name", "study_accession_number","sample_accession_number","library_ssid", "ebi_run_acc", "lane_is_paired_read","lane_manual_qc", "study_ssid","sample_ssid");
   push(@fields_to_check_file_defined_and_not_equal, 'file_md5') if $self->check_file_md5s;
   for my $field_name (@fields_to_check_file_defined_and_not_equal)
   {
@@ -91,7 +91,7 @@ sub _differences_between_file_and_lane_meta_data
   {
     return 1;
   }
-  elsif( defined($self->file_meta_data->total_reads ) && $self->file_meta_data->total_reads > $self->minimum_reads_to_import && $self->lane_meta_data->{lane_processed} > 0 && $self->lane_meta_data->{total_reads} > 0 && !( $self->file_meta_data->total_reads >= $self->lane_meta_data->{total_reads}*0.95  && $self->file_meta_data->total_reads <= $self->lane_meta_data->{total_reads}*1.05 ) )
+  elsif( defined($self->file_meta_data->total_reads ) && $self->file_meta_data->total_reads > $self->minimum_reads_to_import && $self->lane_meta_data->{lane_processed} > 0 && $self->lane_meta_data->{total_reads} > 0 && !( $self->file_meta_data->total_reads >= $self->lane_meta_data->{total_reads}*0.99  && $self->file_meta_data->total_reads <= $self->lane_meta_data->{total_reads}*1.01 ) )
   {
     UpdatePipeline::Exceptions::TotalReadsMismatch->throw( error => $self->file_meta_data->file_name_without_extension );
   }

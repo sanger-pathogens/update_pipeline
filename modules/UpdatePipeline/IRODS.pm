@@ -74,6 +74,7 @@ sub _build_files_metadata
         sample_common_name      => $irods_file_metadata->{sample_common_name},
         sample_ssid             => $irods_file_metadata->{sample_id},
         study_ssid              => $irods_file_metadata->{study_id},
+        ebi_run_acc             => $irods_file_metadata->{ebi_run_acc},
       );
     };
     if($@)

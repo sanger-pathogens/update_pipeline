@@ -31,6 +31,10 @@ attribute: lane
 value: 7
 units: 
 ----
+attribute: ebi_run_acc
+value: ERR1234
+units:
+----
 attribute: sample
 value: AB_CD_EF
 units: 

@@ -4,7 +4,7 @@ use warnings;
 
 BEGIN { unshift(@INC, './modules') }
 BEGIN {
-    use Test::Most tests => 10;
+    use Test::Most;
     use_ok('UpdatePipeline::VRTrack::Lane');
     use VRTrack::VRTrack;
     use UpdatePipeline::VRTrack::Project;
@@ -33,11 +33,12 @@ is_deeply $vr_lane2, $vr_lane, 'return previously created lane instead of making
 
 # update the library
 my $vr_library3 = UpdatePipeline::VRTrack::Library->new(name => 'Another name', external_id  => 123, _vrtrack => $vrtrack,_vr_sample  => $vr_sample)->vr_library();
-ok my $vr_lane3 = UpdatePipeline::VRTrack::Lane->new(name  => '1234_5#6' ,_vrtrack => $vrtrack,_vr_library => $vr_library3)->vr_lane(), 'initialise update library';
+ok my $vr_lane3 = UpdatePipeline::VRTrack::Lane->new(name  => '1234_5#6' ,_vrtrack => $vrtrack, ebi_run_acc => 'ERR4321', _vr_library => $vr_library3)->vr_lane(), 'initialise update library';
 is_deeply $vr_lane3->library_id, UpdatePipeline::VRTrack::Library->new(name => 'Another name', external_id  => 123, _vrtrack => $vrtrack,_vr_sample  => $vr_sample)->vr_library()->id, 'updated library matches';
-
+is $vr_lane3->acc, 'ERR4321', 'lane accessions match';
 
 delete_test_data($vrtrack);
+done_testing();
 
 sub delete_test_data
 {
