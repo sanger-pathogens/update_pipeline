@@ -34,6 +34,7 @@ my %expected_output = (
   sample_common_name => 'Shigella flexneri',
   study_id   => 55555,
   sample_id => 44444,
+  ebi_run_acc => 'ERR1234'
 );
 is_deeply $file->file_attributes(), \%expected_output, "parsed valid irods file";
 
@@ -68,6 +69,7 @@ my %expected_output2 = (
   sample_common_name => 'Shigella flexneri',
   study_id   => 55555,
   sample_id => 44444,
+  ebi_run_acc => 'ERR1234'
 );
 is_deeply $file->file_attributes(), \%expected_output2, "parsed valid irods file with non human";
 

@@ -106,6 +106,8 @@ sub update
           $self->_update_lane($file_metadata) unless ( !$filter_pending  || !$filter_id_run || !$filter_min_run );
       }
     };
+    
+    
     if(my $exception = Exception::Class->caught())
     {
       $self->_exception_handler->add_exception($exception,$file_metadata->file_name_without_extension);
@@ -121,7 +123,6 @@ sub update
       $self->_unwithdraw_lanes(\%current_lane_names);
   }
   $self->_exception_handler->print_report($self->verbose_output);
-
   1;
 }
 
@@ -162,7 +163,8 @@ sub _update_lane
       paired        => $file_metadata->lane_is_paired_read,
       npg_qc_status => $file_metadata->lane_manual_qc,
       raw_reads     => $file_metadata->total_reads, 
-      add_raw_reads => $self->add_raw_reads, 
+      add_raw_reads => $self->add_raw_reads,
+      ebi_run_acc   => $file_metadata->ebi_run_acc,
       _vrtrack      => $self->_vrtrack,
       _vr_library   => $vr_library)->vr_lane();
 

@@ -40,6 +40,7 @@ sub _build_lane_attributes
   lane.paired as lane_is_paired_read,
   lane.changed as lane_changed,
   lane.name as lane_name,
+  lane.acc as ebi_run_acc,
   timestampdiff( hour, lane.changed, now() ) as hours_since_lane_changed,
   sample.ssid as sample_ssid,
   project.ssid as study_ssid,
