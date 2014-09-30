@@ -212,7 +212,7 @@ sub _unwithdraw_lanes
     my ($self, $current_lane_names) = @_;
     foreach my $lane ( keys %{$current_lane_names} ) {
         my $lane_to_unwithdraw = VRTrack::Lane->new_by_name($self->_vrtrack, $lane) || return;
-        if ($lane_to_unwithdraw->is_withdrawn) {
+        if ($lane_to_unwithdraw->is_withdrawn && ! $lane_to_unwithdraw->is_manually_withdrawn) {
             $lane_to_unwithdraw->is_withdrawn(0);
             $lane_to_unwithdraw->update;  
             print "The lane $lane has been unwithdrawn as it has reappeared in iRODS\n";
