@@ -6,7 +6,7 @@ use File::Slurp;
 use Test::MockObject;
 
 
-BEGIN { unshift( @INC, './modules' ) }
+BEGIN { unshift( @INC, './lib' ) }
 
 BEGIN {
     use Test::Most;

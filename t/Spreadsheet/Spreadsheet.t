@@ -7,7 +7,7 @@ use VRTrack::VRTrack;
 use File::Path qw(rmtree);
 
 
-BEGIN { unshift(@INC, './modules') }
+BEGIN { unshift(@INC, './lib') }
 BEGIN {
   use Test::Most;
   use_ok('UpdatePipeline::Spreadsheet');
