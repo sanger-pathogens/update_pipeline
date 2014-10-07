@@ -81,10 +81,10 @@ sub _build_report
     
     # theres a problem where lanes are in the database but havent imported at all on to disk?
     
-    
-    if($self->_lanes_metadata->{$file_metadata->file_name_without_extension})
+    my $lanes_metadata = $self->get_lane_metadata($file_metadata->file_name_without_extension);
+    if($lanes_metadata )
     {
-      my $consistency_value = $self->_compare_file_metadata_with_vrtrack_lane_metadata($file_metadata, $self->_lanes_metadata->{$file_metadata->file_name_without_extension} );
+      my $consistency_value = $self->_compare_file_metadata_with_vrtrack_lane_metadata($file_metadata, $lanes_metadata  );
       if( defined($consistency_value) )
       {
         #inconsitent data

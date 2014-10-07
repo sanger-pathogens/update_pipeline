@@ -87,7 +87,7 @@ sub update
     }
     eval {
       if(UpdatePipeline::UpdateLaneMetaData->new(
-          lane_meta_data => $self->_lanes_metadata->{$file_metadata->file_name_without_extension},
+          lane_meta_data => $self->get_lane_metadata($file_metadata->file_name_without_extension),
           file_meta_data => $file_metadata,
           common_name_required => $self->common_name_required,
           check_file_md5s => $self->override_md5,
@@ -111,7 +111,6 @@ sub update
     if ( $self->vrtrack_lanes && $self->vrtrack_lanes->{$file_metadata->file_name_without_extension} ) {
 		delete $self->vrtrack_lanes->{$file_metadata->file_name_without_extension};
 	}	
-	delete $self->_lanes_metadata->{$file_metadata->file_name_without_extension};
   }
   if ( $self->vrtrack_lanes && keys %{$self->vrtrack_lanes} > 0 && scalar @{$self->_files_metadata} > 0 && $self->_check_irods_is_up ) {
 	  $self->_withdraw_lanes;
