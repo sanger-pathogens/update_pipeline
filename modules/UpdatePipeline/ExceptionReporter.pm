@@ -21,7 +21,6 @@ use UpdatePipeline::Exceptions;
 use Data::Dumper;
 
 
-has '_exceptions'               => ( is => 'ro', isa => 'ArrayRef', default => sub { [] });
 has '_unknown_common_names'     => ( is => 'ro', isa => 'HashRef',  default => sub { {} });
 has '_undefined_common_names'   => ( is => 'ro', isa => 'ArrayRef', default => sub { [] });
 has '_inconsistent_total_reads' => ( is => 'ro', isa => 'ArrayRef', default => sub { [] });
@@ -34,16 +33,13 @@ has 'print_unclassified'        => ( is => 'rw', isa => 'Bool', default => 1);
 sub add_exception
 {
   my($self, $exception) = @_;  
-  #print Dumper $exception;
-  push(@{$self->_exceptions},$exception);
+  $self->_classify_exception($exception);
 }
 
 sub print_report
 {
   my($self,$print_unclassified) = @_;
   $self->print_unclassified($print_unclassified);
-  
-  $self->_build_report;
   
   for my $common_name (sort keys %{$self->_unknown_common_names})
   {
@@ -77,40 +73,36 @@ sub print_report
 
 }
 
-sub _build_report
+sub _classify_exception
 {
-   my($self) = @_;
-   for my $exception (@{$self->_exceptions})
+  my($self, $exception) = @_;
+  if($exception->isa("UpdatePipeline::Exceptions::UnknownCommonName"))
    {
-     if($exception->isa("UpdatePipeline::Exceptions::UnknownCommonName"))
-     {
-       $self->_unknown_common_name($exception);
-     }
-     elsif($exception->isa("UpdatePipeline::Exceptions::UndefinedSampleCommonName"))
-     {
-       $self->_undefined_common_name($exception);
-     }
-     elsif($exception->isa("UpdatePipeline::Exceptions::TotalReadsMismatch"))
-     {
-       $self->_total_read_inconsistency($exception);
-     }
-     elsif($exception->isa("UpdatePipeline::Exceptions::UndefinedSampleName") || 
-           $exception->isa("UpdatePipeline::Exceptions::UndefinedStudySSID")  ||
-           $exception->isa("UpdatePipeline::Exceptions::UndefinedLibraryName"))
-     {
-       $self->_bad_irods_record($exception);
-     }
-     elsif($exception->isa("UpdatePipeline::Exceptions::PathToLaneChanged"))
-     {
-       $self->_path_changed_to_lane($exception);
-     }
-     else
-     {
-       # dont do anything with these exceptions other than count them
-       $self->_unclassified_exception($exception);
-     }
+     $self->_unknown_common_name($exception);
    }
-   1;
+   elsif($exception->isa("UpdatePipeline::Exceptions::UndefinedSampleCommonName"))
+   {
+     $self->_undefined_common_name($exception);
+   }
+   elsif($exception->isa("UpdatePipeline::Exceptions::TotalReadsMismatch"))
+   {
+     $self->_total_read_inconsistency($exception);
+   }
+   elsif($exception->isa("UpdatePipeline::Exceptions::UndefinedSampleName") || 
+         $exception->isa("UpdatePipeline::Exceptions::UndefinedStudySSID")  ||
+         $exception->isa("UpdatePipeline::Exceptions::UndefinedLibraryName"))
+   {
+     $self->_bad_irods_record($exception);
+   }
+   elsif($exception->isa("UpdatePipeline::Exceptions::PathToLaneChanged"))
+   {
+     $self->_path_changed_to_lane($exception);
+   }
+   else
+   {
+     # dont do anything with these exceptions other than count them
+     $self->_unclassified_exception($exception);
+   } 
 }
 
 sub _unclassified_exception

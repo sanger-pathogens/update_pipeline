@@ -39,7 +39,6 @@ if(my $exception = Exception::Class->caught()){ ok $exception_handler->add_excep
 eval { UpdatePipeline::Exceptions::UndefinedSampleCommonName->throw(error => "sample_123"); };
 if(my $exception = Exception::Class->caught()){ ok $exception_handler->add_exception($exception), 'UndefinedSampleCommonName exception added okay';}
 
-ok $exception_handler->_exception_reporter->_build_report(), 'build the report';
 my %expected_unknown_common_names = ("SomeCommonName" => 1 ,"AnotherCommonName" => 2);
 is_deeply $exception_handler->_exception_reporter->_unknown_common_names, \%expected_unknown_common_names, 'list of common names';
 
@@ -62,7 +61,6 @@ if(my $exception = Exception::Class->caught()){ ok $exception_handler_min_run_id
 eval { UpdatePipeline::Exceptions::TotalReadsMismatch->throw(error => "some_other_error_message"); };
 if(my $exception = Exception::Class->caught()){ ok $exception_handler_min_run_id->add_exception($exception,"7000_1#3"), 'exception added with min run id';}
 @expected_inconsistent_total_reads = ("some_other_error_message");
-ok $exception_handler_min_run_id->_exception_reporter->_build_report(), 'build the report';
 is_deeply $exception_handler_min_run_id->_exception_reporter->_inconsistent_total_reads, \@expected_inconsistent_total_reads, 'list of inconsistent file names should be empty';
 
 
