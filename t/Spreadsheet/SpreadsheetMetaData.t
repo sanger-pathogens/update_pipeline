@@ -5,7 +5,7 @@ use Data::Dumper;
 use Test::MockObject;
 
 
-BEGIN { unshift(@INC, './modules') }
+BEGIN { unshift(@INC, './lib') }
 BEGIN {
   use Test::Most;
   use_ok('UpdatePipeline::Spreadsheet::SpreadsheetMetaData');
