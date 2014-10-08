@@ -56,7 +56,7 @@ ok my $file_meta_data_for_post_populate = UpdatePipeline::FileMetaData->new(file
 is $file_meta_data_for_post_populate->supplier_name, undef, 'supplier name should be undefined to begin with';
 ok my $warehouse_sample_for_post_populate = Warehouse::Sample->new(file_meta_data => $file_meta_data_for_post_populate, _dbh => $dbh), 'initialise warehouse sample object with file metadata';
 ok $warehouse_sample_for_post_populate->post_populate(), 'post_populate file metadata with supplier name';
-is $file_meta_data_for_post_populate->supplier_name, undef, 'supplier name should be undef if sample name not defined';
+is $file_meta_data_for_post_populate->supplier_name, "Supplier name", 'supplier name should be populated if ssid passed in';
 ok $warehouse_sample_for_post_populate->populate(), 'now populate file metadata with sample name';
 is $file_meta_data_for_post_populate->sample_name, "Sample name", 'check sample name is populated';
 ok $warehouse_sample_for_post_populate->post_populate(), 'post_populate file metadata with supplier name';
