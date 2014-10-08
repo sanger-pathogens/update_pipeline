@@ -26,7 +26,7 @@ has 'number_of_files_to_return' => ( is => 'rw', isa => 'Maybe[Int]');
 has '_irods_studies'            => ( is => 'rw', isa => 'ArrayRef',      lazy_build => 1 );
 has '_warehouse_dbh'            => ( is => 'rw',                         required => 1 );
 has 'no_pending_lanes'      => ( is => 'ro', default    => 0,            isa => 'Bool');
-
+has 'specific_min_run'      => ( is => 'ro', default    => 0,            isa => 'Int');
 
 sub _build__irods_studies
 {
@@ -51,6 +51,7 @@ sub _build_files_metadata
   for my $irods_file_metadata (@irods_files_metadata)
   {
     my $file_metadata; 
+    next if($irods_file_metadata->{id_run} < $self->specific_min_run);
     eval{
       $file_metadata = UpdatePipeline::FileMetaData->new(
         study_name              => $irods_file_metadata->{study},
@@ -109,7 +110,8 @@ sub _get_irods_file_metadata_for_studies
   # Allows you to only check the latest X runs.
   @sorted_file_locations = (sort (sort_by_id_run @unsorted_file_locations));
   $self->_limit_returned_results(\@sorted_file_locations);
-  for my $file_location (@sorted_file_locations)
+  my $min_run_filtered = $self->_filter_file_locations_by_min_run_id(\@sorted_file_locations);
+  for my $file_location (@{$min_run_filtered})
   {
       push(@files_metadata, IRODS::File->new(file_location => $file_location)->file_attributes );
   }
@@ -137,9 +139,30 @@ sub print_file_metadata
   }
 }
 
+sub _filter_file_locations_by_min_run_id
+{
+  my ($self,$files_metadata) = @_;
+  
+  my $filtered_files_metadata;
+  if(defined($self->specific_min_run) && @{$files_metadata} > 0 && $files_metadata->[0] =~ /\/seq\/[\d]+\//)
+  {
+    for my $file_metadata (@{$files_metadata})
+    {
+      my @file_path = split('/',$file_metadata );
+      if($file_path[2] >= $self->specific_min_run)
+      {
+        push(@{$filtered_files_metadata},$file_metadata);
+      }
+    }
+    $files_metadata = $filtered_files_metadata;
+  }
+  return $files_metadata;
+}
+
 sub _limit_returned_results
 {
    my ($self,$files_metadata) = @_;
+
    if(defined($self->number_of_files_to_return) && $self->number_of_files_to_return > 0 && $self->number_of_files_to_return +1 < @{$files_metadata})
    {
      splice @{$files_metadata}, $self->number_of_files_to_return;

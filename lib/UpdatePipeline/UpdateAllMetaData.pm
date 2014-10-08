@@ -35,7 +35,6 @@ has 'use_supplier_name'     => ( is => 'ro', default    => 0,            isa => 
 has 'override_md5'          => ( is => 'ro', default    => 0,            isa => 'Bool');
 has 'add_raw_reads'         => ( is => 'ro', default    => 0,            isa => 'Bool');
 has 'specific_run_id'       => ( is => 'ro', default    => 0,            isa => 'Int');
-has 'specific_min_run'      => ( is => 'ro', default    => 0,            isa => 'Int');
                            
 has '_warehouse_dbh'        => ( is => 'rw', lazy_build => 1 );
 has 'minimum_run_id'        => ( is => 'rw', default    => 1,            isa => 'Int' );
