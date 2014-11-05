@@ -22,7 +22,7 @@ BEGIN {
     my $irods_file = Test::MockObject->new();
     $irods_file->fake_module( 'IRODS::File', test => sub{1} );
     $irods_file->fake_new( 'IRODS::File' );
-    $irods_file->mock('file_attributes', sub{ {md5 => 'abcefg12345667', run => 'run123', well => 'A02'} });
+    $irods_file->mock('file_attributes', sub{ {md5 => 'abcefg12345667', run => 'run123',ebi_run_acc => 'ERR1234', well => 'A02'} });
     
     
 }
@@ -40,26 +40,30 @@ $dbh->do(
 $dbh->do(
 'insert into current_samples (name,accession_number,common_name, supplier_name,internal_id,is_current) values("ABC sample","HIJ456","Sample common name","Sample supplier name",2222,1)'
 );
+$dbh->do('insert into current_pac_bio_library_tubes (name,internal_id,is_current) values("Library name",3333,1)');
+
+
 
 ok(my $obj = UpdatePipeline::PB::StudyFilesMetaData->new(
     study_name        => 'ABC study',
     dbh               => $dbh
   ),'initialise object with valid study ');
+
 is_deeply([
           bless( {
-                   'library_ssid' => undef,
-                   'sample_ssid' => undef,
-                   'library_name' => undef,
-                   'ebi_run_acc' => undef,
-                   'study_ssid' => undef,
+                   'library_ssid' => '3333',
+                   'sample_ssid' => '2222',
+                   'library_name' => 'Library name',
+                   'study_ssid' => '1111',
                    'supplier_name' => 'Sample supplier name',
-                   'sample_common_name' => undef,
-                   'study_accession_number' => undef,
-                   'study_name' => undef,
-                   'sample_name' => undef,
-                   'sample_accession_number' => undef,
+                   'sample_common_name' => 'Sample common name',
+                   'study_accession_number' => 'EFG123',
+                   'study_name' => 'ABC study',
+                   'sample_name' => 'ABC sample',
+                   'sample_accession_number' => 'HIJ456',
                    'file_location' => '/path/to/data.0.bas',
                    'lane_name' => 'run123_A02',
+                   'ebi_run_acc' => 'ERR1234',
                    'md5' => 'abcefg12345667'
                  }, 'UpdatePipeline::PB::FileMetaData' )
         ], $obj->files_metadata(),'files found');
