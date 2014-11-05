@@ -62,6 +62,7 @@ sub _files_metadata_from_sample_name {
             study_ssid              => $library_metadata->study_ssid,
             sample_ssid             => $library_metadata->sample_ssid,
             lane_name               => $lane_name,
+            ebi_run_acc             => $irods_file_metadata->{ebi_run_acc},
             md5                     => $irods_file_metadata->{md5},
             file_location           => $file_location
         );
