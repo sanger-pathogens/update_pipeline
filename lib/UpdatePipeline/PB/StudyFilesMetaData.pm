@@ -51,17 +51,16 @@ sub _files_metadata_from_sample_name {
         
         # Denormalise
         my $merged_file_metadata = UpdatePipeline::PB::FileMetaData->new(
-            study_name              => $irods_file_metadata->{study_name},
-            study_accession_number  => $irods_file_metadata->{study_accession_number},
-            library_name            => $irods_file_metadata->{library_name},
-            library_ssid            => $irods_file_metadata->{library_id},
-            sample_name             => $irods_file_metadata->{sample},
-            sample_accession_number => $irods_file_metadata->{sample_accession_number},
-            sample_common_name      => $irods_file_metadata->{sample_common_name},
+            study_name              => $library_metadata->study_name,
+            study_accession_number  => $library_metadata->study_accession_number,
+            library_name            => $library_metadata->library_name,
+            library_ssid            => $library_metadata->library_ssid,
+            sample_name             => $library_metadata->sample_name,
+            sample_accession_number => $library_metadata->sample_accession_number,
+            sample_common_name      => $library_metadata->sample_common_name,
             supplier_name           => $library_metadata->supplier_name,
-            study_ssid              => $irods_file_metadata->{study_id},
-            sample_ssid             => $irods_file_metadata->{sample_id},
-            ebi_run_acc             => $irods_file_metadata->{ebi_run_acc},
+            study_ssid              => $library_metadata->study_ssid,
+            sample_ssid             => $library_metadata->sample_ssid,
             lane_name               => $lane_name,
             md5                     => $irods_file_metadata->{md5},
             file_location           => $file_location

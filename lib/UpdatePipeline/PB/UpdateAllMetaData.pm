@@ -139,7 +139,6 @@ sub _update_lane
 
     my $vr_lane = UpdatePipeline::VRTrack::Lane->new(
       name          => $file_metadata->lane_name,
-      ebi_run_acc   => $file_metadata->ebi_run_acc,
       _vrtrack      => $self->_vrtrack,
       _vr_library   => $vr_library)->vr_lane();
 

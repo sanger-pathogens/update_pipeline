@@ -28,7 +28,7 @@ has 'sample_ssid'                      => ( is => 'rw', isa => 'Maybe[Int]');
 has 'lane_name'                        => ( is => 'rw', isa => 'Maybe[Str]');
 has 'md5'                              => ( is => 'rw', isa => 'Maybe[Str]');
 has 'file_location'                    => ( is => 'rw', isa => 'Maybe[Str]');
-has 'ebi_run_acc'                      => ( is => 'rw', isa => 'Maybe[Str]' );
+
 
 
 __PACKAGE__->meta->make_immutable;
