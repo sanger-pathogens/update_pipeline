@@ -25,7 +25,6 @@ $dbh->do(
 $dbh->do(
 'insert into current_samples (name,accession_number,common_name, supplier_name,internal_id,is_current) values("ABC sample","HIJ456","Sample common name","Sample supplier name",2222,1)'
 );
-$dbh->do('insert into current_pac_bio_library_tubes (name,internal_id,is_current) values("Library name",3333,1)');
 
 ok(
     my $study_doesnt_exist_obj = Warehouse::LibraryAliquots->new(
@@ -47,16 +46,9 @@ is_deeply(
     [
         bless(
             {
-                'library_ssid'            => '3333',
-                'sample_ssid'             => '2222',
-                'library_name'            => 'Library name',
-                'study_ssid'              => '1111',
                 'supplier_name'           => 'Sample supplier name',
-                'sample_common_name'      => 'Sample common name',
-                'study_accession_number'  => 'EFG123',
                 'study_name'              => 'ABC study',
                 'sample_name'             => 'ABC sample',
-                'sample_accession_number' => 'HIJ456'
             },
             'UpdatePipeline::LibraryMetaData'
         )

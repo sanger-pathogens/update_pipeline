@@ -24,7 +24,21 @@ BEGIN {
     my $irods_file = Test::MockObject->new();
     $irods_file->fake_module( 'IRODS::File', test => sub{1} );
     $irods_file->fake_new( 'IRODS::File' );
-    $irods_file->mock('file_attributes', sub{ {md5 => 'abcefg12345667', run => 'run123', well => 'A02'} });
+    $irods_file->mock('file_attributes', sub{ {
+      md5                     => 'abcefg12345667', 
+      run                     => 'run123', 
+      well                    => 'A02', 
+      study_name              => 'ABC_study',
+      study_accession_number  => 'EFG123',
+      library_name            => 'PB Library name',
+      library_id              => 3333,
+      sample                  => 'PB sample',
+      sample_accession_number => 'HIJ456',
+      sample_common_name      => 'PBBacteria',
+      study_id                => 1111,
+      sample_id               => 2222,
+      ebi_run_acc             => 'ERR1234'
+      } });
 
     $ENV{VRTRACK_RW_USER} = 'root';
 }
@@ -47,9 +61,6 @@ $dbh->do(
 $dbh->do(
 'insert into current_samples (name,accession_number,common_name, supplier_name,internal_id,is_current) values("PB sample","HIJ456","PBBacteria","Sample supplier name",2222,1)'
 );
-$dbh->do('insert into current_pac_bio_library_tubes (name,internal_id,is_current) values("PB Library name",3333,1)');
-
-
 
 my $script_name = 'UpdatePipeline::CommandLine::UpdatePBPipeline';
 my $cwd = getcwd();
@@ -61,6 +72,7 @@ mock_execute_script( $script_name, ['-h']);
 
 ## single study
 mock_execute_script( $script_name, ['-e test -d vrtrack_test -n ABC_study']);
+
 is("run123_A02",         $vrtrack->{_dbh}->selectrow_arrayref('select name from latest_lane where name like "run123_A02"')->[0],'Lane name added');
 is("PB Library name",    $vrtrack->{_dbh}->selectrow_arrayref('select name from latest_library where name like "PB Library name"')->[0],'Library name added');
 is("PB sample",          $vrtrack->{_dbh}->selectrow_arrayref('select name from latest_sample where name like "PB sample"')->[0],'Sample name added');
