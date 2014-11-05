@@ -104,6 +104,8 @@ sub _classify_exception
 sub _unclassified_exception
 {
   my($self,$exception) = @_;
+  use Data::Dumper;
+  print Dumper $exception;
   push(@{$self->_unclassified_exceptions}, $exception->error);
 }
 
