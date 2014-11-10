@@ -10,8 +10,8 @@ package UpdatePipeline::Main::UpdatePBPipeline;
 Update a PB pipelines metadata
 =cut
 
-BEGIN { unshift( @INC, '../modules' ) }
-BEGIN { unshift( @INC, './modules' ) }
+BEGIN { unshift(@INC, './lib') }
+BEGIN { unshift(@INC, '../lib') }
 BEGIN { unshift( @INC, '/software/pathogen/internal/prod/lib/' ) }
 use UpdatePipeline::CommandLine::UpdatePBPipeline;
 

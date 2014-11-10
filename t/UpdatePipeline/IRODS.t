@@ -34,9 +34,9 @@ my %irods_file_expected_output = (
 $irods_file->mock('file_attributes', sub{ \%irods_file_expected_output });
 
 
-BEGIN { unshift(@INC, './modules') }
+BEGIN { unshift(@INC, './lib') }
 BEGIN {
-  use Test::Most tests => 5;
+  use Test::Most;
   
   my $irods_study = Test::MockObject->new();
   $irods_study->fake_new( 'IRODS::Study' );
@@ -57,6 +57,15 @@ my @expected_sorting= ("/seq/2009/2009_1.bam","/seq/2002/2002_6#2.bam","/seq/200
 
 my @actual_sorting = (sort sort_by_id_run @unsorted_runs);
 is_deeply \@expected_sorting,\@actual_sorting, 'sorting by id run works okay';
+
+
+ok $update_pipelines_irods = UpdatePipeline::IRODS->new( study_names => \@study_names, _warehouse_dbh => "abc", specific_min_run => 2001), 'Initialise valid irods with min run';
+
+my @files_metadata = ('/seq/2002/2002_5.bam','/seq/2002/2002_6#2.bam','/seq/2009/2009_1.bam','/seq/1001/1001_1.bam');
+ok my $actual_results = $update_pipelines_irods->_filter_file_locations_by_min_run_id(\@files_metadata);
+is_deeply($actual_results, ['/seq/2002/2002_5.bam','/seq/2002/2002_6#2.bam','/seq/2009/2009_1.bam'], 'run below 2001 filtered out');
+
+done_testing();
 
 # Fixme: shouldnt be here at all but cant get the module calling correctly
 sub sort_by_id_run

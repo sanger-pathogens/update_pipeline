@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-BEGIN { unshift(@INC, './modules') }
+BEGIN { unshift(@INC, './lib') }
 BEGIN {
     use Test::Most tests => 11;
     use_ok('UpdatePipeline::VRTrack::Study');

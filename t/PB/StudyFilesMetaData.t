@@ -6,7 +6,7 @@ use File::Slurp;
 use Test::MockObject;
 
 
-BEGIN { unshift( @INC, './modules' ) }
+BEGIN { unshift( @INC, './lib' ) }
 
 BEGIN {
     use Test::Most;
@@ -22,7 +22,7 @@ BEGIN {
     my $irods_file = Test::MockObject->new();
     $irods_file->fake_module( 'IRODS::File', test => sub{1} );
     $irods_file->fake_new( 'IRODS::File' );
-    $irods_file->mock('file_attributes', sub{ {md5 => 'abcefg12345667', run => 'run123', well => 'A02'} });
+    $irods_file->mock('file_attributes', sub{ {md5 => 'abcefg12345667', run => 'run123',ebi_run_acc => 'ERR1234', well => 'A02'} });
     
     
 }
@@ -63,6 +63,7 @@ is_deeply([
                    'sample_accession_number' => 'HIJ456',
                    'file_location' => '/path/to/data.0.bas',
                    'lane_name' => 'run123_A02',
+                   'ebi_run_acc' => 'ERR1234',
                    'md5' => 'abcefg12345667'
                  }, 'UpdatePipeline::PB::FileMetaData' )
         ], $obj->files_metadata(),'files found');

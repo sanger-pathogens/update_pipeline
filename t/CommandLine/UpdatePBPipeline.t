@@ -6,7 +6,7 @@ use File::Path qw( remove_tree);
 use Cwd;
 use Test::MockObject;
 
-BEGIN { unshift( @INC, './modules' ) }
+BEGIN { unshift( @INC, './lib' ) }
 BEGIN { unshift( @INC, './t/lib' ) }
 with 'TestHelper';
 

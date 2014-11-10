@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Data::Dumper;
 
-BEGIN { unshift(@INC, './modules') }
+BEGIN { unshift(@INC, './lib') }
 BEGIN {
     use Test::Most tests => 14;
     use_ok('UpdatePipeline::Validate');
