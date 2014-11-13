@@ -21,9 +21,9 @@ sub _build_irods_query
   my $no_pending_lanes_str = '';
   if($self->no_pending_lanes == 1 )
   {
-    $no_pending_lanes_str = " manual_qc = 1 ";
+    $no_pending_lanes_str = ' and manual_qc like "%"';
   }
-  return $self->bin_directory . "imeta qu -z seq -d study = '".$self->name."' and target = 1 and total_reads != 0 ".$no_pending_lanes_str." |";
+  return $self->bin_directory . "imeta qu -z seq -d study = '".$self->name."' and type = bam and target = 1 and total_reads != 0".$no_pending_lanes_str." |";
 }
 
 
