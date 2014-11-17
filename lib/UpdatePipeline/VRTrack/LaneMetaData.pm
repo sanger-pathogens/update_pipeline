@@ -44,6 +44,7 @@ sub _build_lane_attributes
   library.fragment_size_from as fragment_size_from,
   library.fragment_size_to as fragment_size_to,
   file.md5 as file_md5,
+  file.reference as reference,
   individual.name as individual_name,
   individual.alias as individual_alias
   from latest_lane as lane

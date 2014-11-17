@@ -165,12 +165,13 @@ sub _update_lane
 
 
     UpdatePipeline::VRTrack::File->new(
-      name => $file_metadata->file_name,
-      file_type => $file_metadata->file_type_number($file_metadata->file_type), 
-      md5 => $file_metadata->file_md5 , 
+      name         => $file_metadata->file_name,
+      file_type    => $file_metadata->file_type_number($file_metadata->file_type), 
+      md5          => $file_metadata->file_md5 , 
       override_md5 => $self->override_md5, 
-      _vrtrack => $self->_vrtrack,
-      _vr_lane => $vr_lane)->vr_file();
+      reference    => $file_metadata->reference,
+      _vrtrack     => $self->_vrtrack,
+      _vr_lane     => $vr_lane)->vr_file();
       
     if(defined($file_metadata->mate_file_name))
     {
