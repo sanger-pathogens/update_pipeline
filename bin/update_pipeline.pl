@@ -112,6 +112,7 @@ $no_pending_lanes ||=0;
 $override_md5 ||=0;
 $withdraw_del ||=0;
 $total_reads ||=0;
+$file_type  ||='bam';
 
 if(defined($lock_file))
 {
