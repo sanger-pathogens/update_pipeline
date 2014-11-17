@@ -27,7 +27,7 @@ use Parallel::ForkManager;
 use UpdatePipeline::UpdateAllMetaData;
 use UpdatePipeline::Studies;
 
-my ( $studyfile, $help, $number_of_files_to_return, $lock_file, $parallel_processes, $verbose_output, $errors_min_run_id, $database,$input_study_name, $update_if_changed, $dont_use_warehouse, $taxon_id, $overwrite_common_name, $use_supplier_name, $specific_run_id, $specific_min_run, $common_name_required, $no_pending_lanes, $species_name, $override_md5, $withdraw_del, $vrtrack_lanes, $total_reads );
+my ( $studyfile, $help, $file_type, $number_of_files_to_return, $lock_file, $parallel_processes, $verbose_output, $errors_min_run_id, $database,$input_study_name, $update_if_changed, $dont_use_warehouse, $taxon_id, $overwrite_common_name, $use_supplier_name, $specific_run_id, $specific_min_run, $common_name_required, $no_pending_lanes, $species_name, $override_md5, $withdraw_del, $vrtrack_lanes, $total_reads );
 
 GetOptions(
     's|studies=s'               => \$studyfile,
@@ -49,6 +49,7 @@ GetOptions(
     'wdr|withdraw_del'          => \$withdraw_del,
     'trd|include_total_reads'   => \$total_reads,    
     'l|lock_file=s'             => \$lock_file,
+    't|file_type=s'             => \$file_type,
     'h|help'                    => \$help,
 );
 
@@ -75,6 +76,7 @@ Usage: $0
   -wdr|--withdraw_del          <optionally withdraw a lane if has been deleted from iRODS>
   -trd|--include_total_reads   <optionally write the total_reads from bam metadata to the file table in vrtrack>  
   -l|--lock_file               <optional lock file to prevent multiple instances running>
+  -t|--file_type               <optionally change the default file type to import from bam (to cram)>
   -h|--help                    <this message>
 
 Update the tracking database from IRODs and the warehouse.
@@ -90,6 +92,9 @@ $0 -s my_study_file -d pathogen_abc_track -f 500
 
 # perform the update using 10 processes
 $0 -s my_study_file -d pathogen_abc_track -p 10
+
+# import cram files
+$0 -s my_study_file -d pathogen_abc_track --file_type cram
 
 USAGE
 
@@ -167,6 +172,7 @@ if($parallel_processes == 1)
     override_md5              => $override_md5,
     vrtrack_lanes             => $vrtrack_lanes,
     add_raw_reads             => $total_reads,
+    file_type                 => $file_type,
   );
   $update_pipeline->update();
 }
@@ -204,6 +210,7 @@ else
       override_md5              => $override_md5,
       vrtrack_lanes             => $vrtrack_lanes,
       add_raw_reads             => $total_reads,
+      file_type                 => $file_type,
     );
     $update_pipeline->update();
     $pm->finish; # do the exit in the child process

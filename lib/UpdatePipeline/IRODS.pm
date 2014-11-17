@@ -27,6 +27,7 @@ has '_irods_studies'            => ( is => 'rw', isa => 'ArrayRef',      lazy_bu
 has '_warehouse_dbh'            => ( is => 'rw',                         required => 1 );
 has 'no_pending_lanes'      => ( is => 'ro', default    => 0,            isa => 'Bool');
 has 'specific_min_run'      => ( is => 'ro', default    => 0,            isa => 'Int');
+has 'file_type'             => ( is => 'ro', default    => 'bam',        isa => 'Str');
 
 sub _build__irods_studies
 {
@@ -35,7 +36,7 @@ sub _build__irods_studies
   
   for my $study_name (@{$self->study_names})
   {
-     push(@irods_studies, IRODS::Study->new(name => $study_name, no_pending_lanes => $self->no_pending_lanes));
+     push(@irods_studies, IRODS::Study->new(name => $study_name, no_pending_lanes => $self->no_pending_lanes,file_type => $self->file_type ));
   }
    
   return \@irods_studies;

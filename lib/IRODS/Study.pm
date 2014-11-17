@@ -14,6 +14,7 @@ use Moose;
 extends 'IRODS::Files';
 
 has 'no_pending_lanes'      => ( is => 'ro', default    => 0,            isa => 'Bool');
+has 'file_type'             => ( is => 'ro', default    => 'bam',        isa => 'Str');
 
 sub _build_irods_query
 {
@@ -23,7 +24,7 @@ sub _build_irods_query
   {
     $no_pending_lanes_str = ' and manual_qc like "%"';
   }
-  return $self->bin_directory . "imeta qu -z seq -d study = '".$self->name."' and type = bam and target = 1 and total_reads != 0".$no_pending_lanes_str." |";
+  return $self->bin_directory . "imeta qu -z seq -d study = '".$self->name."' and type = ".$self->file_type." and target = 1 and total_reads != 0".$no_pending_lanes_str." |";
 }
 
 
