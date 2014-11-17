@@ -104,6 +104,11 @@ sub _differences_between_file_and_lane_meta_data
     return 1;
   }
   
+  if($self->_file_defined_and_not_equal($self->file_meta_data->reference,$self->lane_meta_data->{reference}))
+  {
+    return 1;
+  }
+  
   return 0; 
 }
 

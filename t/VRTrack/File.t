@@ -5,7 +5,7 @@ use Data::Dumper;
 
 BEGIN { unshift(@INC, './lib') }
 BEGIN {
-    use Test::Most tests => 13;
+    use Test::Most;
     use_ok('UpdatePipeline::VRTrack::File');
     use VRTrack::VRTrack;
     use UpdatePipeline::VRTrack::Project;
@@ -49,7 +49,16 @@ ok my $file5 = UpdatePipeline::VRTrack::File->new(name => 'myfile.bam',md5 => 'c
 ok my $vr_file5 = $file5->vr_file(), 'build vr file';
 is $vr_file5->md5, 'cde3456675232432432', 'MD5 has been successfully updated';
 
+
+# create a File object
+ok  $file = UpdatePipeline::VRTrack::File->new(name => 'myfile3.bam',md5 => 'abc123134343243222f2',reference => '/path/to/reference', _vrtrack => $vrtrack,_vr_lane => $vr_lane), 'add a reference file';
+ok  $vr_file = $file->vr_file(), 'build vr file';
+isa_ok $vr_file, "VRTrack::File";
+is_deeply $vr_file->reference, '/path/to/reference', 'lanes matches up';
+
+
 delete_test_data($vrtrack);
+done_testing();
 
 sub delete_test_data
 {

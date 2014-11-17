@@ -58,6 +58,7 @@ BEGIN {
       total_reads => '100200300',
       type => 'bam',
       is_paired_read => 1,
+      reference => '/path/to/reference'
     );
     $irods_file->mock('file_attributes', sub{ \%irods_file_expected_output });
     $irods_file->mock('lane_manual_qc', sub{ 'pass' });   
@@ -111,8 +112,8 @@ is("AB_CD_EF 1",    $vrtrack->{_dbh}->selectrow_arrayref('select name from lates
 is("AB_CD_EF",          $vrtrack->{_dbh}->selectrow_arrayref('select name from latest_sample where name like "AB_CD_EF"')->[0],'Sample name added');
 is("ABC_study",          $vrtrack->{_dbh}->selectrow_arrayref('select name from latest_project where name like "ABC_study"')->[0],'Project name added');
 is("AB_CD_EF",          $vrtrack->{_dbh}->selectrow_arrayref('select name from individual where name like "AB_CD_EF"')->[0],'Individual name added');
-is("2442_5.bam",$vrtrack->{_dbh}->selectrow_arrayref('select name from file where name like "2442_5.bam"')->[0],'File name added');
-
+is("2442_5.bam",$vrtrack->{_dbh}->selectrow_arrayref('select name from latest_file where name like "2442_5.bam"')->[0],'File name added');
+is("/path/to/reference",$vrtrack->{_dbh}->selectrow_arrayref('select reference from latest_file where name like "2442_5.bam"')->[0],'File reference added');
 
 delete_inserted_vrtrack_test_data($vrtrack);
 delete_vrtrack_test_data($vrtrack);
