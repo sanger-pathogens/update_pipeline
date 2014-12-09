@@ -24,7 +24,8 @@ sub _build_irods_query
   {
     $no_pending_lanes_str = ' and manual_qc like "%"';
   }
-  return $self->bin_directory . "imeta qu -z seq -d study = '".$self->name."' and type = ".$self->file_type." and total_reads != 0 ".$no_pending_lanes_str." and target = 1|";
+
+  return $self->bin_directory . "imeta qu -z seq -d target = 1 ".$no_pending_lanes_str." and type = ".$self->file_type." and total_reads != 0 and study = '".$self->name."' |";
 }
 
 
