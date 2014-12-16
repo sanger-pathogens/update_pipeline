@@ -316,6 +316,7 @@ sub _update_md5_of_file_in_database
      my $expected_name = $pipeline_filename;
      if($vfile->name =~ /$expected_name/)
      {
+       next if(defined($vfile->md5));
        my $md5_of_gzip_file = $self->_calculate_md5_of_gzip_file($source_file);
        
        # save to DB
