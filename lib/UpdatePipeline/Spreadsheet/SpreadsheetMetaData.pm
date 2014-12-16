@@ -71,8 +71,20 @@ sub _build__sequencing_experiments
 {
   my ($self) = @_;
   my @sequencing_experiements_array;
+  
+  my %file_seen_before;
   for my $raw_row (@{$self->raw_rows})
   {
+    if($file_seen_before{$raw_row->{filename}} )
+    {
+      delete($self->raw_rows->{$raw_row});
+    }
+    $file_seen_before{$raw_row->{filename}}++;
+  }
+  
+  for my $raw_row (@{$self->raw_rows})
+  {
+     next unless( defined($raw_row));
      push(@sequencing_experiements_array, UpdatePipeline::Spreadsheet::SequencingExperimentMetaData->new($raw_row));
   } 
   return \@sequencing_experiements_array;
