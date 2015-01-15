@@ -42,8 +42,8 @@ is $fm_name_multiplexed_library_tube->library_ssid, 2222, 'library ssid should b
 
 # populate the fragment sizes based on the library ssid.
 ok (Warehouse::Library->new(file_meta_data => $fm_ssid_library_tube, _dbh => $dbh)->post_populate());
-is $fm_ssid_library_tube->fragment_size_from, 200, 'fragment size from should be populated';
-is $fm_ssid_library_tube->fragment_size_to, 300, 'fragment size to should be populated';
+is $fm_ssid_library_tube->fragment_size_from, undef, 'fragment size from shouldnt be populated for a multiplexed lane';
+is $fm_ssid_library_tube->fragment_size_to, undef, 'fragment size to should be populated for a multiplexed lane';
 
 # fragment sizes already set so dont change
 ok my $fm_ssid_library_tube_frag_sizes_exist = UpdatePipeline::FileMetaData->new(file_name => '1234_5#6.bam', file_name_without_extension =>  '1234_5#6', library_ssid => 1111, fragment_size_from => 1, fragment_size_to => 9), 'create file metadata with library tube ssid where fragment sizes already exist';
