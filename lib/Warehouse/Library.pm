@@ -35,7 +35,7 @@ sub populate
 sub post_populate
 {
   my($self) = @_;
-  return if(($self->file_meta_data->file_name_without_extension =~ /#/));
+  return 1 if(($self->file_meta_data->file_name_without_extension =~ /#/));
   return unless(defined($self->file_meta_data->library_ssid));
   return unless((!defined($self->file_meta_data->fragment_size_from))   ||  (!defined($self->file_meta_data->fragment_size_to)));
   
