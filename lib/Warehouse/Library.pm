@@ -35,33 +35,15 @@ sub populate
 sub post_populate
 {
   my($self) = @_;
+  return if(($self->file_meta_data->file_name_without_extension =~ /#/));
   return unless(defined($self->file_meta_data->library_ssid));
   return unless((!defined($self->file_meta_data->fragment_size_from))   ||  (!defined($self->file_meta_data->fragment_size_to)));
   
   # only available on a library tube
-  $self->_populate_fragment_size_from_library_tube_ssid;
   $self->_populate_fragment_size_via_batch_requests_from_library_tube_ssid;
   1;
 }
 
-sub _populate_fragment_size_from_library_tube_ssid
-{
-  my($self) = @_;
-  if((!defined($self->file_meta_data->fragment_size_from))   ||  (!defined($self->file_meta_data->fragment_size_to)))
-  {
-    my $library_ssid = $self->file_meta_data->library_ssid;
-    
-    my $sql = qq[select fragment_size_required_from,fragment_size_required_to from current_library_tubes where internal_id = "$library_ssid" AND fragment_size_required_from is not NULL AND fragment_size_required_to is not NULL limit 1;];
-    my $sth = $self->_dbh->prepare($sql);
-    $sth->execute;
-    my @library_warehouse_details  = $sth->fetchrow_array;
-    if(@library_warehouse_details > 0)
-    {
-      $self->file_meta_data->fragment_size_from($library_warehouse_details[0]);
-      $self->file_meta_data->fragment_size_to($library_warehouse_details[1]);
-    }
-  }
-}
 
 sub _populate_fragment_size_via_batch_requests_from_library_tube_ssid
 {
