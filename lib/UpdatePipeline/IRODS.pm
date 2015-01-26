@@ -83,7 +83,6 @@ sub _build_files_metadata {
             );
         };
         if ($@) {
-
             # An error occured while trying to get data from IRODs, usually a transient error which will probably be fixed next time its run
             next;
         }
@@ -95,7 +94,6 @@ sub _build_files_metadata {
     }
 
     my @sorted_files_metadata = reverse( ( sort ( sort_by_file_name @files_metadata ) ) );
-    $self->_limit_returned_results( \@sorted_files_metadata );
 
     return \@sorted_files_metadata;
 }
@@ -115,8 +113,7 @@ sub _get_irods_file_metadata_for_studies {
     # Allows you to only check the latest X runs.
     @sorted_file_locations = ( sort ( sort_by_id_run @unsorted_file_locations ) );
     $self->_limit_returned_results( \@sorted_file_locations );
-    my $min_run_filtered = $self->_filter_file_locations_by_min_run_id( \@sorted_file_locations );
-    for my $file_location ( @{$min_run_filtered} ) {
+    for my $file_location ( @sorted_file_locations} ) {
         push( @files_metadata, IRODS::File->new( file_location => $file_location )->file_attributes );
     }
 
