@@ -115,7 +115,7 @@ sub _get_irods_file_metadata_for_studies {
     @sorted_file_locations = ( sort ( sort_by_id_run @unsorted_file_locations ) );
     $self->_limit_returned_results( \@sorted_file_locations );
     for my $file_location ( @sorted_file_locations ) {
-        print "Syncing file: $file_location\n";
+        print "Syncing file: $file_location\n" if($self->verbose_output);
         push( @files_metadata, IRODS::File->new( file_location => $file_location )->file_attributes );
     }
 
