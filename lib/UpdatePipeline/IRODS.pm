@@ -30,7 +30,7 @@ has '_warehouse_dbh'   => ( is => 'rw', required => 1 );
 has 'no_pending_lanes' => ( is => 'ro', default  => 0, isa => 'Bool' );
 has 'specific_min_run' => ( is => 'ro', default  => 0, isa => 'Int' );
 has 'file_type'        => ( is => 'ro', default  => 'bam', isa => 'Str' );
-has 'verbose_output'        => ( is => 'rw', default    => 0,            isa => 'Bool');
+has 'verbose_output'   => ( is => 'rw', default  => 0,     isa => 'Bool');
 
 sub _build__irods_studies {
     my ($self) = @_;
@@ -115,7 +115,7 @@ sub _get_irods_file_metadata_for_studies {
     @sorted_file_locations = ( sort ( sort_by_id_run @unsorted_file_locations ) );
     $self->_limit_returned_results( \@sorted_file_locations );
     for my $file_location ( @sorted_file_locations ) {
-        print "Syncing lane: ".$self->verbose_output."\n";
+        print "Syncing file: $file_location\n";
         push( @files_metadata, IRODS::File->new( file_location => $file_location )->file_attributes );
     }
 
