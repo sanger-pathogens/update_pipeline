@@ -8,6 +8,7 @@ has 'study_names'               => ( is => 'rw', isa => 'ArrayRef', required   =
 has 'no_pending_lanes'      => ( is => 'ro', default    => 0,            isa => 'Bool');
 has 'specific_min_run'      => ( is => 'ro', default    => 0,            isa => 'Int');
 has 'file_type'             => ( is => 'ro', default    => 'bam',        isa => 'Str');
+has 'verbose_output'        => ( is => 'rw', default    => 0,            isa => 'Bool');
 
 sub _build__files_metadata
 {
@@ -18,7 +19,8 @@ sub _build__files_metadata
     no_pending_lanes          => $self->no_pending_lanes,
     _warehouse_dbh            => $self->_warehouse_dbh,
     specific_min_run          => $self->specific_min_run,
-    file_type                 => $self->file_type
+    file_type                 => $self->file_type,
+    verbose_output            => $self->verbose_output
     )->files_metadata();
   return $irods_files_metadata;
 }

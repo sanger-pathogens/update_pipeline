@@ -28,7 +28,6 @@ has '_exception_handler'    => ( is => 'rw', lazy_build => 1,            isa => 
 has '_config_settings'      => ( is => 'rw', lazy_build => 1,            isa => 'HashRef' );
 has '_database_settings'    => ( is => 'rw', lazy_build => 1,            isa => 'HashRef' );
                            
-has 'verbose_output'        => ( is => 'rw', default    => 0,            isa => 'Bool');
 has 'update_if_changed'     => ( is => 'rw', default    => 0,            isa => 'Bool');
 has 'dont_use_warehouse'    => ( is => 'ro', default    => 0,            isa => 'Bool');
 has 'use_supplier_name'     => ( is => 'ro', default    => 0,            isa => 'Bool');

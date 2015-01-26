@@ -15,6 +15,7 @@ extends 'IRODS::Files';
 
 has 'no_pending_lanes'      => ( is => 'ro', default    => 0,            isa => 'Bool');
 has 'file_type'             => ( is => 'ro', default    => 'bam',        isa => 'Str');
+has 'specific_min_run'      => ( is => 'ro', default    => 0,            isa => 'Int');
 
 sub _build_irods_query
 {
@@ -24,8 +25,14 @@ sub _build_irods_query
   {
     $no_pending_lanes_str = ' and manual_qc like "%"';
   }
+  
+  my $specific_min_run_str = '';
+  if($self->specific_min_run > 0)
+  {
+   $specific_min_run_str = "and id_run 'n>=' ".$self->specific_min_run;
+  }
 
-  return $self->bin_directory . "imeta qu -z seq -d target = 1 ".$no_pending_lanes_str." and type = ".$self->file_type." and total_reads != 0 and study = '".$self->name."' |";
+  return $self->bin_directory . "imeta qu -z seq -d target = 1 $no_pending_lanes_str and type = ".$self->file_type." $specific_min_run_str and total_reads != 0 and study = '".$self->name."' |";
 }
 
 

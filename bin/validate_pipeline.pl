@@ -23,12 +23,13 @@ use VertRes::Utils::VRTrackFactory;
 use UpdatePipeline::Validate;
 use UpdatePipeline::Studies;
 
-my ( $studyfile, $help, $database, $read_count_consistency_check_requested, $no_pending_lanes, $file_type);
+my ( $studyfile, $help, $database, $read_count_consistency_check_requested, $no_pending_lanes,$specific_min_run, $file_type);
 
 GetOptions(
     'p|studies=s'      => \$studyfile,
     'd|database=s'     => \$database,
     'c|checkreadcount' => \$read_count_consistency_check_requested,
+    'min|specific_min_run=i'  => \$specific_min_run,
     'nop|no_pending_lanes' => \$no_pending_lanes,
     't|file_type=s'    => \$file_type,
     'h|help'           => \$help,
@@ -43,6 +44,7 @@ my $db = $database ;
                 --checkreadcount        <activate read count consistency evaluation (IO intensive)>
                 -nop|--no_pending_lanes <optionally filter out lanes whose npg QC status is pending>
                 --file_type             <cram or bam, defaults to bam>
+                --specific_min_run      <dont check lanes below this run id (default 10000)>
                 --help                  <this message>
 
 Check to see if the pipeline is valid compared to the data stored in IRODS
@@ -50,6 +52,7 @@ Check to see if the pipeline is valid compared to the data stored in IRODS
 USAGE
 
 $file_type ||= 'bam';
+$specific_min_run ||=10000;
 
 my $vrtrack = VertRes::Utils::VRTrackFactory->instantiate(
     database => $db,
@@ -62,7 +65,7 @@ unless ($vrtrack) {
 
 my @study_names = UpdatePipeline::Studies->new(filename => $studyfile)->study_names;
 
-my $validate_pipeline = UpdatePipeline::Validate->new(study_names => @study_names, _vrtrack => $vrtrack, file_type => $file_type);
+my $validate_pipeline = UpdatePipeline::Validate->new(study_names => @study_names, _vrtrack => $vrtrack, file_type => $file_type,  specific_min_run   => $specific_min_run,);
 
 if ($read_count_consistency_check_requested) 
 {
