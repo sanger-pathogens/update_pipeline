@@ -152,6 +152,7 @@ if ( $parallel_processes == 1 ) {
         }
     }
     for my $study_name ( @{$study_names} ) {
+        print "Updating study: $study_name\n" if($verbose_output);
         my $update_pipeline = UpdatePipeline::UpdateAllMetaData->new(
             study_names               => [$study_name],
             _vrtrack                  => $vrtrack,
