@@ -113,7 +113,7 @@ sub _get_irods_file_metadata_for_studies {
     # Allows you to only check the latest X runs.
     @sorted_file_locations = ( sort ( sort_by_id_run @unsorted_file_locations ) );
     $self->_limit_returned_results( \@sorted_file_locations );
-    for my $file_location ( @sorted_file_locations} ) {
+    for my $file_location ( @sorted_file_locations ) {
         push( @files_metadata, IRODS::File->new( file_location => $file_location )->file_attributes );
     }
 
