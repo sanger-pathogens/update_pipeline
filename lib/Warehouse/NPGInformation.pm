@@ -45,6 +45,7 @@ sub populate
     && defined($self->file_meta_data->library_name) 
     && $self->file_meta_data->lane_manual_qc ne '-' 
     && $self->file_meta_data->lane_manual_qc ne 'pending'
+	&& defined($self->file_meta_data->run_date)
   )
   {
    return 1 ; 
@@ -63,7 +64,7 @@ sub _populate_from_npg_information_table
   {
     my $id_run = $self->_id_run;
     my $position = $self->_position;
-    my $sql = qq[select study_id, sample_id, asset_id, asset_name, paired_read from npg_information where id_run = "$id_run" AND position = $position limit 1;];
+    my $sql = qq[select study_id, sample_id, asset_id, asset_name, paired_read, run_complete from npg_information where id_run = "$id_run" AND position = $position limit 1;];
     my $sth = $self->_dbh->prepare($sql);
     $sth->execute;
     my @study_warehouse_details  = $sth->fetchrow_array;
@@ -71,6 +72,7 @@ sub _populate_from_npg_information_table
     {
       $self->file_meta_data->study_ssid($study_warehouse_details[0])   if(!defined($self->file_meta_data->study_ssid));
       $self->file_meta_data->lane_is_paired_read($study_warehouse_details[4]) if(defined($study_warehouse_details[4]));
+	  $self->file_meta_data->run_date($study_warehouse_details[5]) if(defined($study_warehouse_details[5]));
       
       if(! ($self->file_meta_data->file_name_without_extension =~ /#/))
       {

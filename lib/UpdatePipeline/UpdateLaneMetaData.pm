@@ -74,7 +74,7 @@ sub _differences_between_file_and_lane_meta_data
     UpdatePipeline::Exceptions::PathToLaneChanged->throw( error => $error_message );
   }
 
-  my @fields_to_check_file_defined_and_not_equal =  $self->common_name_required ? ("study_name", "library_name","sample_common_name", "study_accession_number","sample_accession_number","library_ssid", "lane_is_paired_read","lane_manual_qc", "study_ssid","sample_ssid","ebi_run_acc") : ("study_name", "library_name", "study_accession_number","sample_accession_number","library_ssid", "ebi_run_acc", "lane_is_paired_read","lane_manual_qc", "study_ssid","sample_ssid");
+  my @fields_to_check_file_defined_and_not_equal =  $self->common_name_required ? ("study_name", "library_name","sample_common_name", "study_accession_number","sample_accession_number","library_ssid", "lane_is_paired_read","lane_manual_qc", "study_ssid","sample_ssid","ebi_run_acc") : ("study_name", "library_name", "study_accession_number","sample_accession_number","library_ssid", "ebi_run_acc", "lane_is_paired_read","lane_manual_qc", "study_ssid","sample_ssid","run_date");
   push(@fields_to_check_file_defined_and_not_equal, 'file_md5') if $self->check_file_md5s;
   for my $field_name (@fields_to_check_file_defined_and_not_equal)
   {

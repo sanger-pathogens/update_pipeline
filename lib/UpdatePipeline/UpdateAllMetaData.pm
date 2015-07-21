@@ -159,6 +159,7 @@ sub _update_lane
       raw_reads     => $file_metadata->total_reads, 
       add_raw_reads => $self->add_raw_reads,
       ebi_run_acc   => $file_metadata->ebi_run_acc,
+	  run_date      => $file_metadata->run_date,
       _vrtrack      => $self->_vrtrack,
       _vr_library   => $vr_library)->vr_lane();
 
