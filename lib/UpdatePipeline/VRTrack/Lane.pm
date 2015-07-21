@@ -23,6 +23,7 @@ has 'paired'        => ( is => 'rw', isa => 'Bool', default    => 1 );
 has 'raw_reads'     => ( is => 'rw', isa => 'Maybe[Int]',  default    => 0 );
 has 'add_raw_reads' => ( is => 'rw', isa => 'Bool', default    => 0 );
 has 'ebi_run_acc'   => ( is => 'rw', isa => 'Maybe[Str]' );
+has 'run_date'      => ( is => 'rw', isa => 'Maybe[Str]' );
 has '_vrtrack'      => ( is => 'rw',                required   => 1 );
 has '_vr_library'   => ( is => 'rw',                required   => 1 );
 
@@ -48,7 +49,7 @@ sub _build_vr_lane
   my $raw_reads = $self->add_raw_reads ? $self->raw_reads : 0;
   $vlane->raw_reads($raw_reads) unless $vlane->raw_reads;
   $vlane->raw_bases(0) if(not defined($vlane->raw_bases));
-  
+  $vlane->run_date($self->run_date);  
   $vlane->npg_qc_status( $self->npg_qc_status );
   $vlane->is_paired( $self->paired );
   $vlane->acc($self->ebi_run_acc);
