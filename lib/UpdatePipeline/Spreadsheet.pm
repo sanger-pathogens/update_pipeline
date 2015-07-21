@@ -265,20 +265,17 @@ sub _get_fastqs_readcount
     my ($self,$lane_dir,$fastq_1,$fastq_2) = @_;
     my $tot_number_sequences = 0;
     my $tot_sequence_len = 0;
-
     for my $fastq ($fastq_1,$fastq_2)
     {
         next unless defined($fastq); # $fastq_2 undefined for single-ended
         my $fastq_file = join('/',$lane_dir,$fastq);
-        open(my $fh, qq[zcat $fastq_file |]) or UpdatePipeline::Exceptions::InvalidSpreadsheet->throw( error => "Failed to open $fastq_file: $!");
+        open(my $fh, qq[gunzip -c $fastq_file |]) or UpdatePipeline::Exceptions::InvalidSpreadsheet->throw( error => "Failed to open $fastq_file: $!");
         my $fastq_in = Bio::SeqIO->new(-format => 'fastq', -fh => $fh);
         my $first_seq = $fastq_in->next_seq;
         close($fh);
-
-        my $lines_in_file = qx/zcat $fastq_file | wc -l/; # use wc for linecount
+        my $lines_in_file = qx/gunzip -c $fastq_file | wc -l/; # use wc for linecount
         UpdatePipeline::Exceptions::InvalidSpreadsheet->throw( error => "Failed to get line count from $fastq_file") unless defined $lines_in_file ;
         my $number_of_sequences = $lines_in_file/4;
-
         $tot_number_sequences += $number_of_sequences;
         $tot_sequence_len += $first_seq->length * $number_of_sequences;
     }
@@ -301,7 +298,6 @@ sub _copy_files
      
      # create fastqcheck file from the original file
      `gunzip -c $source_file | sed 's/ /_/g' | fastqcheck > $target_file.fastqcheck`;
-     
      $pm->finish; # do the exit in the child process
    }
    $pm->wait_all_children;
