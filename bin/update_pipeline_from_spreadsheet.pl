@@ -30,7 +30,7 @@ GetOptions(
     'f|files_to_add_directory=s'  => \$files_to_add_directory,
     'p|pipeline_base_directory=s' => \$pipeline_base_directory,
     'u|update_if_changed'       => \$update_if_changed,
-	't|threads'                 => \$threads,
+    't|threads=i'                 => \$threads,
     'h|help'                    => \$help,
 );
 
