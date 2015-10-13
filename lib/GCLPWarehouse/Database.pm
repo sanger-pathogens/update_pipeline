@@ -8,6 +8,7 @@ has 'settings'   => ( is => 'rw', isa => 'HashRef', required   => 1 );
 sub connect
 {
   my ($self) = @_;
+  
   my $name     = $self->settings->{database};
   my $host     = $self->settings->{host};
   my $port     = $self->settings->{port};

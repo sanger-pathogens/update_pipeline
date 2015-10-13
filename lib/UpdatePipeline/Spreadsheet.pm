@@ -29,6 +29,7 @@ extends "UpdatePipeline::UpdateAllMetaData";
 has 'filename'                => ( is => 'ro', isa => 'Str',      required => 1 );
 has 'files_base_directory'    => ( is => 'ro', isa => 'Maybe[Str]');
 has 'pipeline_base_directory' => ( is => 'ro', isa => 'Maybe[Str]');
+has 'data_access_group'       => ( is => 'ro', isa => 'Maybe[Str]');
 has 'parallel_processes'      => ( is => 'ro', isa => 'Int',    default => 4);
 
 
@@ -87,6 +88,7 @@ sub _populate_files_metadata_with_dummy_ssids
     $file_metadata->study_ssid($self->_study_ssid($file_metadata->study_name));
     $file_metadata->library_ssid($self->_library_ssid($file_metadata->library_name));
     $file_metadata->sample_ssid($self->_sample_ssid($file_metadata->sample_name));
+	$file_metadata->data_access_group($self->data_access_group);
   }
 
   return $self;

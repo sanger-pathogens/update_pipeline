@@ -22,7 +22,7 @@ use VRTrack::VRTrack;
 use VertRes::Utils::VRTrackFactory;
 use UpdatePipeline::Spreadsheet;
 
-my ( $help, $verbose_output, $database, $update_if_changed, $files_to_add_directory,$pipeline_base_directory,$threads );
+my ( $help, $verbose_output, $database, $update_if_changed, $files_to_add_directory,$pipeline_base_directory,$threads,$data_access_group );
 
 GetOptions(
     'd|database=s'              => \$database,
@@ -31,6 +31,7 @@ GetOptions(
     'p|pipeline_base_directory=s' => \$pipeline_base_directory,
     'u|update_if_changed'       => \$update_if_changed,
     't|threads=i'                 => \$threads,
+	'r|data_access_group=s'     => \$data_access_group,
     'h|help'                    => \$help,
 );
 
@@ -45,6 +46,7 @@ Usage: $0 [options] spreadsheet.xls
   -p|--pipeline_base_directory <required if -f provided, path to sequencing pipeline root directory>
   -u|--update_if_changed       <optionally delete lane & file entries, if metadata changes, for reimport>
   -t|--threads                 <number of threads to use>
+  -r|--data_access_group       <restrict access to this unix group>
 
   -h|--help                    <this message>
 
@@ -72,7 +74,8 @@ my $spreadsheet = UpdatePipeline::Spreadsheet->new(
   study_names          => [],
   files_base_directory => $files_to_add_directory,
   pipeline_base_directory => $pipeline_base_directory,
-  parallel_processes => $threads
+  parallel_processes => $threads,
+  data_access_group  => $data_access_group,
 );
 $spreadsheet->update();
 $spreadsheet->import_sequencing_files_to_pipeline() if(defined($files_to_add_directory));

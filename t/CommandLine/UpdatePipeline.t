@@ -22,6 +22,12 @@ BEGIN {
     $warehouse->fake_new( 'Warehouse::FileMetaDataPopulation' );
     $warehouse->mock('populate', sub{1});
     $warehouse->mock('post_populate', sub{1});
+	
+    my $gclp_warehouse = Test::MockObject->new();
+    $gclp_warehouse->fake_module( 'GCLPWarehouse::FileMetaDataPopulation', test => sub{1} );
+    $gclp_warehouse->fake_new( 'GCLPWarehouse::FileMetaDataPopulation' );
+    $gclp_warehouse->mock('populate', sub{1});
+    $gclp_warehouse->mock('post_populate', sub{1});
     
     # mock the call to the IRODS::Study
     my $irods_study = Test::MockObject->new();
@@ -102,7 +108,9 @@ ok(my $update_pipeline = UpdatePipeline::UpdateAllMetaData->new(
     no_pending_lanes          => $no_pending_lanes,
     override_md5              => $override_md5,
     vrtrack_lanes             => undef,
-    add_raw_reads             => $total_reads,)
+    add_raw_reads             => $total_reads,
+	environment               => 'test'
+	)
   , 'create the update metadata object');
 ok($update_pipeline->update(), 'Run the update');
 

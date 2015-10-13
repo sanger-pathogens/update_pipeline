@@ -13,7 +13,7 @@ BEGIN {
 }
 # connect to the test warehouse database
 my $database_settings = Pathogens::ConfigSettings->new(environment => 'test', filename => 'database.yml')->settings();
-my $dbh = GCLPWarehouse::Database->new(settings => $database_settings->{gclpwarehouse})->connect;
+my $dbh = GCLPWarehouse::Database->new(settings => $database_settings->{gclp_warehouse})->connect;
 
 delete_test_data($dbh);
 $dbh->do('insert into study (id_lims,id_study_lims,data_access_group) values("SQSCP",123, "unix_group_1")');

@@ -15,11 +15,11 @@ my $vr_project = $project->vr_project();
 use VRTrack::Project;
 use Moose;
 
-has 'name'       => ( is => 'rw', isa => 'Str', required   => 1 );
-has '_vrtrack'   => ( is => 'rw',               required   => 1 );
-has 'vr_project' => ( is => 'rw',               lazy_build => 1 );
-
-has 'external_id' => ( is => 'ro', isa => 'Maybe[Int]' );
+has 'name'               => ( is => 'rw', isa => 'Str', required   => 1 );
+has '_vrtrack'           => ( is => 'rw',               required   => 1 );
+has 'vr_project'         => ( is => 'rw',               lazy_build => 1 );
+has 'external_id'        => ( is => 'ro', isa => 'Maybe[Int]' );
+has 'data_access_group'  => ( is => 'rw', isa => 'Maybe[Str]');
 
 sub _build_vr_project
 {
@@ -33,6 +33,7 @@ sub _build_vr_project
   }
   UpdatePipeline::Exceptions::CouldntCreateProject->throw( error => "Couldnt create project with name ".$self->name."\n" ) if(not defined($vproject));
   $vproject->ssid($self->external_id);
+  $vproject->data_access_group($self->data_access_group);
   $vproject->update;
   
   return $vproject;

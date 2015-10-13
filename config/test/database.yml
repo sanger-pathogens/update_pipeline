@@ -3,7 +3,7 @@ warehouse:
   host:     localhost
   port:     3306
   user:     root
-gclpwarehouse:
+gclp_warehouse:
   database: gclp_mlwarehouse
   host:     localhost
   port:     3306
