@@ -39,6 +39,7 @@ has 'id_run'                           => ( is => 'rw', isa => 'Maybe[Int]' );
 has 'ebi_run_acc'                      => ( is => 'rw', isa => 'Maybe[Str]' );
 has 'reference'                        => ( is => 'rw', isa => 'Maybe[Str]' );
 has 'run_date'                         => ( is => 'rw', isa => 'Maybe[Str]' );
+has 'data_access_group'                => ( is => 'rw', isa => 'Maybe[Str]' );
 
 sub file_type_number
 {

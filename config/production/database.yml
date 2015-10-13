@@ -3,3 +3,10 @@ warehouse:
   host:     seqw-db
   port:     3379
   user:     warehouse_ro
+gclpwarehouse:
+  database: gclp_mlwarehouse
+  host:     vm-mii-gclp
+  port:     3435
+  user:     insert_username
+  password: insert_password
+  
