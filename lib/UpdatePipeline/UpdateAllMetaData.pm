@@ -124,7 +124,7 @@ sub _update_lane
 {
   my ($self, $file_metadata) = @_;
   eval {
-    my $vproject = UpdatePipeline::VRTrack::Project->new(name => $file_metadata->study_name, external_id => $file_metadata->study_ssid, _vrtrack => $self->_vrtrack)->vr_project();
+    my $vproject = UpdatePipeline::VRTrack::Project->new(name => $file_metadata->study_name, external_id => $file_metadata->study_ssid, $file_metadata->data_access_group,  _vrtrack => $self->_vrtrack)->vr_project();
     if(defined($file_metadata->study_accession_number))
     {
       my $vstudy   = UpdatePipeline::VRTrack::Study->new(accession => $file_metadata->study_accession_number, _vr_project => $vproject)->vr_study();

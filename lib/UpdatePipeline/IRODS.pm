@@ -20,6 +20,7 @@ use IRODS::File;
 use Warehouse::Database;
 use UpdatePipeline::FileMetaData;
 use Warehouse::FileMetaDataPopulation;
+use GCLPWarehouse::FileMetaDataPopulation;
 
 has 'study_names'    => ( is => 'rw', isa => 'ArrayRef[Str]', required   => 1 );
 has 'files_metadata' => ( is => 'rw', isa => 'ArrayRef',      lazy_build => 1 );
@@ -27,6 +28,7 @@ has 'number_of_files_to_return' => ( is => 'rw', isa => 'Maybe[Int]' );
 
 has '_irods_studies'   => ( is => 'rw', isa => 'ArrayRef', lazy_build => 1 );
 has '_warehouse_dbh'   => ( is => 'rw', required => 1 );
+has '_gclp_warehouse_dbh' => ( is => 'rw', required => 1 );
 has 'no_pending_lanes' => ( is => 'ro', default  => 0, isa => 'Bool' );
 has 'specific_min_run' => ( is => 'ro', default  => 0, isa => 'Int' );
 has 'file_type'        => ( is => 'ro', default  => 'bam', isa => 'Str' );
@@ -90,6 +92,9 @@ sub _build_files_metadata {
 
         # fill in the blanks with data from the warehouse
         Warehouse::FileMetaDataPopulation->new( file_meta_data => $file_metadata, _dbh => $self->_warehouse_dbh )->populate();
+		
+        # fill in the blanks with data from the GCLP warehouse
+        GCLPWarehouse::FileMetaDataPopulation->new( file_meta_data => $file_metadata, _dbh => $self->_gclp_warehouse_dbh )->populate();
 
         push( @files_metadata, $file_metadata );
     }
