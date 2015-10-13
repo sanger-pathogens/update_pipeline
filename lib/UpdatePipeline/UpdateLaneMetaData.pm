@@ -109,6 +109,11 @@ sub _differences_between_file_and_lane_meta_data
     return 1;
   }
   
+  if($self->_file_defined_and_not_equal($self->file_meta_data->data_access_group,$self->lane_meta_data->{data_access_group}))
+  {
+    return 1;
+  }
+  
   return 0; 
 }
 

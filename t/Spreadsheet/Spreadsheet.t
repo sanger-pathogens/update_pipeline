@@ -18,11 +18,7 @@ BEGIN {
   $ncbi_taxon_lookup->mock('common_name', sub{ 'Some Common Name' });
 }
 
-my $vrtrack = VRTrack::VRTrack->new({database => "vrtrack_test",host => "localhost",port => 3306,user => "root",password => undef});
-delete_test_data($vrtrack);
-$vrtrack->{_dbh}->do("INSERT INTO `project` (`project_id`,`ssid`,`name`, `hierarchy_name`,`study_id`,`changed`,`latest`) VALUES	(1,123,'My Study Name','My_Study_Name',1,NOW(),1)");
-$vrtrack->{_dbh}->do("INSERT INTO `sample`  (`sample_id`, `ssid`,`name`, `hierarchy_name`,`changed`,`latest`) VALUES	(1,456,'2','2',NOW(),1)");
-$vrtrack->{_dbh}->do("INSERT INTO `library` (`library_id`,`ssid`,`name`, `hierarchy_name`,`changed`,`latest`) VALUES	(1,789,'ABC45678','ABC45678',NOW(),1)");
+my $vrtrack = initialse_test_setup();
 
 ok my $spreadsheet = UpdatePipeline::Spreadsheet->new(
   filename                => 't/data/external_data_example.xls',
@@ -91,9 +87,41 @@ is $vlane_updated_2->raw_reads,   5, 'paired ended lane reads correct';
 is $vlane_updated_2->raw_bases, 525, 'paired ended lane bases correct';
 is $vlane_updated_2->read_len,  105, 'paired ended lane readlen correct';
 
+rmtree('t/data/pipeline_base_directory');
+delete_test_data($vrtrack);
+
+###################################
+$vrtrack = initialse_test_setup();
+
+ok(my $spreadsheet_data_access_group = UpdatePipeline::Spreadsheet->new(
+  filename                => 't/data/external_data_example.xls',
+  _vrtrack                => $vrtrack,
+  study_names             => [],
+  dont_use_warehouse      => 1,
+  common_name_required    => 0,
+  pipeline_base_directory => 't/data/pipeline_base_directory',
+  files_base_directory    => 't/data/path/to/sequencing',
+  data_access_group       => 'unix_group_1'
+), 'initialise spreadsheet driver class data access group');
+ok($spreadsheet_data_access_group->_files_metadata, 'generate the files metadata');
+is($spreadsheet_data_access_group->_files_metadata->[0]->data_access_group, 'unix_group_1', 'data access group returned');
+ok $spreadsheet_data_access_group->update();
+ok(my $vproject_access_group = VRTrack::Project->new_by_name( $vrtrack, 'My Study Name'), 'retrieve the project object');
+is($vproject_access_group->data_access_group(), 'unix_group_1', 'check data access group on project');
+
 done_testing();
 rmtree('t/data/pipeline_base_directory');
 delete_test_data($vrtrack);
+
+sub initialse_test_setup
+{
+	my $vrtrack = VRTrack::VRTrack->new({database => "vrtrack_test",host => "localhost",port => 3306,user => "root",password => undef});
+	delete_test_data($vrtrack);
+	$vrtrack->{_dbh}->do("INSERT INTO `project` (`project_id`,`ssid`,`name`, `hierarchy_name`,`study_id`,`changed`,`latest`) VALUES	(1,123,'My Study Name','My_Study_Name',1,NOW(),1)");
+	$vrtrack->{_dbh}->do("INSERT INTO `sample`  (`sample_id`, `ssid`,`name`, `hierarchy_name`,`changed`,`latest`) VALUES	(1,456,'2','2',NOW(),1)");
+	$vrtrack->{_dbh}->do("INSERT INTO `library` (`library_id`,`ssid`,`name`, `hierarchy_name`,`changed`,`latest`) VALUES	(1,789,'ABC45678','ABC45678',NOW(),1)");
+	return $vrtrack;
+}
 
 sub delete_test_data
 {

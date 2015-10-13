@@ -47,7 +47,8 @@ sub _build_lane_attributes
   file.reference as reference,
   individual.name as individual_name,
   individual.alias as individual_alias,
-  lane.run_date as run_date
+  lane.run_date as run_date,
+  project.data_access_group as data_access_group
   from latest_lane as lane
   left join latest_file as file on file.lane_id = lane.lane_id
   left join latest_library as library on library.library_id = lane.library_id 

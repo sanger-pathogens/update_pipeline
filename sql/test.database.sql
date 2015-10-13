@@ -8,7 +8,7 @@ CREATE TABLE `schema_version` (
   PRIMARY KEY  (`schema_version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-insert into schema_version(schema_version) values (18);
+insert into schema_version(schema_version) values (29);
 
 --
 -- Table structure for table `assembly`
@@ -360,6 +360,7 @@ CREATE TABLE `project` (
   `name` varchar(255) NOT NULL default '',
   `hierarchy_name` varchar(255) NOT NULL default '',
   `study_id` smallint(5) default NULL,
+  `data_access_group` varchar(255) DEFAULT NULL,
   `note_id` mediumint(8) unsigned default NULL,
   `changed` datetime NOT NULL,
   `latest` tinyint(1) default '0',

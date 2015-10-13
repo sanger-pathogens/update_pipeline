@@ -102,7 +102,9 @@ ok(my $update_pipeline = UpdatePipeline::UpdateAllMetaData->new(
     no_pending_lanes          => $no_pending_lanes,
     override_md5              => $override_md5,
     vrtrack_lanes             => undef,
-    add_raw_reads             => $total_reads,)
+    add_raw_reads             => $total_reads,
+	environment               => 'test'
+	)
   , 'create the update metadata object');
 ok($update_pipeline->update(), 'Run the update');
 

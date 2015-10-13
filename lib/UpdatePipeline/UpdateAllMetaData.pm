@@ -18,7 +18,8 @@ use UpdatePipeline::VRTrack::File;
 use UpdatePipeline::VRTrack::Study;
 use UpdatePipeline::ExceptionHandler;
 use Pathogens::ConfigSettings;
-
+use Warehouse::Database;
+use GCLPWarehouse::Database;
 extends 'UpdatePipeline::CommonMetaDataManipulation';
 
 
@@ -36,6 +37,7 @@ has 'add_raw_reads'         => ( is => 'ro', default    => 0,            isa => 
 has 'specific_run_id'       => ( is => 'ro', default    => 0,            isa => 'Int');
                            
 has '_warehouse_dbh'        => ( is => 'rw', lazy_build => 1 );
+has '_gclp_warehouse_dbh'   => ( is => 'rw', lazy_build => 1 );
 has 'minimum_run_id'        => ( is => 'rw', default    => 1,            isa => 'Int' );
 has 'environment'           => ( is => 'rw', default    => 'production', isa => 'Str');
 has 'common_name_required'  => ( is => 'rw', default    => 1,            isa => 'Bool');
@@ -63,6 +65,12 @@ sub _build__warehouse_dbh
 {
   my ($self) = @_;
   Warehouse::Database->new(settings => $self->_database_settings->{warehouse})->connect;
+}
+
+sub _build__gclp_warehouse_dbh
+{
+  my ($self) = @_;
+  GCLPWarehouse::Database->new(settings => $self->_database_settings->{gclp_warehouse})->connect;
 }
 
 sub _build__exception_handler
@@ -124,7 +132,7 @@ sub _update_lane
 {
   my ($self, $file_metadata) = @_;
   eval {
-    my $vproject = UpdatePipeline::VRTrack::Project->new(name => $file_metadata->study_name, external_id => $file_metadata->study_ssid, _vrtrack => $self->_vrtrack)->vr_project();
+    my $vproject = UpdatePipeline::VRTrack::Project->new(name => $file_metadata->study_name, external_id => $file_metadata->study_ssid, data_access_group => $file_metadata->data_access_group,  _vrtrack => $self->_vrtrack)->vr_project();
     if(defined($file_metadata->study_accession_number))
     {
       my $vstudy   = UpdatePipeline::VRTrack::Study->new(accession => $file_metadata->study_accession_number, _vr_project => $vproject)->vr_study();
