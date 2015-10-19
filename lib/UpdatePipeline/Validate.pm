@@ -11,6 +11,8 @@ use UpdatePipeline::IRODS;
 use UpdatePipeline::VRTrack::LaneMetaData;
 use UpdatePipeline::CheckReadConsistency;
 use Pathogens::ConfigSettings;
+use GCLPWarehouse::Database;
+use Warehouse::Database;
 
 extends 'UpdatePipeline::CommonMetaDataManipulation';
 
