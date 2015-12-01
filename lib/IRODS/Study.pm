@@ -1,5 +1,7 @@
 package IRODS::Study;
+
 # ABSTRACT: lookup a study in irods
+
 =head1 SYNOPSIS
 
 use IRODS::Study;

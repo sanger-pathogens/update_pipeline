@@ -1,5 +1,7 @@
 package GCLPWarehouse::Database;
+
 # ABSTRACT: GCLPWarehouse db
+
 use Moose;
 use DBI;
 use DBD::mysql;

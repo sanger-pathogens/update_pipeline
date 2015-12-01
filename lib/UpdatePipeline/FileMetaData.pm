@@ -1,5 +1,7 @@
 package UpdatePipeline::FileMetaData;
+
 # ABSTRACT: Represents a container of metadata about a file. This is where validation on the input data is done.
+
 =head1 SYNOPSIS
 
 use UpdatePipeline::File;

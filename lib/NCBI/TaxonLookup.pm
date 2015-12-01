@@ -1,5 +1,7 @@
 package NCBI::TaxonLookup;
+
 # ABSTRACT: Given a taxon find the common name
+
 =head1 SYNOPSIS
 
 use NCBI::TaxonLookup;

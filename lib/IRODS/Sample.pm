@@ -1,4 +1,5 @@
 package IRODS::Sample;
+
 # ABSTRACT: Take in a sample name and look up all files assosiated with it.
 
 =head1 SYNOPSIS

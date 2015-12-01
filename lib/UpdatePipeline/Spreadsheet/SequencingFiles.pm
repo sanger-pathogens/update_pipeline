@@ -1,5 +1,7 @@
 package UpdatePipeline::Spreadsheet::SequencingFiles;
+
 # ABSTRACT: Take in a sequencing file and a base directory and find where it is located on disk
+
 =head1 SYNOPSIS
 
 use UpdatePipeline::Spreadsheet::SequencingFiles;

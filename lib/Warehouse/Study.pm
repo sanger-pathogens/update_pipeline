@@ -1,5 +1,7 @@
 package Warehouse::Study;
+
 # ABSTRACT: Take in a study name or ssid and fill in the missing data in the file metadata object
+
 =head1 SYNOPSIS
 
 use Warehouse::Study;

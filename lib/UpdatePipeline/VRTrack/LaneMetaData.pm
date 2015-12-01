@@ -1,5 +1,7 @@
 package UpdatePipeline::VRTrack::LaneMetaData;
+
 # ABSTRACT: Given the name of a lane, look up the tracking database and return all the metadata about it in a denormalised format.
+
 =head1 SYNOPSIS
 
 use UpdatePipeline::VRTrack::LaneMetaData;

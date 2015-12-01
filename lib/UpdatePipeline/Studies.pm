@@ -1,5 +1,7 @@
 package UpdatePipeline::Studies;
+
 # ABSTRACT:  Take in a filename and extract a list of study names
+
 =head1 SYNOPSIS
 use UpdatePipeline::Studies;
 my @study_names = UpdatePipeline::Studies->new(filename => $studyfile);

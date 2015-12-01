@@ -1,5 +1,7 @@
 package GCLPWarehouse::FileMetaDataPopulation;
+
 # ABSTRACT: Take in a FileMetaData object and try and fill in the blanks with data from the GCLP Warehouse
+
 =head1 SYNOPSIS
 
 use GCLPWarehouse::FileMetaDataPopulation;

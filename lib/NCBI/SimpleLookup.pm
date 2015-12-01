@@ -1,5 +1,7 @@
 package NCBI::SimpleLookup;
+
 # ABSTRACT: Lookup taxon in ncbi
+
 =head1 SYNOPSIS
 
 use NCBI::SimpleLookup;

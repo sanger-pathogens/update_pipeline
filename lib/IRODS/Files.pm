@@ -1,5 +1,7 @@
 package IRODS::Files;
+
 # ABSTRACT: Irods files lookup
+
 use Moose;
 extends 'IRODS::Common';
 

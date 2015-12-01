@@ -1,5 +1,7 @@
 package UpdatePipeline::ExceptionHandler;
+
 # ABSTRACT: Exception handler 
+
 =head1 SYNOPSIS
 
 use UpdatePipeline::ExceptionHandler;

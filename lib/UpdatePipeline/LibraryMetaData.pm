@@ -1,4 +1,5 @@
 package UpdatePipeline::LibraryMetaData;
+
 # ABSTRACT: Represents a container of metadata about a library from the aliquots warehouse lookup.
 
 =head1 SYNOPSIS

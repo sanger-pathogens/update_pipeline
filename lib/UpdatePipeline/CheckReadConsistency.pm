@@ -1,5 +1,7 @@
 package UpdatePipeline::CheckReadConsistency;
+
 # ABSTRACT: Read consistency checker
+
 =head1 SYNOPSIS
 
 my $consistency_evaluator = UpdatePipeline::CheckReadConsistency->new( _vrtrack => $vrtrack );

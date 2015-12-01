@@ -1,5 +1,7 @@
 package UpdatePipeline::Common;
+
 # ABSTRACT: Common class
+
 use Moose;
 
 

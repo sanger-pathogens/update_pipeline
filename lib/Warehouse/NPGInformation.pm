@@ -1,5 +1,7 @@
 package Warehouse::NPGInformation;
+
 # ABSTRACT: Take in a lane name and try to extract information from the npg_information table
+
 =head1 SYNOPSIS
 
 use Warehouse::NPGInformation;

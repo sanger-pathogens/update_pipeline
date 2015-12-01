@@ -1,5 +1,7 @@
 package UpdatePipeline::Spreadsheet::Validate::SequencingExperiments;
+
 # ABSTRACT:  Validate the metadata assosiated with a sequencing experiment, basically a row in the main body of the spreadsheet
+
 =head1 SYNOPSIS
 
 # in a Moose class

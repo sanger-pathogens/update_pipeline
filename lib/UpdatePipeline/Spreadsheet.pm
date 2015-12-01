@@ -1,5 +1,7 @@
 package UpdatePipeline::Spreadsheet;
+
 # ABSTRACT: Main driver class which pulls everything together to allow for a spreadsheet to be parsed, validated, converted to filemetadata objects and loaded into the pipeline
+
 =head1 SYNOPSIS
 
 use UpdatePipeline::Spreadsheet;

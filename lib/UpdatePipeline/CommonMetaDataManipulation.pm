@@ -1,5 +1,7 @@
 package UpdatePipeline::CommonMetaDataManipulation;
+
 # ABSTRACT: Common meta data manipulation
+
 use Moose;
 
 has '_files_metadata'           => ( is => 'rw', isa => 'ArrayRef', lazy_build => 1 );

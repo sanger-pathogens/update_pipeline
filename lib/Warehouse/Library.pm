@@ -1,5 +1,7 @@
 package Warehouse::Library;
+
 # ABSTRACT: Take in a library name or ssid and fill in the missing data in the file metadata object
+
 =head1 SYNOPSIS
 
 use Warehouse::Library;

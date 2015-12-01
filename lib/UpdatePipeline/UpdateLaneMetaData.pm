@@ -1,5 +1,7 @@
 package UpdatePipeline::UpdateLaneMetaData;
+
 # ABSTRACT: Take in a LaneMetaData object and a FileMetaData object, and create/update as needed in VRTrack
+
 =head1 SYNOPSIS
 use UpdatePipeline::UpdateLaneMetaData;
 my $update_lane_metadata = UpdatePipeline::UpdateLaneMetaData->new(
