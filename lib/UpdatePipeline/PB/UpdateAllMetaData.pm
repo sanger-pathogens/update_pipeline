@@ -1,11 +1,14 @@
 package UpdatePipeline::PB::UpdateAllMetaData;
+
 # ABSTRACT: Take in a list of study names, and a VRTracking database handle and update/create where IRODs differs to the tracking database
+
 =head1 SYNOPSIS
 
 my $pipeline = UpdatePipeline::UpdateAllMetaData->new(study_names => \@study_names, _vrtrack => $self->_vrtrack);
 $pipeline->update();
 
 =cut
+
 use Moose;
 use UpdatePipeline::IRODS;
 use UpdatePipeline::VRTrack::LaneMetaData;
@@ -21,13 +24,10 @@ use Pathogens::ConfigSettings;
 use UpdatePipeline::PB::StudyFilesMetaData;
 
 extends 'UpdatePipeline::CommonMetaDataManipulation';
-
-
-has '_vrtrack'              => ( is => 'rw', required   => 1);
+with 'UpdatePipeline::CommonDatabaseSetup';
                            
 has '_exception_handler'    => ( is => 'rw', lazy_build => 1,            isa => 'UpdatePipeline::ExceptionHandler' );
 has '_config_settings'      => ( is => 'rw', lazy_build => 1,            isa => 'HashRef' );
-has '_database_settings'    => ( is => 'rw', lazy_build => 1,            isa => 'HashRef' );
                            
 has 'verbose_output'        => ( is => 'rw', default    => 0,            isa => 'Bool');
 has 'update_if_changed'     => ( is => 'rw', default    => 0,            isa => 'Bool');
@@ -39,7 +39,6 @@ has 'add_raw_reads'         => ( is => 'ro', default    => 0,            isa => 
 has 'specific_run_id'       => ( is => 'ro', default    => 0,            isa => 'Int');
 has 'specific_min_run'      => ( is => 'ro', default    => 0,            isa => 'Int');
                            
-has '_warehouse_dbh'        => ( is => 'rw', lazy_build => 1 );
 has 'minimum_run_id'        => ( is => 'rw', default    => 1,            isa => 'Int' );
 has 'environment'           => ( is => 'rw', default    => 'production', isa => 'Str');
 has 'common_name_required'  => ( is => 'rw', default    => 1,            isa => 'Bool');
@@ -56,18 +55,6 @@ sub _build__config_settings
    \%{Pathogens::ConfigSettings->new(environment => $self->environment, filename => 'config.yml')->settings()};
 }
 
-sub _build__database_settings
-{
-  my ($self) = @_;
-  \%{Pathogens::ConfigSettings->new(environment => $self->environment, filename => 'database.yml')->settings()};
-}
-
-
-sub _build__warehouse_dbh
-{
-  my ($self) = @_;
-  Warehouse::Database->new(settings => $self->_database_settings->{warehouse})->connect;
-}
 
 sub _build__exception_handler
 {
@@ -87,7 +74,7 @@ sub _generate_study_files_metadata
 sub update
 {
   my ($self) = @_;
-
+  $self->_set_database_auto_reconnect;
   for my $study_name (@{$self->study_names})
   {
     for my $file_metadata (@{$self->_generate_study_files_metadata($study_name )}) {
