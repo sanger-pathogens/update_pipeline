@@ -70,8 +70,8 @@ done_testing();
 
 sub delete_test_data {
     my $vrtrack = shift;
-    $dbh->do('delete from current_studies where name="ABC study"');
+    $dbh->do('delete from current_studies where internal_id=1111');
     $dbh->do('delete from current_aliquots where sample_internal_id=2222');
-    $dbh->do('delete from current_samples where name="ABC sample"');
-    $dbh->do('delete from current_pac_bio_library_tubes where name="Library name"');
+    $dbh->do('delete from current_samples where internal_id=2222');
+    $dbh->do('delete from current_pac_bio_library_tubes where internal_id=3333');
 }

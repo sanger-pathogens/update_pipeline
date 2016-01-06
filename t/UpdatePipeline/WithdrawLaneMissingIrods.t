@@ -98,6 +98,7 @@ ok my $update_pipeline = UpdatePipeline::UpdateAllMetaData->new(
     vrtrack_lanes             => $vrtrack_lanes,
     _files_metadata           => \@files_metadata,
     bin_directory             => 't/bin/',
+    environment               => 'test'
 ), 'running metadata through UpdateAllMetaData';
 ok $update_pipeline->update(), 'updating pipeline database';
 

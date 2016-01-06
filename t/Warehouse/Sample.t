@@ -68,5 +68,5 @@ done_testing();
 sub delete_test_data
 {
   my $vrtrack = shift;
-  #$dbh->do('delete from current_samples where name="Sample name"');
+  $dbh->do('delete from current_samples where internal_id=1111');
 }

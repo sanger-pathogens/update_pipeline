@@ -18,12 +18,14 @@ sub _build__warehouse_dbh
 {
   my ($self) = @_;
   Warehouse::Database->new(settings => $self->_database_settings->{warehouse})->connect;
+  
 }
 
 sub _build__gclp_warehouse_dbh
 {
   my ($self) = @_;
   GCLPWarehouse::Database->new(settings => $self->_database_settings->{gclp_warehouse})->connect;
+ 
 }
 
 sub _build__database_settings
@@ -35,11 +37,9 @@ sub _build__database_settings
 sub _set_database_auto_reconnect
 {
   my ($self) = @_;
-  # set mysql_auto_reconnect for warehouse and tracking database
-  # required for validating large databases
- # $self->_warehouse_dbh->{mysql_auto_reconnect}   = 1;
- # $self->_gclp_warehouse_dbh->{mysql_auto_reconnect}   = 1;
- # $self->_vrtrack->{_dbh}->{mysql_auto_reconnect} = 1;
+  $self->_warehouse_dbh->{mysql_auto_reconnect}   = 1; # required for validating large databases
+  $self->_gclp_warehouse_dbh->{mysql_auto_reconnect}   = 1; # required for validating large databases
+  $self->_vrtrack->{_dbh}->{mysql_auto_reconnect} = 1;
 }
 
 1;

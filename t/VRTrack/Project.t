@@ -10,7 +10,7 @@ BEGIN {
 }
 
 my $vrtrack = VRTrack::VRTrack->new({database => "vrtrack_test",host => "localhost",port => 3306,user => "root",password => undef});
-
+delete_test_data($vrtrack);
 ok my $project = UpdatePipeline::VRTrack::Project->new(name => 'My project', _vrtrack => $vrtrack), 'initialise for the first time';
 ok my $vr_project = $project->vr_project(), 'create a vr project';
 isa_ok $vr_project , "VRTrack::Project";
@@ -28,5 +28,12 @@ is $vr_project3->{data_access_group}, 'unix_group_1 unix_group_2',  'get the pro
 
 	
 ok $vrtrack->{_dbh}->do('delete from project where name="My project"'), 'cleanup';
+delete_test_data($vrtrack);
 
 done_testing();
+
+sub delete_test_data
+{
+  my $vrtrack = shift;
+  ok $vrtrack->{_dbh}->do('delete from project where name="My project"'), 'cleanup';
+}
