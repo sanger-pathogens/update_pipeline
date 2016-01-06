@@ -1,5 +1,7 @@
 package UpdatePipeline::Spreadsheet::SpreadsheetMetaData;
+
 # ABSTRACT: Container with header and rows from spreadsheet, which get validated as they are passed in.
+
 =head1 SYNOPSIS
 
 use UpdatePipeline::Spreadsheet::SpreadsheetMetaData;

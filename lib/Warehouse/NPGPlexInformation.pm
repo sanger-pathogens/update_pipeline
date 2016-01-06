@@ -1,5 +1,7 @@
 package Warehouse::NPGPlexInformation;
+
 # ABSTRACT: Take in a lane name and try to extract information from the npg_plex_information table
+
 =head1 SYNOPSIS
 
 use Warehouse::NPGPlexInformation;

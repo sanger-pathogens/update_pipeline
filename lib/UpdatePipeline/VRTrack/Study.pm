@@ -1,5 +1,7 @@
 package UpdatePipeline::VRTrack::Study;
+
 # ABSTRACT: Link between the input meta data for a study and the VRTracking table of the same name. 
+
 =head1 SYNOPSIS
 
 use UpdatePipeline::VRTrack::Study;

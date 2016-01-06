@@ -1,5 +1,7 @@
 package Warehouse::Request;
+
 # ABSTRACT: Take in a sample name or ssid and fill in the missing data in the file metadata object
+
 =head1 SYNOPSIS
 
 use Warehouse::Request;

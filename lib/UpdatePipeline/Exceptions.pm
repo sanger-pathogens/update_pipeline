@@ -1,5 +1,7 @@
 package UpdatePipeline::Exceptions;
+
 # ABSTRACT: exceptions class
+
 use Exception::Class (
     UpdatePipeline::Exceptions::UnknownCommonName         => { description => 'The sample has a common name which is not in our list of valid names' },
     UpdatePipeline::Exceptions::CouldntCreateProject      => { description => 'Couldnt create a row in VRTrack for project' },

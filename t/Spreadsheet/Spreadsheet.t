@@ -27,7 +27,8 @@ ok my $spreadsheet = UpdatePipeline::Spreadsheet->new(
   dont_use_warehouse      => 1,
   common_name_required    => 0,
   pipeline_base_directory => 't/data/pipeline_base_directory',
-  files_base_directory    => 't/data/path/to/sequencing'
+  files_base_directory    => 't/data/path/to/sequencing',
+  environment             => 'test'
 ), 'initialise spreadsheet driver class';
 ok $spreadsheet->_files_metadata, 'generate the files metadata';
 
@@ -101,7 +102,8 @@ ok(my $spreadsheet_data_access_group = UpdatePipeline::Spreadsheet->new(
   common_name_required    => 0,
   pipeline_base_directory => 't/data/pipeline_base_directory',
   files_base_directory    => 't/data/path/to/sequencing',
-  data_access_group       => 'unix_group_1'
+  data_access_group       => 'unix_group_1',
+  environment             => 'test'
 ), 'initialise spreadsheet driver class data access group');
 ok($spreadsheet_data_access_group->_files_metadata, 'generate the files metadata');
 is($spreadsheet_data_access_group->_files_metadata->[0]->data_access_group, 'unix_group_1', 'data access group returned');

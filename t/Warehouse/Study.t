@@ -53,5 +53,5 @@ done_testing();
 sub delete_test_data
 {
   my $vrtrack = shift;
-  $dbh->do('delete from current_studies where name="Study name"');
+  $dbh->do('delete from current_studies where internal_id=1111');
 }

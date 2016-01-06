@@ -1,5 +1,7 @@
 package Pathogens::ConfigSettings;
+
 # ABSTRACT: Config file parsing 
+
 =head1 SYNOPSIS
 
 use Pathogens::ConfigSettings;

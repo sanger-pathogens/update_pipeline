@@ -1,11 +1,14 @@
 package UpdatePipeline::UpdateAllMetaData;
+
 # ABSTRACT: Take in a list of study names, and a VRTracking database handle and update/create where IRODs differs to the tracking database
+
 =head1 SYNOPSIS
 
 my $pipeline = UpdatePipeline::UpdateAllMetaData->new(study_names => \@study_names, _vrtrack => $self->_vrtrack);
 $pipeline->update();
 
 =cut
+
 use Moose;
 use UpdatePipeline::IRODS;
 use UpdatePipeline::VRTrack::LaneMetaData;
@@ -18,59 +21,30 @@ use UpdatePipeline::VRTrack::File;
 use UpdatePipeline::VRTrack::Study;
 use UpdatePipeline::ExceptionHandler;
 use Pathogens::ConfigSettings;
-use Warehouse::Database;
-use GCLPWarehouse::Database;
 extends 'UpdatePipeline::CommonMetaDataManipulation';
-
-
-has '_vrtrack'              => ( is => 'rw', required   => 1);
-                           
+with 'UpdatePipeline::CommonDatabaseSetup';
+               
 has '_exception_handler'    => ( is => 'rw', lazy_build => 1,            isa => 'UpdatePipeline::ExceptionHandler' );
 has '_config_settings'      => ( is => 'rw', lazy_build => 1,            isa => 'HashRef' );
-has '_database_settings'    => ( is => 'rw', lazy_build => 1,            isa => 'HashRef' );
-                           
 has 'update_if_changed'     => ( is => 'rw', default    => 0,            isa => 'Bool');
 has 'dont_use_warehouse'    => ( is => 'ro', default    => 0,            isa => 'Bool');
 has 'use_supplier_name'     => ( is => 'ro', default    => 0,            isa => 'Bool');
 has 'override_md5'          => ( is => 'ro', default    => 0,            isa => 'Bool');
 has 'add_raw_reads'         => ( is => 'ro', default    => 0,            isa => 'Bool');
-has 'specific_run_id'       => ( is => 'ro', default    => 0,            isa => 'Int');
-                           
-has '_warehouse_dbh'        => ( is => 'rw', lazy_build => 1 );
-has '_gclp_warehouse_dbh'   => ( is => 'rw', lazy_build => 1 );
+has 'specific_run_id'       => ( is => 'ro', default    => 0,            isa => 'Int');                      
 has 'minimum_run_id'        => ( is => 'rw', default    => 1,            isa => 'Int' );
 has 'environment'           => ( is => 'rw', default    => 'production', isa => 'Str');
 has 'common_name_required'  => ( is => 'rw', default    => 1,            isa => 'Bool');
 has 'taxon_id'              => ( is => 'rw', default    => 0,            isa => 'Int' );
 has 'species_name'          => ( is => 'ro',                             isa => 'Maybe[Str]' );
 has 'vrtrack_lanes'         => ( is => 'ro',                             isa => 'Maybe[HashRef]' );
-
-has 'bin_directory' => (isa => 'Str', is => 'rw', default => '/software/irods/icommands/bin/');
+has 'bin_directory'         => (isa => 'Str', is => 'rw', default => '/software/irods/icommands/bin/');
 
 
 sub _build__config_settings
 {
    my ($self) = @_;
    \%{Pathogens::ConfigSettings->new(environment => $self->environment, filename => 'config.yml')->settings()};
-}
-
-sub _build__database_settings
-{
-  my ($self) = @_;
-  \%{Pathogens::ConfigSettings->new(environment => $self->environment, filename => 'database.yml')->settings()};
-}
-
-
-sub _build__warehouse_dbh
-{
-  my ($self) = @_;
-  Warehouse::Database->new(settings => $self->_database_settings->{warehouse})->connect;
-}
-
-sub _build__gclp_warehouse_dbh
-{
-  my ($self) = @_;
-  GCLPWarehouse::Database->new(settings => $self->_database_settings->{gclp_warehouse})->connect;
 }
 
 sub _build__exception_handler
@@ -84,6 +58,7 @@ sub update
 {
   my ($self) = @_;
 
+  $self->_set_database_auto_reconnect;
   my %current_lane_names;
   my $num_lanes_in_vrtrack = $self->vrtrack_lanes ? keys %{$self->vrtrack_lanes} : 0;
   for my $file_metadata (@{$self->_files_metadata}) {

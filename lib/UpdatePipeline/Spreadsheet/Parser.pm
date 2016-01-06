@@ -1,5 +1,7 @@
 package UpdatePipeline::Spreadsheet::Parser;
+
 # ABSTRACT: Take in a spreadsheet with sequencing manifest information and map it to a hash for the header information and an array of hashes for the row data
+
 =head1 SYNOPSIS
 
 use UpdatePipeline::Spreadsheet::Parser;

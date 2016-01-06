@@ -1,5 +1,7 @@
 package UpdatePipeline::Spreadsheet::HeaderMetaData;
+
 # ABSTRACT:  A class to represent the header metadata
+
 =head1 SYNOPSIS
 
 use UpdatePipeline::Spreadsheet::Validate::HeaderMetaData;

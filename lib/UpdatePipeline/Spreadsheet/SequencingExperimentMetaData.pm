@@ -1,5 +1,7 @@
 package UpdatePipeline::Spreadsheet::SequencingExperimentMetaData;
+
 # ABSTRACT: A class to represent the metadata associated with a single sequencing experiment
+
 =head1 SYNOPSIS
 
 use UpdatePipeline::Spreadsheet::Validate::SequencingExperimentMetaData;

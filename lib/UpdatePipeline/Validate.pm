@@ -1,5 +1,7 @@
 package UpdatePipeline::Validate;
+
 # ABSTRACT: Take in a list of study names, and a VRTracking database handle and produce a report on the current state of the data in the pipeline compared to IRODS
+
 =head1 SYNOPSIS
 
 my $validate_pipeline = UpdatePipeline::Validate->new(study_names => \@study_names, _vrtrack => $vrtrack);
@@ -11,23 +13,14 @@ use UpdatePipeline::IRODS;
 use UpdatePipeline::VRTrack::LaneMetaData;
 use UpdatePipeline::CheckReadConsistency;
 use Pathogens::ConfigSettings;
-use GCLPWarehouse::Database;
-use Warehouse::Database;
-
 extends 'UpdatePipeline::CommonMetaDataManipulation';
+with 'UpdatePipeline::CommonDatabaseSetup';
 
 has 'study_names'         => ( is => 'rw', isa => 'ArrayRef', required   => 1 );
-has '_vrtrack'            => ( is => 'rw', required => 1 );
-has '_warehouse_dbh'      => ( is => 'rw', lazy_build => 1 );
-has '_gclp_warehouse_dbh' => ( is => 'rw', lazy_build => 1 );
-
 has 'report'              => ( is => 'rw', isa => 'HashRef',  lazy_build => 1 );
 has 'inconsistent_files'  => ( is => 'rw', isa => 'HashRef' );
 has 'environment'                   => ( is => 'rw', isa => 'Str', default => 'production');
-
 has '_config_settings'              => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
-has '_database_settings'            => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
-
 has '_consistency_evaluator'        => ( is => 'rw', isa => 'UpdatePipeline::CheckReadConsistency', lazy_build => 1 );
 has 'request_for_read_count_consistency_evaluation' => (is => 'rw', isa => 'Bool', default => undef);
 has 'no_pending_lanes'    => ( is => 'rw', isa => 'Bool', default => 0 );
@@ -38,39 +31,12 @@ sub _build__config_settings
    \%{Pathogens::ConfigSettings->new(environment => $self->environment, filename => 'config.yml')->settings()};
 }
 
-sub _build__database_settings
-{
-  my ($self) = @_;
-  \%{Pathogens::ConfigSettings->new(environment => $self->environment, filename => 'database.yml')->settings()};
-}
-
 sub _build__consistency_evaluator 
 {
     my ($self) = @_;
     return UpdatePipeline::CheckReadConsistency->new( _vrtrack => $self->_vrtrack );
 }
 
-sub _build__warehouse_dbh
-{
-  my ($self) = @_;
-  Warehouse::Database->new(settings => $self->_database_settings->{warehouse})->connect;
-}
-
-sub _build__gclp_warehouse_dbh
-{
-  my ($self) = @_;
-  GCLPWarehouse::Database->new(settings => $self->_database_settings->{gclp_warehouse})->connect;
-}
-
-
-sub _set_database_auto_reconnect
-{
-  my ($self) = @_;
-  # set mysql_auto_reconnect for warehouse and tracking database
-  # required for validating large databases
-  $self->_warehouse_dbh->{mysql_auto_reconnect}   = 1;
-  $self->_vrtrack->{_dbh}->{mysql_auto_reconnect} = 1;
-}
 
 sub _build_report
 {

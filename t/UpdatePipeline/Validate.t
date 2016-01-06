@@ -40,7 +40,7 @@ my @studies = ('EFG456');
 #############################################
 #Core tests for UpdatePipeline::Validate.pm 
 #############################################
-my $validator = UpdatePipeline::Validate->new(study_names => \@studies, _vrtrack => $vrtrack);
+my $validator = UpdatePipeline::Validate->new(study_names => \@studies, _vrtrack => $vrtrack, environment => 'test');
 isa_ok( $validator, 'UpdatePipeline::Validate' );
 can_ok($validator, '_new_lane_changed_too_recently_to_compare');
 

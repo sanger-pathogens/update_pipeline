@@ -1,5 +1,7 @@
 package UpdatePipeline::VRTrack::File;
+
 # ABSTRACT: Link between the input meta data for a file and the VRTracking table of the same name. 
+
 =head1 SYNOPSIS
 
 use UpdatePipeline::VRTrack::File;

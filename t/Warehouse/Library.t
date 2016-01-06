@@ -18,7 +18,6 @@ my $dbh = Warehouse::Database->new(settings => $database_settings->{warehouse})-
 delete_test_data($dbh);
 $dbh->do('insert into current_library_tubes (name,internal_id,fragment_size_required_from,fragment_size_required_to,is_current) values("Library tube name",1111,200,300,1)');
 $dbh->do('insert into current_multiplexed_library_tubes (name,internal_id,is_current) values("Multiplexed library tube name",2222,1)');
-$dbh->do('insert into current_pulldown_multiplexed_library_tubes (name,internal_id,is_current) values("Pulldown multiplexed library tube name",3333,1)');
 
 ### pass in an ssid for a library tube
 ok my $fm_ssid_library_tube = UpdatePipeline::FileMetaData->new(file_name => '1234_5#6.bam', file_name_without_extension =>  '1234_5#6', library_ssid => 1111), 'create file metadata with library tube ssid';
@@ -57,7 +56,6 @@ done_testing();
 sub delete_test_data
 {
   my $vrtrack = shift;
-  $dbh->do('delete from current_library_tubes where name="Library tube name"');
-  $dbh->do('delete from current_multiplexed_library_tubes where name="Multiplexed library tube name"');
-  $dbh->do('delete from current_pulldown_multiplexed_library_tubes where name="Pulldown multiplexed library tube name"');
+  $dbh->do('delete from current_library_tubes where internal_id=1111');
+  $dbh->do('delete from current_multiplexed_library_tubes where internal_id=2222');
 }

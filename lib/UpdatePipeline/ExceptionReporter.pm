@@ -1,5 +1,7 @@
 package UpdatePipeline::ExceptionReporter;
+
 # ABSTRACT: Exception reporter 
+
 =head1 SYNOPSIS
 
 use UpdatePipeline::ExceptionReporter;

@@ -1,5 +1,7 @@
 package UpdatePipeline::Spreadsheet::Validate::Header;
+
 # ABSTRACT: Validator for a spreadsheet header. Takes in the values as a hash and returns true or false
+
 =head1 SYNOPSIS
 
 # in a Moose class

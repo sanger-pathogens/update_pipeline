@@ -1,4 +1,5 @@
 package IRODS::File;
+
 # ABSTRACT: Irods file lookup
 
 =head1 SYNOPSIS

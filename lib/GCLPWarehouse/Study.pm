@@ -1,5 +1,7 @@
 package GCLPWarehouse::Study;
+
 # ABSTRACT: Take in a study ssid and fill in the missing data in the file metadata object
+
 =head1 SYNOPSIS
 
 use GCLPWarehouse::Study;

@@ -1,5 +1,7 @@
 package Warehouse::FileMetaDataPopulation;
+
 # ABSTRACT: Take in a FileMetaData object and try and fill in the blanks with data from the Warehouse (using SFind where possible)
+
 =head1 SYNOPSIS
 
 use Warehouse::FileMetaDataPopulation;

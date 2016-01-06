@@ -1,5 +1,7 @@
 package Warehouse::Database;
+
 # ABSTRACT: Warehouse db
+
 use Moose;
 use DBI;
 use DBD::mysql;
