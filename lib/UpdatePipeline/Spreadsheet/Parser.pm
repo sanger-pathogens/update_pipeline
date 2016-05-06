@@ -46,6 +46,7 @@ sub _build_header_metadata
 	
 	for my $cell_name (keys %raw_header)
 	{
+		next unless(defined($raw_header{$cell_name}));
 		$raw_header{$cell_name} =~ s/^[\s\t]+//;
 		$raw_header{$cell_name} =~ s/[\s\t]+$//;
 		
