@@ -43,6 +43,17 @@ sub _build_header_metadata
     total_size_of_files_in_gbytes  => $self->_worksheet_parser->get_cell( 6, 1 ) ? $self->_worksheet_parser->get_cell( 6, 1 )->value() : undef,
     data_to_be_kept_until          => $self->_worksheet_parser->get_cell( 7, 1 ) ? $self->_worksheet_parser->get_cell( 7, 1 )->value() : undef,
   );
+	
+	for my $cell_name (keys %raw_header)
+	{
+		$raw_header{$cell_name} =~ s/^[\s\t]+//;
+		$raw_header{$cell_name} =~ s/[\s\t]+$//;
+		
+		if($raw_header{$cell_name} eq '')
+		{
+			$raw_header{$cell_name} = undef;
+		}
+	}
 
   return \%raw_header;
 }
