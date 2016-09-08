@@ -48,7 +48,8 @@ sub _files_metadata_from_sample_name {
         {
            $lane_name = $irods_file_metadata->{run} . '_' . $irods_file_metadata->{well};
         }
-        
+	
+	next unless(defined($irods_file_metadata->{study_name}));
         # Denormalise
         my $merged_file_metadata = UpdatePipeline::PB::FileMetaData->new(
             study_name              => $irods_file_metadata->{study_name},
