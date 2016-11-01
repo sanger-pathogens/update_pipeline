@@ -50,6 +50,8 @@ sub _files_metadata_from_sample_name {
         }
 	
 	next unless(defined($irods_file_metadata->{study_name}));
+	next unless(defined($irods_file_metadata->{sample_common_name}));
+	next unless(defined($irods_file_metadata->{md5}));
         # Denormalise
         my $merged_file_metadata = UpdatePipeline::PB::FileMetaData->new(
             study_name              => $irods_file_metadata->{study_name},
