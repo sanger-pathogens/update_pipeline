@@ -17,7 +17,7 @@ use URI::Escape;
 use NCBI::Exceptions;
 
 has 'taxon_id'             => ( is => 'ro', isa => 'Int', required => 1 );
-has 'taxon_lookup_service' => ( is => 'ro', isa => 'Str', default  => 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&report=xml&id=' );
+has 'taxon_lookup_service' => ( is => 'ro', isa => 'Str', default  => 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&report=xml&id=' );
 
 has 'common_name' => ( is => 'ro', isa => 'Str', lazy_build => 1 );
 
