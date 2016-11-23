@@ -133,9 +133,9 @@ else {
 }
 
 unless ($species_name) {
-    eval { $species_name = $taxon_id ? NCBI::SimpleLookup->new( taxon_id => $taxon_id )->common_name : undef; };
+    eval { $species_name = $taxon_id ? NCBI::TaxonLookup->new( taxon_id => $taxon_id )->common_name : undef; };
     if ($@) {
-        eval { $species_name = $taxon_id ? NCBI::TaxonLookup->new( taxon_id => $taxon_id )->common_name : undef; };
+	eval { $species_name = $taxon_id ? NCBI::SimpleLookup->new( taxon_id => $taxon_id )->common_name : undef; };
         die "Unable to retrieve taxonomic data from NCBI.\n" if ($@);
     }
 }
