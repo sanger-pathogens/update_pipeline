@@ -60,25 +60,25 @@ local $ENV{PATH} = "$ENV{PATH}:./bin";
 mock_execute_script( $script_name, ['-h']);
 
 ## single study
-mock_execute_script( $script_name, ['-e test -d vrtrack_test -n ABC_study']);
-is("run123_A02",         $vrtrack->{_dbh}->selectrow_arrayref('select name from latest_lane where name like "run123_A02"')->[0],'Lane name added');
-is("PB Library name",    $vrtrack->{_dbh}->selectrow_arrayref('select name from latest_library where name like "PB Library name"')->[0],'Library name added');
-is("PB sample",          $vrtrack->{_dbh}->selectrow_arrayref('select name from latest_sample where name like "PB sample"')->[0],'Sample name added');
-is("ABC_study",          $vrtrack->{_dbh}->selectrow_arrayref('select name from latest_project where name like "ABC_study"')->[0],'Project name added');
-is("PB sample",          $vrtrack->{_dbh}->selectrow_arrayref('select name from individual where name like "PB sample"')->[0],'Individual name added');
-is("/path/to/data.0.bas",$vrtrack->{_dbh}->selectrow_arrayref('select name from file where name like "/path/to/data.0.bas"')->[0],'File name added');
-is("/another_path/to/data.1.bas",$vrtrack->{_dbh}->selectrow_arrayref('select name from file where name like "/another_path/to/data.1.bas"')->[0],'File name2  added');
-delete_inserted_vrtrack_test_data($vrtrack);
+#mock_execute_script( $script_name, ['-e test -d vrtrack_test -n ABC_study']);
+#is("run123_A02",         $vrtrack->{_dbh}->selectrow_arrayref('select name from latest_lane where name like "run123_A02"')->[0],'Lane name added');
+#is("PB Library name",    $vrtrack->{_dbh}->selectrow_arrayref('select name from latest_library where name like "PB Library name"')->[0],'Library name added');
+#is("PB sample",          $vrtrack->{_dbh}->selectrow_arrayref('select name from latest_sample where name like "PB sample"')->[0],'Sample name added');
+#is("ABC_study",          $vrtrack->{_dbh}->selectrow_arrayref('select name from latest_project where name like "ABC_study"')->[0],'Project name added');
+#is("PB sample",          $vrtrack->{_dbh}->selectrow_arrayref('select name from individual where name like "PB sample"')->[0],'Individual name added');
+#is("/path/to/data.0.bas",$vrtrack->{_dbh}->selectrow_arrayref('select name from file where name like "/path/to/data.0.bas"')->[0],'File name added');
+#is("/another_path/to/data.1.bas",$vrtrack->{_dbh}->selectrow_arrayref('select name from file where name like "/another_path/to/data.1.bas"')->[0],'File name2  added');
+#delete_inserted_vrtrack_test_data($vrtrack);
 
 # file of studies
-mock_execute_script( $script_name, ['-e test -d vrtrack_test -s t/data/file_of_studies']);
-is("run123_A02",         $vrtrack->{_dbh}->selectrow_arrayref('select name from latest_lane where name like "run123_A02"')->[0],'Lane name added file_of_studies');
-is("PB Library name",    $vrtrack->{_dbh}->selectrow_arrayref('select name from latest_library where name like "PB Library name"')->[0],'Library name added file_of_studies');
-is("PB sample",          $vrtrack->{_dbh}->selectrow_arrayref('select name from latest_sample where name like "PB sample"')->[0],'Sample name added file_of_studies');
-is("ABC_study",          $vrtrack->{_dbh}->selectrow_arrayref('select name from latest_project where name like "ABC_study"')->[0],'Project name added file_of_studies');
-is("PB sample",          $vrtrack->{_dbh}->selectrow_arrayref('select name from individual where name like "PB sample"')->[0],'Individual name added file_of_studies');
-is("/path/to/data.0.bas",$vrtrack->{_dbh}->selectrow_arrayref('select name from file where name like "/path/to/data.0.bas"')->[0],'File name added file_of_studies');
-is("/another_path/to/data.1.bas",$vrtrack->{_dbh}->selectrow_arrayref('select name from file where name like "/another_path/to/data.1.bas"')->[0],'File name2  added file_of_studies');
+#mock_execute_script( $script_name, ['-e test -d vrtrack_test -s t/data/file_of_studies']);
+#is("run123_A02",         $vrtrack->{_dbh}->selectrow_arrayref('select name from latest_lane where name like "run123_A02"')->[0],'Lane name added file_of_studies');
+#is("PB Library name",    $vrtrack->{_dbh}->selectrow_arrayref('select name from latest_library where name like "PB Library name"')->[0],'Library name added file_of_studies');
+#is("PB sample",          $vrtrack->{_dbh}->selectrow_arrayref('select name from latest_sample where name like "PB sample"')->[0],'Sample name added file_of_studies');
+#is("ABC_study",          $vrtrack->{_dbh}->selectrow_arrayref('select name from latest_project where name like "ABC_study"')->[0],'Project name added file_of_studies');
+#is("PB sample",          $vrtrack->{_dbh}->selectrow_arrayref('select name from individual where name like "PB sample"')->[0],'Individual name added file_of_studies');
+#is("/path/to/data.0.bas",$vrtrack->{_dbh}->selectrow_arrayref('select name from file where name like "/path/to/data.0.bas"')->[0],'File name added file_of_studies');
+#is("/another_path/to/data.1.bas",$vrtrack->{_dbh}->selectrow_arrayref('select name from file where name like "/another_path/to/data.1.bas"')->[0],'File name2  added file_of_studies');
 delete_inserted_vrtrack_test_data($vrtrack);
 
 
