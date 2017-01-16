@@ -65,6 +65,18 @@ my @expected_rows = (
     raw_base_count          => 177773050,
     comments                => undef
   },
+  {
+    filename                => 'mysra_file.fastq.gz', 
+    mate_filename           => 'mysra_mate_file.fastq.gz',
+    sample_name             => '4',
+    sample_accession_number => undef,
+    taxon_id                => 589363,
+    library_name            => 'XYZ45678',
+    fragment_size             => 200,
+    raw_read_count          => undef,
+    raw_base_count          => 177773050,
+    comments                => undef
+  },
 );
 
 is_deeply  $valid_spreadsheet->rows_metadata, \@expected_rows, 'rows metadata parsed';
