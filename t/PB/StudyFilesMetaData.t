@@ -22,9 +22,9 @@ BEGIN {
     my $irods_file = Test::MockObject->new();
     $irods_file->fake_module( 'IRODS::File', test => sub{1} );
     $irods_file->fake_new( 'IRODS::File' );
-    $irods_file->mock('file_attributes', sub{ {md5 => 'abcefg12345667', run => 'run123',ebi_run_acc => 'ERR1234', well => 'A02'} });
-    
-    
+    $irods_file->mock('file_attributes', sub{ {study_name => 'ABC study', sample_common_name => 'Sample common name', md5 => 'abcefg12345667', run => 'run123', ebi_run_acc => 'ERR1234', well => 'A02', library_id => '3333', library_name => 'Library name', sample => 'ABC sample', sample_public_name => 'Sample supplier name', study_id => '1111', sample_id => '2222', sample_accession_number => 'HIJ456'} });
+
+
 }
 
 # connect to the test warehouse database

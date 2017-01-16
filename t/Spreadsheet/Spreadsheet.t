@@ -61,11 +61,18 @@ ok $spreadsheet->import_sequencing_files_to_pipeline(),'copy the files into the 
 ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/1/SLX/L5_AB_12_2011/myfile/myfile_1.fastq.gz', 'target fastq exists myfile_1');
 ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/2/SLX/EF_CD_12_2011/myotherfile_L3/myotherfile_L3_2.fastq.gz', 'target fastq exists myotherfile_L3_2');
 ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/2/SLX/EF_CD_12_2011/myotherfile_L3/myotherfile_L3_1.fastq.gz', 'target fastq exists myotherfile_L3_1');
+ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/4/SLX/XYZ45678/mysra_file/mysra_file_1.fastq.gz', 'target fastq exists mysra_file_1');
+ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/4/SLX/XYZ45678/mysra_file/mysra_file_2.fastq.gz', 'target fastq exists mysra_file_2');
 
 ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/1/SLX/L5_AB_12_2011/myfile/myfile_1.fastq.gz.md5', 'md5 hash file exists for myfile_1');
 ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/2/SLX/EF_CD_12_2011/myotherfile_L3/myotherfile_L3_1.fastq.gz.md5', 'md5 hash file exists for myotherfile_L3_1');
 ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/2/SLX/EF_CD_12_2011/myotherfile_L3/myotherfile_L3_2.fastq.gz.md5', 'md5 hash file exists for myotherfile_L3_2');
 ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/3/SLX/ABC45678/yetanotherfile_L4/yetanotherfile_L4_1.fastq.gz.md5', 'md5 hash file exists for yetanotherfile_L4_1');
+ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/4/SLX/XYZ45678/mysra_file/mysra_file_1.fastq.gz.md5', 'md5 hash file exists for mysra_file_1');
+ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/4/SLX/XYZ45678/mysra_file/mysra_file_2.fastq.gz.md5', 'md5 hash file exists for mysra_file_2');
+
+is `gunzip -c t/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/4/SLX/XYZ45678/mysra_file/mysra_file_1.fastq.gz | head -1`, "\@SRR3530795.1/1\n", 'SRA fastq-dump header replaced';
+
 
 # check that the files all have md5 hashes in the database
 ok my $vfile_myfile_1 = VRTrack::File->new_by_name( $vrtrack, 'myfile_1.fastq.gz'), 'retrieve the updated file object myfile_1';
@@ -74,11 +81,17 @@ ok my $vfile_myotherfile_L3_2 = VRTrack::File->new_by_name( $vrtrack, 'myotherfi
 is($vfile_myotherfile_L3_2->md5, "81b5693c5751dec6606faec306271061", 'MD5 for myotherfile_L3_2');
 ok my $vfile_myotherfile_L3_1 = VRTrack::File->new_by_name( $vrtrack, 'myotherfile_L3_1.fastq.gz'), 'retrieve the updated file object myotherfile_L3_1';
 is($vfile_myotherfile_L3_1->md5, "c1fb9ece9e438899c419999a6db75e63", 'MD5 for myotherfile_L3_1');
+ok my $vfile_mysra_file_1 = VRTrack::File->new_by_name( $vrtrack, 'mysra_file_1.fastq.gz'), 'retrieve the updated file object mysra_file_1';
+is($vfile_mysra_file_1->md5, "f4cf80f24538f20c43fd37c8a0ee0e1f", 'MD5 for mysra_file_1');
+ok my $vfile_mysra_file_2 = VRTrack::File->new_by_name( $vrtrack, 'mysra_file_2.fastq.gz'), 'retrieve the updated file object mysra_file_2';
+is($vfile_mysra_file_2->md5, "6ffd8c811d10a01d6ea77cb0ac0f720f", 'MD5 for mysra_file_2');
 
 ok my $vlane_updated = VRTrack::Lane->new_by_name( $vrtrack, 'myfile'), 'retrieve the updated lane object';
 is $vlane_updated->is_processed('import'), 1, 'import for lane after import';
 ok my $vlane_updated_2 = VRTrack::Lane->new_by_name( $vrtrack, 'myotherfile_L3'), 'retrieve the updated lane object';
 is $vlane_updated_2->is_processed('import'), 1, 'import for lane after import';
+ok my $vlane_updated_3 = VRTrack::Lane->new_by_name( $vrtrack, 'mysra_file'), 'retrieve the updated lane object';
+is $vlane_updated_3->is_processed('import'), 1, 'import for lane after import';
 
 # Check readcount
 is $vlane_updated->raw_reads,     2, 'single ended lane reads correct';
@@ -87,6 +100,9 @@ is $vlane_updated->read_len,    105, 'single ended lane readlen correct';
 is $vlane_updated_2->raw_reads,   5, 'paired ended lane reads correct';
 is $vlane_updated_2->raw_bases, 525, 'paired ended lane bases correct';
 is $vlane_updated_2->read_len,  105, 'paired ended lane readlen correct';
+is $vlane_updated_3->raw_reads,   4, 'paired ended lane reads correct';
+is $vlane_updated_3->raw_bases, 400, 'paired ended lane bases correct';
+is $vlane_updated_3->read_len,  100, 'paired ended lane readlen correct';
 
 rmtree('t/data/pipeline_base_directory');
 delete_test_data($vrtrack);
