@@ -200,7 +200,6 @@ sub import_sequencing_files_to_pipeline
    return unless(defined($self->files_base_directory));
    my @files_source_and_dest; 
    
-   
    for my $sequencing_experiment (@{$self->_spreadsheet_metadata->_sequencing_experiments})
    {
      my $vlane = VRTrack::Lane->new_by_name( $self->_vrtrack, $self->_spreadsheet_metadata->_file_name_without_extension($sequencing_experiment->filename,'fastq.gz'));
@@ -210,8 +209,8 @@ sub import_sequencing_files_to_pipeline
      
      my $target_file = join('/',($target_directory,$sequencing_experiment->pipeline_filename ));
      my $source_file = $sequencing_experiment->file_location_on_disk;
-     my @source_and_dest = ($source_file,$target_file );
-     push(@files_source_and_dest, \@source_and_dest);
+     my @source_and_dest = ($source_file,$target_file);
+     #push(@files_source_and_dest, \@source_and_dest);
      
      $self->_update_md5_of_file_in_database($vlane, $sequencing_experiment->pipeline_filename,$source_file, $target_file );
      
@@ -220,14 +219,18 @@ sub import_sequencing_files_to_pipeline
        my $target_mate_file = join('/',($target_directory, $sequencing_experiment->pipeline_mate_filename));
        my $source_mate_file =$sequencing_experiment->mate_file_location_on_disk;
        my @mate_source_and_dest = ($source_mate_file,$target_mate_file );
-       push(@files_source_and_dest, \@mate_source_and_dest);
+       #push(@files_source_and_dest, \@mate_source_and_dest);
+       push(@source_and_dest, @mate_source_and_dest);
        
        $self->_update_md5_of_file_in_database($vlane, $sequencing_experiment->pipeline_mate_filename,$source_mate_file,$target_mate_file );
 
      }
+     push(@files_source_and_dest,\@source_and_dest);
    }
-   
+
    $self->_copy_files(\@files_source_and_dest);
+   $self->_check_fastq_header(\@files_source_and_dest);
+
    $self->_vrtrack->{_dbh}->{mysql_auto_reconnect} = 1;
    
    $self->_update_lanes_metadata_after_import;
@@ -263,7 +266,6 @@ sub _update_lanes_metadata_after_import
 
 }
 
-
 sub _get_fastqs_readcount
 {
     my ($self,$lane_dir,$fastq_1,$fastq_2) = @_;
@@ -287,8 +289,6 @@ sub _get_fastqs_readcount
     return($tot_number_sequences,$tot_sequence_len);
 }
 
-
-
 sub _copy_files
 {
    my ($self, $files_source_and_dest) = @_;
@@ -296,15 +296,76 @@ sub _copy_files
    for my $file_source_and_dest (@{$files_source_and_dest})
    {
      $pm->start and next; # do the fork
+
      my $source_file = $file_source_and_dest->[0];
      my $target_file = $file_source_and_dest->[1];
      `rsync $source_file $target_file`;
-     
+
      # create fastqcheck file from the original file
      `gunzip -c $source_file | sed 's/ /_/g' | fastqcheck > $target_file.fastqcheck`;
+
+     # Copy mate files
+     if (scalar @{ $file_source_and_dest } == 4) 
+     {
+        my $source_mate_file = $file_source_and_dest->[2];
+        my $target_mate_file = $file_source_and_dest->[3];
+        `rsync $source_mate_file $target_mate_file`;
+
+        # create fastqcheck file from the original file
+        `gunzip -c $source_mate_file | sed 's/ /_/g' | fastqcheck > $target_mate_file.fastqcheck`;
+     }
+
      $pm->finish; # do the exit in the child process
    }
    $pm->wait_all_children;
+}
+
+sub _check_fastq_header 
+{
+  my ($self, $files_source_and_dest) = @_;
+  my $pm = new Parallel::ForkManager($self->parallel_processes); 
+
+  for my $file_source_and_dest (@{$files_source_and_dest})
+  {
+    if (scalar @{ $file_source_and_dest } == 4) {
+      
+      my $target_file = $file_source_and_dest->[1];
+      my $target_mate_file = $file_source_and_dest->[3];
+
+      # Check first read for fasta-dump headers
+      my $source_sra_header = qx/gunzip -c $target_file | head -1 | grep -E "^\@SRR.*length=" | awk '{print \$1}'/; 
+      my $mate_sra_header = qx/gunzip -c $target_mate_file | head -1 | grep -E "^\@SRR.*length=" | awk '{print \$1}'/;
+
+      if ($source_sra_header && $source_sra_header) {
+        $pm->start and next; # do the fork
+
+        # Change both sequence and quality headers from @SRR3530795.1.1 1 length=100 to @SRR3530795.1/1 (temp files else get gzip eof error)
+        my $tmp_target_file = substr($target_file, 0,-3) . ".tmp";
+        `gunzip -c $target_file | awk 'BEGIN{FS=".1 "}{print (NR%2 == 1) ? \$1"/1" : \$0}' | gzip > $tmp_target_file`;
+        my $tmp_target_mate_file = substr($target_mate_file, 0,-3) . ".tmp";
+        `gunzip -c $target_mate_file | awk 'BEGIN{FS=".2 "}{print (NR%2 == 1) ? \$1"/2" : \$0}' | gzip > $tmp_target_mate_file`;
+
+        # Compare the new headers to ensure they match and replace copied files with temp files or throw error
+        my $source_sra_header = qx/gunzip -c $tmp_target_file | head -1 | grep -E "^\@SRR" | awk 'BEGIN {FS="\/"};{print \$1}'/; 
+        my $mate_sra_header = qx/gunzip -c $tmp_target_mate_file | head -1 | grep -E "^\@SRR" | awk 'BEGIN {FS="\/"};{print \$1}'/;
+
+        if ($source_sra_header eq $mate_sra_header) 
+        {
+          `mv $tmp_target_file $target_file`; 
+          `mv $tmp_target_mate_file $target_mate_file`;
+        } else 
+        {
+          UpdatePipeline::Exceptions::InvalidSpreadsheet->throw( error => "SRA source and mate header mismatch in $tmp_target_file");
+          unlink $tmp_target_file;
+          unlink $tmp_target_mate_file;
+        }
+         
+        $pm->finish; # do the exit in the child process
+      }
+    }
+  }
+  
+  $pm->wait_all_children;
 }
 
 sub _update_md5_of_file_in_database
