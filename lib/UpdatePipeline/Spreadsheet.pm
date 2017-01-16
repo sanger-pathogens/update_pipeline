@@ -299,8 +299,14 @@ sub _copy_files
 
      my $source_file = $file_source_and_dest->[0];
      my $target_file = $file_source_and_dest->[1];
-     `rsync $source_file $target_file`;
 
+     if (-l $source_file) 
+     {
+        `rsync --copy-links $source_file $target_file`;
+     } else {
+        `rsync $source_file $target_file`;
+     }
+     
      # create fastqcheck file from the original file
      `gunzip -c $source_file | sed 's/ /_/g' | fastqcheck > $target_file.fastqcheck`;
 
