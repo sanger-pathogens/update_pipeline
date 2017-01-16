@@ -71,6 +71,9 @@ ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/3/SLX/ABC45
 ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/4/SLX/XYZ45678/mysra_file/mysra_file_1.fastq.gz.md5', 'md5 hash file exists for mysra_file_1');
 ok (-e 't/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/4/SLX/XYZ45678/mysra_file/mysra_file_2.fastq.gz.md5', 'md5 hash file exists for mysra_file_2');
 
+is `gunzip -c t/data/pipeline_base_directory/Some/Common_Name/TRACKING/123/4/SLX/XYZ45678/mysra_file/mysra_file_1.fastq.gz | head -1`, "\@SRR3530795.1/1\n", 'SRA fastq-dump header replaced';
+
+
 # check that the files all have md5 hashes in the database
 ok my $vfile_myfile_1 = VRTrack::File->new_by_name( $vrtrack, 'myfile_1.fastq.gz'), 'retrieve the updated file object myfile_1';
 is($vfile_myfile_1->md5, "7bfa821c601bebc2a96f7b8dda141457", 'MD5 for myfile_1');
