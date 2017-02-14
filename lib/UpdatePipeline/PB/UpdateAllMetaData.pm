@@ -122,7 +122,6 @@ sub _update_lane
       
     my $vr_library = UpdatePipeline::VRTrack::Library->new(
       name => $file_metadata->library_name,
-      external_id        => $file_metadata->library_ssid,
       _vrtrack           => $self->_vrtrack,
       _vr_sample         => $vr_sample)->vr_library();
 
