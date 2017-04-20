@@ -49,6 +49,16 @@ sub _files_metadata_from_sample_name {
            $lane_name = $irods_file_metadata->{run} . '_' . $irods_file_metadata->{well};
         }
 	
+        if(defined($irods_file_metadata->{library_id}) && ! defined($irods_file_metadata->{library_name}) )
+        {
+           $irods_file_metadata->{library_name} = $irods_file_metadata->{library_id}; 
+        }
+	
+        if(defined($irods_file_metadata->{sample}) && ! defined($irods_file_metadata->{sample_public_name}) )
+        {
+           $irods_file_metadata->{sample_public_name} = $irods_file_metadata->{sample}; 
+        }
+	
 	next unless(defined($irods_file_metadata->{study_name}));
 	next unless(defined($irods_file_metadata->{sample_common_name}));
 	next unless(defined($irods_file_metadata->{md5}));
