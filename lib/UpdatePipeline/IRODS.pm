@@ -62,6 +62,17 @@ sub _build_files_metadata {
     for my $irods_file_metadata (@irods_files_metadata) {
         my $file_metadata;
         next if ( $irods_file_metadata->{id_run} < $self->specific_min_run );
+	
+        if(defined($irods_file_metadata->{library_id}) && ! defined($irods_file_metadata->{library_name}) )
+        {
+           $irods_file_metadata->{library_name} = $irods_file_metadata->{library_id}; 
+        }
+	
+        if(defined($irods_file_metadata->{sample}) && ! defined($irods_file_metadata->{sample_public_name}) )
+        {
+           $irods_file_metadata->{sample_public_name} = $irods_file_metadata->{sample}; 
+        }
+	
         eval {
             $file_metadata = UpdatePipeline::FileMetaData->new(
                 study_name                  => $irods_file_metadata->{study},
