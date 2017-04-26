@@ -63,14 +63,9 @@ sub _build_files_metadata {
         my $file_metadata;
         next if ( $irods_file_metadata->{id_run} < $self->specific_min_run );
 	
-        if(defined($irods_file_metadata->{library_id}) && ! defined($irods_file_metadata->{library_name}) )
+        if(defined($irods_file_metadata->{library_id}) && ! defined($irods_file_metadata->{library}) )
         {
-           $irods_file_metadata->{library_name} = $irods_file_metadata->{library_id}; 
-        }
-	
-        if(defined($irods_file_metadata->{sample}) && ! defined($irods_file_metadata->{sample_public_name}) )
-        {
-           $irods_file_metadata->{sample_public_name} = $irods_file_metadata->{sample}; 
+           $irods_file_metadata->{library} = $irods_file_metadata->{library_id}; 
         }
 	
         eval {
