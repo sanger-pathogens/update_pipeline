@@ -67,7 +67,8 @@ sub _generate_study_files_metadata
    my ($self,$study_name) = @_;
    return  UpdatePipeline::PB::StudyFilesMetaData->new(
        study_name        => $study_name,
-       dbh               => $self->_warehouse_dbh
+       dbh               => $self->_warehouse_dbh,
+       specific_min_run  => $self->specific_min_run
      )->files_metadata;
 }
 
