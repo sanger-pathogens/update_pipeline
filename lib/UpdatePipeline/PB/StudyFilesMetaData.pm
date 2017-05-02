@@ -44,7 +44,8 @@ sub _files_metadata_from_sample_name {
     for my $file_location ( @{$file_locations} ) {
         my $irods_file_metadata = IRODS::File->new( file_location => $file_location )->file_attributes;
 	
-	if(defined($irods_file_metadata->{run}) && $irods_file_metadata->{run} < $self->specific_min_run )
+	next unless(defined($irods_file_metadata->{run}));
+	if($irods_file_metadata->{run} < $self->specific_min_run )
 	{
 		next;
 	}
@@ -64,6 +65,7 @@ sub _files_metadata_from_sample_name {
         {
            $irods_file_metadata->{sample_public_name} = $irods_file_metadata->{sample}; 
         }
+	
 	
 	next unless(defined($irods_file_metadata->{study_name}));
 	next unless(defined($irods_file_metadata->{sample_common_name}));
