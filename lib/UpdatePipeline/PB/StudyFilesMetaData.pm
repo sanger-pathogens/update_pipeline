@@ -25,6 +25,7 @@ has 'study_name'         => ( is => 'ro', isa      => 'Str', required => 1 );
 has 'dbh'                => ( is => 'ro', required => 1 );
 has 'files_metadata'     => ( is => 'ro', isa      => 'ArrayRef', lazy => 1, builder => '_build_files_metadata' );
 has 'libraries_metadata' => ( is => 'ro', isa      => 'ArrayRef', lazy => 1, builder => '_build_libraries_metadata' );
+has 'specific_min_run'   => ( is => 'ro', default    => 0,            isa => 'Int');
 
 sub _build_libraries_metadata {
     my ($self) = @_;
@@ -42,6 +43,11 @@ sub _files_metadata_from_sample_name {
     my $file_locations = IRODS::Sample->new( name => $library_metadata->sample_name )->file_locations();
     for my $file_location ( @{$file_locations} ) {
         my $irods_file_metadata = IRODS::File->new( file_location => $file_location )->file_attributes;
+	
+	if(defined($irods_file_metadata->{run}) && $irods_file_metadata->{run} < $self->specific_min_run )
+	{
+		next;
+	}
 
         my $lane_name = $library_metadata->sample_name;
         if(defined($irods_file_metadata->{run}) && defined($irods_file_metadata->{well}))
