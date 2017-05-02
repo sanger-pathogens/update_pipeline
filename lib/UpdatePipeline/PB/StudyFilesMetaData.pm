@@ -16,6 +16,7 @@ Take in the name of a study and produce a metadata object for each experiment fi
 =cut
 
 use Moose;
+use Scalar::Util qw(looks_like_number);
 use Warehouse::LibraryAliquots;
 use IRODS::Sample;
 use IRODS::File;
@@ -44,7 +45,7 @@ sub _files_metadata_from_sample_name {
     for my $file_location ( @{$file_locations} ) {
         my $irods_file_metadata = IRODS::File->new( file_location => $file_location )->file_attributes;
 	
-	next unless(defined($irods_file_metadata->{run}));
+	next if(! defined($irods_file_metadata->{run}) || ! looks_like_number($irods_file_metadata->{run}));
 	if($irods_file_metadata->{run} < $self->specific_min_run )
 	{
 		next;
