@@ -99,10 +99,17 @@ sub _build_files_metadata
   my ($self) = @_;
   my @files_metadata;
   my $file_type = 'fastq.gz';
+  my %taxon_hash;
   
   for my $sequencing_experiment (@{$self->_sequencing_experiments})
   {
-  
+      my $common_name;
+    if (exists $taxon_hash{$sequencing_experiment->taxon_id}) {
+	$common_name = $taxon_hash{$sequencing_experiment->taxon_id};
+    } else {
+	$common_name = NCBI::TaxonLookup->new(taxon_id => $sequencing_experiment->taxon_id)->common_name();
+	$taxon_hash{$sequencing_experiment->taxon_id} = $common_name;
+    }
     $sequencing_experiment->populate_file_locations_on_disk($self->files_base_directory);
     
     my $file_metadata = UpdatePipeline::FileMetaData->new(
@@ -120,7 +127,7 @@ sub _build_files_metadata
       fragment_size_to                 => $sequencing_experiment->fragment_size,
       sample_name                      => $sequencing_experiment->sample_name,
       sample_accession_number          => $sequencing_experiment->sample_accession_number,
-      sample_common_name               => NCBI::TaxonLookup->new(taxon_id => $sequencing_experiment->taxon_id)->common_name,
+      sample_common_name               => $common_name,
       study_name                       => $self->_header->study_name,
       study_accession_number           => $self->_header->study_accession_number,
     );
