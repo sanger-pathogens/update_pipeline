@@ -1,6 +1,6 @@
-package GCLPWarehouse::Database;
+package MLWarehouse::Database;
 
-# ABSTRACT: GCLPWarehouse db
+# ABSTRACT: MLWarehouse db
 
 use Moose;
 use DBI;

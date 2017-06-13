@@ -19,8 +19,7 @@ sub _build__files_metadata
     study_names               => $self->study_names,
     number_of_files_to_return => $self->number_of_files_to_return,
     no_pending_lanes          => $self->no_pending_lanes,
-    _warehouse_dbh            => $self->_warehouse_dbh,
-    _gclp_warehouse_dbh       => $self->_gclp_warehouse_dbh,
+    _ml_warehouse_dbh       => $self->_ml_warehouse_dbh,
     specific_min_run          => $self->specific_min_run,
     file_type                 => $self->file_type,
     verbose_output            => $self->verbose_output

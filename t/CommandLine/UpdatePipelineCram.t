@@ -16,13 +16,6 @@ BEGIN {
     use VRTrack::VRTrack;
     use_ok('UpdatePipeline::UpdateAllMetaData');
     
-    
-    my $warehouse = Test::MockObject->new();
-    $warehouse->fake_module( 'Warehouse::FileMetaDataPopulation', test => sub{1} );
-    $warehouse->fake_new( 'Warehouse::FileMetaDataPopulation' );
-    $warehouse->mock('populate', sub{1});
-    $warehouse->mock('post_populate', sub{1});
-    
     # mock the call to the IRODS::Study
     my $irods_study = Test::MockObject->new();
     $irods_study->fake_module( 'IRODS::Study', test => sub{1} );

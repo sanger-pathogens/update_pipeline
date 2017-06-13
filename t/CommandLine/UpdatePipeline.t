@@ -15,19 +15,12 @@ BEGIN {
     use VertRes::Utils::VRTrackFactory;
     use VRTrack::VRTrack;
     use_ok('UpdatePipeline::UpdateAllMetaData');
-    
-    
-    my $warehouse = Test::MockObject->new();
-    $warehouse->fake_module( 'Warehouse::FileMetaDataPopulation', test => sub{1} );
-    $warehouse->fake_new( 'Warehouse::FileMetaDataPopulation' );
-    $warehouse->mock('populate', sub{1});
-    $warehouse->mock('post_populate', sub{1});
 	
-    my $gclp_warehouse = Test::MockObject->new();
-    $gclp_warehouse->fake_module( 'GCLPWarehouse::FileMetaDataPopulation', test => sub{1} );
-    $gclp_warehouse->fake_new( 'GCLPWarehouse::FileMetaDataPopulation' );
-    $gclp_warehouse->mock('populate', sub{1});
-    $gclp_warehouse->mock('post_populate', sub{1});
+    my $ml_warehouse = Test::MockObject->new();
+    $ml_warehouse->fake_module( 'MLWarehouse::FileMetaDataPopulation', test => sub{1} );
+    $ml_warehouse->fake_new( 'MLWarehouse::FileMetaDataPopulation' );
+    $ml_warehouse->mock('populate', sub{1});
+    $ml_warehouse->mock('post_populate', sub{1});
     
     # mock the call to the IRODS::Study
     my $irods_study = Test::MockObject->new();
