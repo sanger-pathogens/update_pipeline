@@ -30,6 +30,7 @@ sub _build_file_attributes
    my $irods_stream = $self->_stream_location() ;
    $file_attributes{file_name}  = $self->file_name();
    $file_attributes{file_name_without_extension} = $self->_file_name_without_extension($self->file_name());
+   $file_attributes{file_location} = $self->file_location;
 
    open( my $irods, $irods_stream ) or return  \%file_attributes;
    

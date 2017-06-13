@@ -1,11 +1,11 @@
-package GCLPWarehouse::Study;
+package MLWarehouse::Study;
 
 # ABSTRACT: Take in a study ssid and fill in the missing data in the file metadata object
 
 =head1 SYNOPSIS
 
-use GCLPWarehouse::Study;
-my $file = GCLPWarehouse::Study->new(
+use MLWarehouse::Study;
+my $file = MLWarehouse::Study->new(
   file_meta_data => $filemetadata,
   _dbh => $warehouse_dbh
   );
@@ -15,7 +15,7 @@ $file->populate();
 =cut
 use Moose;
 
-has 'file_meta_data'   => ( is => 'rw', isa => 'UpdatePipeline::FileMetaData', required => 1 );
+has 'file_meta_data'   => ( is => 'rw', isa => 'UpdatePipeline::CommonFileMetaData', required => 1 );
 has '_dbh'             => ( is => 'rw',                                        required => 1 );
 
 sub populate

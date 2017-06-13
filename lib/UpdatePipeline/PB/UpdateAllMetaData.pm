@@ -21,7 +21,7 @@ use UpdatePipeline::VRTrack::File;
 use UpdatePipeline::VRTrack::Study;
 use UpdatePipeline::ExceptionHandler;
 use Pathogens::ConfigSettings;
-use UpdatePipeline::PB::StudyFilesMetaData;
+use UpdatePipeline::PB::IRODS;
 
 extends 'UpdatePipeline::CommonMetaDataManipulation';
 with 'UpdatePipeline::CommonDatabaseSetup';
@@ -64,11 +64,11 @@ sub _build__exception_handler
 
 sub _generate_study_files_metadata
 {
-   my ($self,$study_name) = @_;
-   return  UpdatePipeline::PB::StudyFilesMetaData->new(
-       study_name        => $study_name,
-       dbh               => $self->_warehouse_dbh,
-       specific_min_run  => $self->specific_min_run
+   my ($self,$study_names) = @_;
+   return  UpdatePipeline::PB::IRODS->new(
+       study_names        => $study_names,
+       specific_min_run  => $self->specific_min_run,
+       ml_warehouse_dbh => $self->ml_warehouse_dbh
      )->files_metadata;
 }
 
@@ -76,20 +76,18 @@ sub update
 {
   my ($self) = @_;
   $self->_set_database_auto_reconnect;
-  for my $study_name (@{$self->study_names})
-  {
-    for my $file_metadata (@{$self->_generate_study_files_metadata($study_name )}) {
-      if ($self->taxon_id && defined $self->species_name) {
-      	$file_metadata->sample_common_name($self->species_name);
-      }
-      eval {
-        
-            $self->_update_lane($file_metadata) ;
-      };
-      if(my $exception = Exception::Class->caught())
-      {
-        $self->_exception_handler->add_exception($exception,$file_metadata->lane_name);
-      }
+
+  for my $file_metadata (@{$self->_generate_study_files_metadata($self->study_names )}) {
+    if ($self->taxon_id && defined $self->species_name) {
+    	$file_metadata->sample_common_name($self->species_name);
+    }
+    eval {
+      
+          $self->_update_lane($file_metadata) ;
+    };
+    if(my $exception = Exception::Class->caught())
+    {
+      $self->_exception_handler->add_exception($exception,$file_metadata->lane_name);
     }
   }
   $self->_exception_handler->print_report($self->verbose_output);

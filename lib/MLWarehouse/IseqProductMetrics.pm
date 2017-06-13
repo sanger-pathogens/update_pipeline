@@ -1,11 +1,11 @@
-package Warehouse::NPGPlexInformation;
+package MLWarehouse::IseqProductMetrics;
 
-# ABSTRACT: Take in a lane name and try to extract information from the npg_plex_information table
+# ABSTRACT: Take a run ID and look up the insert size 
 
 =head1 SYNOPSIS
 
-use Warehouse::NPGPlexInformation;
-my $file = Warehouse::NPGPlexInformation->new(
+use MLWarehouse::IseqProductMetrics;
+my $file = MLWarehouse::IseqProductMetrics->new(
   file_meta_data => $filemetadata,
   _dbh => $warehouse_dbh
   );
@@ -15,16 +15,16 @@ $file->populate();
 =cut
 use Moose;
 
-has 'file_meta_data'   => ( is => 'rw', isa => 'UpdatePipeline::FileMetaData', required => 1 );
-has '_dbh'             => ( is => 'rw',                                        required => 1 );
+has 'file_meta_data' => ( is => 'rw', isa => 'UpdatePipeline::CommonFileMetaData', required => 1 );
+has '_dbh'           => ( is => 'rw',                                        required => 1 );
+has '_id_run'        => ( is => 'rw', isa => 'Int');
+has '_position'      => ( is => 'rw', isa => 'Int');
+has '_tag'           => ( is => 'rw', isa => 'Int');
 
-has '_id_run'          => ( is => 'rw', isa => 'Int');
-has '_position'        => ( is => 'rw', isa => 'Int');
-has '_tag'             => ( is => 'rw', isa => 'Int');
-
-sub post_populate
+sub populate
 {
   my($self) = @_;
+  return 0 if(! defined($self->file_meta_data->file_name_without_extension));
   return 0 if(! ($self->file_meta_data->file_name_without_extension =~ /#/));
   
   unless ((!defined($self->file_meta_data->fragment_size_from))   ||
@@ -33,18 +33,12 @@ sub post_populate
    return 1; 
   }
   $self->_split_file_name;
-  $self->_populate_median_insert_size_from_npg_plex_information_table;
+  $self->_populate_median_insert_size_from_iseq_product_metrics;
+  
   1;
 }
 
-sub populate
-{
-  my($self) = @_;
-  1;
-}
-
-
-sub _populate_median_insert_size_from_npg_plex_information_table
+sub _populate_median_insert_size_from_iseq_product_metrics
 {
   my($self) = @_;
   if(defined($self->_id_run) && defined($self->_position) && defined($self->_tag)  )
@@ -53,7 +47,7 @@ sub _populate_median_insert_size_from_npg_plex_information_table
     my $position = $self->_position;
     my $tag = $self->_tag;
     
-    my $sql = qq[select insert_size_median from npg_plex_information where id_run = "$id_run" AND position = $position AND tag_index = $tag AND insert_size_median is not NULL limit 1;];
+    my $sql = qq[select insert_size_median from iseq_product_metrics where id_run = "$id_run" AND position = $position AND tag_index = $tag AND insert_size_median is not NULL limit 1;];
     my $sth = $self->_dbh->prepare($sql);
     $sth->execute;
     my @study_warehouse_details  = $sth->fetchrow_array;

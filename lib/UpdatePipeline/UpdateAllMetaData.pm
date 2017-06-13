@@ -76,7 +76,6 @@ sub update
           )->update_required
         )
       {
-          $self->_post_populate_file_metadata($file_metadata) unless($self->dont_use_warehouse);
 		  my $filter_pending = ( !$self->no_pending_lanes || ( $self->no_pending_lanes && defined $file_metadata->lane_manual_qc && $file_metadata->lane_manual_qc ne 'pending' ) );
 		  my $filter_id_run = ( !$self->specific_run_id || ( $self->specific_run_id && defined $file_metadata->id_run && $self->specific_run_id == $file_metadata->id_run));
 		  my $filter_min_run = ( !$self->specific_min_run || ( $self->specific_min_run && defined $file_metadata->id_run && $self->specific_min_run < $file_metadata->id_run));
@@ -165,12 +164,6 @@ sub _update_lane
   {
     $self->_exception_handler->add_exception($exception, $file_metadata->file_name_without_extension);
   }
-}
-
-sub _post_populate_file_metadata
-{
-  my ($self, $file_metadata) = @_;
-  Warehouse::FileMetaDataPopulation->new(file_meta_data => $file_metadata, _dbh => $self->_warehouse_dbh)->post_populate();
 }
 
 sub _withdraw_lanes

@@ -1,11 +1,6 @@
-warehouse:
-  database: sequencescape_warehouse
-  host:     seqw-db
-  port:     3379
-  user:     warehouse_ro
-gclp_warehouse:
-  database: gclp_mlwarehouse
-  host:     vm-mii-gclp
+ml_warehouse:
+  database: mlwarehouse
+  host:     mlwh-db
   port:     3435
   user:     insert_username
   password: insert_password
