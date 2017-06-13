@@ -67,7 +67,7 @@ CREATE TABLE `study` (
   UNIQUE KEY `study_uuid_study_lims_index` (`uuid_study_lims`),
   KEY `study_accession_number_index` (`accession_number`),
   KEY `study_name_index` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=4723 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 CREATE TABLE `iseq_product_metrics` (
@@ -127,9 +127,7 @@ CREATE TABLE `iseq_product_metrics` (
   KEY `iseq_pm_fcid_run_pos_tag_index` (`id_run`,`position`,`tag_index`),
   KEY `iseq_pr_metrics_flc_fk` (`id_iseq_flowcell_tmp`),
   KEY `iseq_pr_metrics_lm_fk` (`id_run`,`position`),
-  CONSTRAINT `iseq_pr_metrics_flc_fk` FOREIGN KEY (`id_iseq_flowcell_tmp`) REFERENCES `iseq_flowcell` (`id_iseq_flowcell_tmp`) ON DELETE SET NULL ON UPDATE NO ACTION,
-  CONSTRAINT `iseq_pr_metrics_lm_fk` FOREIGN KEY (`id_run`, `position`) REFERENCES `iseq_run_lane_metrics` (`id_run`, `position`) ON DELETE CASCADE ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=945198520 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;

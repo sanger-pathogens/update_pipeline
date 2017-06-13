@@ -16,9 +16,9 @@ my $database_settings = Pathogens::ConfigSettings->new(environment => 'test', fi
 my $dbh = MLWarehouse::Database->new(settings => $database_settings->{ml_warehouse})->connect;
 
 delete_test_data($dbh);
-$dbh->do('insert into study (id_lims,id_study_lims,data_access_group) values("SQSCP",123, "unix_group_1")');
-$dbh->do('insert into study (id_lims,id_study_lims,data_access_group) values("SQSCP",456, "unix_group_1 unix_group_2")');
-$dbh->do('insert into study (id_lims,id_study_lims,data_access_group) values("SQSCP",789, NULL)');
+$dbh->do('insert into study (id_lims,id_study_lims,data_access_group, last_updated,recorded_at) values("SQSCP",123, "unix_group_1", NOW(), NOW())');
+$dbh->do('insert into study (id_lims,id_study_lims,data_access_group, last_updated,recorded_at) values("SQSCP",456, "unix_group_1 unix_group_2", NOW(), NOW())');
+$dbh->do('insert into study (id_lims,id_study_lims,data_access_group, last_updated,recorded_at) values("SQSCP",789, NULL, NOW(), NOW())');
 
 ##### lookup with no groups
 ok(my $filemd_no_group = UpdatePipeline::FileMetaData->new(file_name => '1234_5#6.bam', file_name_without_extension =>  '1234_5#6', study_ssid => 789), 'create a file meta data with no groups');
