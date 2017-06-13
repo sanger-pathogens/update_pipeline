@@ -67,7 +67,8 @@ sub _generate_study_files_metadata
    my ($self,$study_names) = @_;
    return  UpdatePipeline::PB::IRODS->new(
        study_names        => $study_names,
-       specific_min_run  => $self->specific_min_run
+       specific_min_run  => $self->specific_min_run,
+       ml_warehouse_dbh => $self->ml_warehouse_dbh
      )->files_metadata;
 }
 

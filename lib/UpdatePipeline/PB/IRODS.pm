@@ -30,7 +30,7 @@ sub _build_files_metadata {
 
     my @irods_files_metadata = @{ $self->_get_irods_file_metadata_for_studies() };
 
-    for my $irods_file_metadata (@irods_files_metadata) {
+    for my $irods_file_metadata (@irods_files_metadata) {       
         my $file_metadata;
 	
 	next if(! defined($irods_file_metadata->{run}) || ! looks_like_number($irods_file_metadata->{run}));

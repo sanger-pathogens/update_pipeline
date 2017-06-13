@@ -33,7 +33,6 @@ my %irods_file_expected_output = (
 );
 $irods_file->mock('file_attributes', sub{ \%irods_file_expected_output });
 
-
 BEGIN { unshift(@INC, './lib') }
 BEGIN {
   use Test::Most;
