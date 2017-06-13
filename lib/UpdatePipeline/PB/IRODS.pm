@@ -1,13 +1,13 @@
-package UpdatePipeline::PB::StudyFilesMetaData;
+package UpdatePipeline::PB::IRODS;
 
 # ABSTRACT: Take in the name of a study and produce a metadata object for each experiment file
 
 =head1 SYNOPSIS
 
 Take in the name of a study and produce a metadata object for each experiment file. Lookup the warehouse, look for files in irods, look for metadata on each file.
-   use UpdatePipeline::PB::StudyFilesMetaData;
+   use UpdatePipeline::PB::IRODS;
 
-   my $obj = UpdatePipeline::PB::StudyFilesMetaData->new(
+   my $obj = UpdatePipeline::PB::IRODS->new(
        study_name        => 'ABC',
        dbh               => $dbh
      );
@@ -16,10 +16,10 @@ Take in the name of a study and produce a metadata object for each experiment fi
 =cut
 
 use Moose;
-use Scalar::Util qw(looks_like_number);
 use UpdatePipeline::PB::FileMetaData;
+use Scalar::Util qw(looks_like_number);
 
-extends 'IRODS::UpdatePipeline::IRODS';
+extends 'UpdatePipeline::IRODS';
 
 has 'files_metadata'  => ( is => 'ro', isa      => 'ArrayRef', lazy => 1, builder => '_build_files_metadata' );
 has 'file_type'       => ( is => 'ro', default  => 'h5', isa => 'Str' );
@@ -32,6 +32,8 @@ sub _build_files_metadata {
 
     for my $irods_file_metadata (@irods_files_metadata) {
         my $file_metadata;
+	
+	next if(! defined($irods_file_metadata->{run}) || ! looks_like_number($irods_file_metadata->{run}));
         next if ( $irods_file_metadata->{run} < $self->specific_min_run );
 	
 	my $lane_name = $irods_file_metadata->{run};
@@ -70,7 +72,7 @@ sub _build_files_metadata {
 	            ebi_run_acc             => $irods_file_metadata->{ebi_run_acc},
 	            md5                     => $irods_file_metadata->{md5},
 		    # need full location here
-	            file_location           => $irods_file_metadata->{file_name}
+	            file_location           => $irods_file_metadata->{file_location}
 	        );
         };
         if ($@) {
@@ -79,15 +81,34 @@ sub _build_files_metadata {
         }
 		
         # fill in the blanks with data from the ML warehouse
-        MLWarehouse::FileMetaDataPopulation->new( file_meta_data => $file_metadata, _dbh => $self->_ml_warehouse_dbh )->populate();
+        MLWarehouse::FileMetaDataPopulation->new( file_meta_data => $file_metadata, _dbh => $self->ml_warehouse_dbh )->populate();
 
         push( @files_metadata, $file_metadata );
     }
 
-    my @sorted_files_metadata = reverse( ( sort ( sort_by_file_name @files_metadata ) ) );
-
-    return \@sorted_files_metadata;
+    return \@files_metadata;
 }
+
+sub _get_irods_file_metadata_for_studies {
+    my ($self) = @_;
+    my @files_metadata;
+    my @unsorted_file_locations;
+    my @sorted_file_locations;
+
+    for my $irods_study ( @{ $self->_irods_studies } ) {
+        for my $file_metadata ( @{ $irods_study->file_locations() } ) {
+            push( @unsorted_file_locations, $file_metadata );
+        }
+    }
+    $self->_limit_returned_results( \@unsorted_file_locations );
+    for my $file_location ( @unsorted_file_locations ) {
+        print "Syncing file: $file_location\n" if($self->verbose_output);
+        push( @files_metadata, IRODS::File->new( file_location => $file_location )->file_attributes );
+    }
+
+    return \@files_metadata;
+}
+
 
 __PACKAGE__->meta->make_immutable;
 no Moose;

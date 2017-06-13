@@ -26,7 +26,7 @@ has 'number_of_files_to_return' => ( is => 'rw', isa => 'Maybe[Int]' );
 
 has '_irods_studies'   => ( is => 'rw', isa => 'ArrayRef', lazy_build => 1 );
 
-has '_ml_warehouse_dbh' => ( is => 'rw', required => 1 );
+has 'ml_warehouse_dbh' => ( is => 'rw', required => 1 );
 has 'no_pending_lanes' => ( is => 'ro', default  => 0, isa => 'Bool' );
 has 'specific_min_run' => ( is => 'ro', default  => 0, isa => 'Int' );
 has 'file_type'        => ( is => 'ro', default  => 'bam', isa => 'Str' );
@@ -95,7 +95,7 @@ sub _build_files_metadata {
         }
 		
         # fill in the blanks with data from the ML warehouse
-        MLWarehouse::FileMetaDataPopulation->new( file_meta_data => $file_metadata, _dbh => $self->_ml_warehouse_dbh )->populate();
+        MLWarehouse::FileMetaDataPopulation->new( file_meta_data => $file_metadata, _dbh => $self->ml_warehouse_dbh )->populate();
 
         push( @files_metadata, $file_metadata );
     }

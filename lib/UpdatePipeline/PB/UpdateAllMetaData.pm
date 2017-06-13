@@ -21,7 +21,7 @@ use UpdatePipeline::VRTrack::File;
 use UpdatePipeline::VRTrack::Study;
 use UpdatePipeline::ExceptionHandler;
 use Pathogens::ConfigSettings;
-use UpdatePipeline::PB::StudyFilesMetaData;
+use UpdatePipeline::PB::IRODS;
 
 extends 'UpdatePipeline::CommonMetaDataManipulation';
 with 'UpdatePipeline::CommonDatabaseSetup';
@@ -65,7 +65,7 @@ sub _build__exception_handler
 sub _generate_study_files_metadata
 {
    my ($self,$study_names) = @_;
-   return  UpdatePipeline::PB::StudyFilesMetaData->new(
+   return  UpdatePipeline::PB::IRODS->new(
        study_names        => $study_names,
        specific_min_run  => $self->specific_min_run
      )->files_metadata;

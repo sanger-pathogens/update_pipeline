@@ -17,14 +17,14 @@ use Moose;
 use MLWarehouse::Study;
 use MLWarehouse::IseqProductMetrics;
 
-has 'file_meta_data'   => ( is => 'rw', isa => 'UpdatePipeline::FileMetaData', required => 1 );
+has 'file_meta_data'   => ( is => 'rw', isa => 'UpdatePipeline::CommonFileMetaData', required => 1 );
 has '_dbh'             => ( is => 'rw',                                        required => 1 );
 
 sub populate
 {
   my($self) = @_;
   MLWarehouse::Study->new(  file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->populate();
-  MLWarehouse::IseqProductMetrics->new(file_meta_data => $self->file_meta_data,_dbh => $self->_dbh)->populate();
+  MLWarehouse::IseqProductMetrics->new(file_meta_data => $self->file_meta_data, _dbh => $self->_dbh)->populate();
 }
 
 sub post_populate

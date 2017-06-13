@@ -15,7 +15,7 @@ $file->populate();
 =cut
 use Moose;
 
-has 'file_meta_data' => ( is => 'rw', isa => 'UpdatePipeline::FileMetaData', required => 1 );
+has 'file_meta_data' => ( is => 'rw', isa => 'UpdatePipeline::CommonFileMetaData', required => 1 );
 has '_dbh'           => ( is => 'rw',                                        required => 1 );
 has '_id_run'        => ( is => 'rw', isa => 'Int');
 has '_position'      => ( is => 'rw', isa => 'Int');
@@ -24,6 +24,7 @@ has '_tag'           => ( is => 'rw', isa => 'Int');
 sub populate
 {
   my($self) = @_;
+  return 0 if(! defined($self->file_meta_data->file_name_without_extension));
   return 0 if(! ($self->file_meta_data->file_name_without_extension =~ /#/));
   
   unless ((!defined($self->file_meta_data->fragment_size_from))   ||
