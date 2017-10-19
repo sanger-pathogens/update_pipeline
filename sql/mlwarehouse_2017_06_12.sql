@@ -129,6 +129,39 @@ CREATE TABLE `iseq_product_metrics` (
   KEY `iseq_pr_metrics_lm_fk` (`id_run`,`position`),
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE `iseq_run_lane_metrics` (
+  `flowcell_barcode` varchar(15) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Manufacturer flowcell barcode or other identifier as recorded by NPG',
+  `id_run` int(10) unsigned NOT NULL COMMENT 'NPG run identifier',
+  `position` smallint(2) unsigned NOT NULL COMMENT 'Flowcell lane number',
+  `instrument_name` char(32) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `instrument_model` char(64) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `paired_read` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `cycles` int(4) unsigned NOT NULL,
+  `cancelled` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Boolen flag to indicate whether the run was cancelled',
+  `run_pending` datetime DEFAULT NULL COMMENT 'Timestamp of run pending status',
+  `run_complete` datetime DEFAULT NULL COMMENT 'Timestamp of run complete status',
+  `qc_complete` datetime DEFAULT NULL COMMENT 'Timestamp of qc complete status',
+  `pf_cluster_count` bigint(20) unsigned DEFAULT NULL,
+  `raw_cluster_count` bigint(20) unsigned DEFAULT NULL,
+  `raw_cluster_density` double(12,3) unsigned DEFAULT NULL,
+  `pf_cluster_density` double(12,3) unsigned DEFAULT NULL,
+  `pf_bases` bigint(20) unsigned DEFAULT NULL,
+  `q20_yield_kb_forward_read` int(10) unsigned DEFAULT NULL,
+  `q20_yield_kb_reverse_read` int(10) unsigned DEFAULT NULL,
+  `q30_yield_kb_forward_read` int(10) unsigned DEFAULT NULL,
+  `q30_yield_kb_reverse_read` int(10) unsigned DEFAULT NULL,
+  `q40_yield_kb_forward_read` int(10) unsigned DEFAULT NULL,
+  `q40_yield_kb_reverse_read` int(10) unsigned DEFAULT NULL,
+  `tags_decode_percent` float(5,2) unsigned DEFAULT NULL,
+  `tags_decode_cv` float(6,2) unsigned DEFAULT NULL,
+  `unexpected_tags_percent` float(5,2) unsigned DEFAULT NULL COMMENT 'tag0_perfect_match_reads as a percentage of total_lane_reads',
+  `run_priority` tinyint(3) DEFAULT NULL COMMENT 'Sequencing lane level run priority, a result of either manual or default value set by core',
+  PRIMARY KEY (`id_run`,`position`),
+  KEY `iseq_rlmm_id_run_index` (`id_run`),
+  KEY `iseq_rlm_cancelled_and_run_pending_index` (`cancelled`,`run_pending`),
+  KEY `iseq_rlm_cancelled_and_run_complete_index` (`cancelled`,`run_complete`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
