@@ -1,5 +1,7 @@
 language: perl
 perl:
   - "5.14"
+install:
+  - "source ./install_dependencies.sh"
 script: dzil test
 
