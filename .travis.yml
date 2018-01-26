@@ -1,7 +1,13 @@
 language: perl
+addons:
+  apt:
+    packages:
+    - libmysqlclient-dev
 perl:
-  - "5.14"
+  - 5.14
+sudo: false
+services:
+  - mysql
 install:
   - "source ./install_dependencies.sh"
 script: dzil test
-
