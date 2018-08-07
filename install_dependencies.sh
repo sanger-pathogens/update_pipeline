@@ -27,7 +27,7 @@ cd fastqcheck
 autoreconf -i -f
 ./configure
 make
-make install
+sudo make install
 
 cd $start_dir
 

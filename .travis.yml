@@ -7,7 +7,6 @@ addons:
     - libtool
 perl:
   - 5.14
-sudo: false
 services:
   - mysql
 before_install:
