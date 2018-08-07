@@ -126,7 +126,7 @@ CREATE TABLE `iseq_product_metrics` (
   KEY `iseq_pm_run_pos_index` (`id_run`,`position`),
   KEY `iseq_pm_fcid_run_pos_tag_index` (`id_run`,`position`,`tag_index`),
   KEY `iseq_pr_metrics_flc_fk` (`id_iseq_flowcell_tmp`),
-  KEY `iseq_pr_metrics_lm_fk` (`id_run`,`position`),
+  KEY `iseq_pr_metrics_lm_fk` (`id_run`,`position`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `iseq_run_lane_metrics` (

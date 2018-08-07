@@ -129,8 +129,7 @@ sub _count_line_tetrads_in_gzipped_fastq_file {
         UpdatePipeline::Exceptions::FileNotFound->throw(error => "Error: Missing file:\n".$file_name);
     }
 
-    my $command = "set -o pipefail; gunzip -c $file_name | wc -l";
-
+    my $command = "bash -c 'set -o pipefail; gunzip -c $file_name | wc -l'";
     #IPC::Cmd's run() provides extensive details when running system commands.
     my ( $success, $error_message, $full_buf, $stdout_buf, $stderr_buf ) = run( command => $command );
 
