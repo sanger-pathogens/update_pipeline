@@ -3,11 +3,18 @@ addons:
   apt:
     packages:
     - libmysqlclient-dev
+    - autoconf
+    - libtool
 perl:
   - 5.14
 sudo: false
 services:
   - mysql
+before_install:
+  - mysqladmin -u root create vrtrack_test
+  - mysqladmin -u root create mlwarehouse
+  - mysql -u root vrtrack_test < sql/vrtrack_db_test.sql
+  - mysql -u root mlwarehouse < sql/mlwarehouse_2017_06_12.sql
 install:
   - "source ./install_dependencies.sh"
 script: dzil test
