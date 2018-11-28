@@ -9,6 +9,7 @@ Update and validate a pipelines metadata
   * [Installation](#installation)
     * [Required dependencies](#required-dependencies)
     * [Debian/Ubuntu](#debianubuntu)
+    * [Running the tests](#running-the-tests)
   * [Usage](#usage)
     * [update\_pipeline\.pl](#update_pipelinepl)
     * [update\_pb\_pipeline](#update_pb_pipeline)
@@ -42,6 +43,11 @@ git clone https://github.com/sanger-pathogens/update_pipeline.git && cd update_p
 dzil authordeps --missing | cpanm
 dzil listdeps --missing | cpanm
 ```
+### Running the tests
+The test can be run with dzil from the top level directory:  
+  
+`dzil test`  
+
 ## Usage
 update_pipeline consists of four scripts for updating the metadata of a pipeline.
 
