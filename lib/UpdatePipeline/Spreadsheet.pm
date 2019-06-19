@@ -62,7 +62,7 @@ sub _build__files_metadata
   }
   catch
   {
-    UpdatePipeline::Exceptions::InvalidSpreadsheet->throw( error =>  "Couldnt parse the input spreadsheet");
+    UpdatePipeline::Exceptions::InvalidSpreadsheet->throw( error =>  "Couldnt parse the input spreadsheet: $_");
   };
   
   try{
@@ -74,7 +74,7 @@ sub _build__files_metadata
   }
   catch
   {
-     UpdatePipeline::Exceptions::InvalidSpreadsheetMetaData->throw( error =>  "The data in the spreadsheet is invalid");
+     UpdatePipeline::Exceptions::InvalidSpreadsheetMetaData->throw( error =>  "The data in the spreadsheet is invalid: $_");
   };
   $self->_populate_files_metadata_with_dummy_ssids($spreadsheet_metadata->files_metadata);
   $self->_spreadsheet_metadata($spreadsheet_metadata);
