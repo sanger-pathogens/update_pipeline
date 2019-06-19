@@ -25,11 +25,15 @@ sub _build_irods_query
   my ($self) = @_;
   if($self->file_type eq 'cram')
   {
-  	return $self->_illumina_irods_query;
+      return $self->_illumina_irods_query;
   }
   elsif($self->file_type eq 'h5')
   {
-  	return $self->_pacbio_irods_query;
+      return $self->_pacbio_irods_query;
+  }
+  elsif($self->file_type eq 'bam')
+  {
+      return $self->_pacbio_irods_query;
   }
   else
   {
