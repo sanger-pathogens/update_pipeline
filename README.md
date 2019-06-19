@@ -117,6 +117,7 @@ Update the metadata of PB samples from the warehouse and iRODS and insert it int
   -wdr|--withdraw_del          <optionally withdraw a lane if has been deleted from iRODS>
   -trd|--include_total_reads   <optionally write the total_reads from bam metadata to the file table in vrtrack>
   -l|--lock_file               <optional lock file to prevent multiple instances running>
+  -t|--file_type               <optionally change the default file type to import from h5 (to bam)>
   -h|--help                    <this message>
 
 # update all studies listed in the file in the given database

@@ -39,11 +39,12 @@ has 'total_reads'               => ( is => 'rw', isa => 'Int', default => 0 );
 has 'common_name_required'               => ( is => 'rw', isa => 'Bool', default => 1 );
 has 'environment'               => ( is => 'rw', isa => 'Str', default => 'production' );
 has 'lock_file'                 => ( is => 'rw', isa => 'Str' );
+has 'file_type'                 => ( is => 'rw', isa => 'Str', default => 'h5');
 
 sub BUILD {
     my ($self) = @_;
     my (
-        $studyfile,             $help,              $number_of_files_to_return, $lock_file,
+        $studyfile,             $help,              $number_of_files_to_return, $lock_file, $file_type,
         $parallel_processes,    $verbose_output,    $errors_min_run_id,         $database,
         $input_study_name,      $update_if_changed, $dont_use_warehouse,        $taxon_id,
         $overwrite_common_name, $use_supplier_name,        $specific_min_run,
@@ -72,6 +73,7 @@ sub BUILD {
         'ncn|common_name_not_required' => \$common_name_not_required,
         'trd|include_total_reads' => \$total_reads,
         'l|lock_file=s'           => \$lock_file,
+        't|file_type=s'           => \$file_type,
         'e|environment=s'         => \$environment,
         'h|help'                  => \$help,
     );
@@ -94,6 +96,7 @@ sub BUILD {
     $self->withdraw_del($withdraw_del)                           if ( defined($withdraw_del) );
     $self->total_reads($total_reads)                             if ( defined($total_reads) );
     $self->lock_file($lock_file)                                 if ( defined($lock_file) );
+    $self->file_type($file_type)                                 if ( defined($file_type) );
     $self->environment($environment)                             if ( defined($environment));
     $self->common_name_required(0)                               if ( defined($common_name_not_required));
     $self->help($help)                                           if ( defined($help) );
@@ -152,7 +155,8 @@ sub run {
         override_md5              => $self->override_md5,
         vrtrack_lanes             => undef,
         add_raw_reads             => $self->total_reads,
-        environment               => $self->environment
+        environment               => $self->environment,
+        file_type                 => $self->file_type
     );
     $update_pipeline->update();
     
@@ -225,6 +229,7 @@ sub usage_text {
       -wdr|--withdraw_del          <optionally withdraw a lane if has been deleted from iRODS>
       -trd|--include_total_reads   <optionally write the total_reads from bam metadata to the file table in vrtrack>  
       -l|--lock_file               <optional lock file to prevent multiple instances running>
+      -t|--file_type               <optionally change the default file type to import from h5 (to bam)>
       -h|--help                    <this message>
 
     # update all studies listed in the file in the given database
