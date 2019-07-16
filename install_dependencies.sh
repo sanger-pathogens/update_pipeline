@@ -31,7 +31,7 @@ sudo make install
 
 cd $start_dir
 
-cpanm Dist::Zilla
+cpanm Dist::Zilla Dist::Zilla::Plugin::Test::Compile
 dzil authordeps --missing | cpanm
 dzil listdeps | cpanm
 cpanm File::Slurp DBI XML::TreePP Bio::DB::EUtilities Parallel::ForkManager Spreadsheet::ParseExcel Test::MockObject Time::Format DBD::mysql YAML::XS IO::Capture::Stderr
