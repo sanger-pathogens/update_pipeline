@@ -20,7 +20,9 @@ has 'settings' => ( is => 'rw', isa => 'HashRef', lazy_build => 1 );
 sub _build_settings 
 {
   my $self = shift;
-  my %config_settings = %{ Load( scalar read_file("config/".$self->environment."/".$self->filename.""))};
+  my $directory = (defined $ENV{'UPDATE_PIPELINE_CONFIG_PATH'}) ? $ENV{'UPDATE_PIPELINE_CONFIG_PATH'} : "config/" . $self->environment ;
+  
+  my %config_settings = %{ Load( scalar read_file($directory . "/" . $self->filename.""))};
   return \%config_settings;
 } 
 

@@ -5,6 +5,11 @@ addons:
     - libmysqlclient-dev
     - autoconf
     - libtool
+    - libdb-dev
+    - build-essential
+    - libssl-dev
+    - libexpat1-dev
+    - libdbd-mysql-perl
 perl:
   - 5.14
 services:
