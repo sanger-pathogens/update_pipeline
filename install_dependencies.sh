@@ -31,10 +31,10 @@ sudo make install
 
 cd $start_dir
 
-cpanm Dist::Zilla
-dzil authordeps --missing | cpanm
-dzil listdeps | cpanm
-cpanm File::Slurp DBI XML::TreePP Bio::DB::EUtilities Parallel::ForkManager Spreadsheet::ParseExcel Test::MockObject Time::Format DBD::mysql YAML::XS IO::Capture::Stderr
+cpanm --notest Dist::Zilla
+dzil authordeps --missing | cpanm --notest
+dzil listdeps | cpanm --notest
+cpanm --notest File::Slurp DBI XML::TreePP Bio::DB::EUtilities Parallel::ForkManager Spreadsheet::ParseExcel Test::MockObject Time::Format DBD::mysql YAML::XS IO::Capture::Stderr
 export LD_LIBRARY_PATH=/usr/local/lib
 
 #Template
