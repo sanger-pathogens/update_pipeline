@@ -49,19 +49,17 @@ sub _remote_lookup_translation_table
 {
   my ($self, $url) = @_;
   my ($result);
-  for (my $i=1; $i<=10; $i++) { 
+  for (my $i=1; $i<=15; $i++) { 
     $result = eval {
       my $tpp = $self->_setup_xml_parser_via_proxy;
       my $tree = $tpp->parsehttp( GET => $url );
-      $tree->{TaxaSet}->{Taxon}->{ScientificName};
+      (defined($tree->{TaxaSet}) && $tree->{TaxaSet} eq '')  ? '' : $tree->{TaxaSet}->{Taxon}->{ScientificName};
     };
-    if (!defined($result)) {
-      my $random_number = int(rand(5)) + 1;
-      sleep($random_number);
-      next;
-    }
+    last if defined($result);
+    my $random_number = int(rand(5)) + 1;
+    sleep($random_number);
   }
-  if (!defined($result)) {
+  if (!defined($result) || $result eq "") {
     NCBI::Exceptions::TaxonLookupFailed ->throw( error => "Cant lookup the scientific name for taxon ID ".$self->taxon_id."\n" );
   }
   else {
