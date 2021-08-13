@@ -142,8 +142,7 @@ sub _file_name_without_extension
    my ($self, $input_filename, $input_file_type) = @_;
    return undef unless(defined($input_filename) && defined($input_file_type));
    $input_filename =~ s!.$input_file_type!!;
-   $input_filename =~ s!\_1$!!;
-   $input_filename =~ s!\_2$!!;
+   $input_filename =~ s!\_[12]$!!;
    return $input_filename;
 }
 
