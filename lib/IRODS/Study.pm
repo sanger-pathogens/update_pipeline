@@ -50,7 +50,7 @@ sub _illumina_irods_query
   my $specific_min_run_str = '';
   if($self->specific_min_run > 0)
   {
-   $specific_min_run_str = "and id_run 'n>=' ".$self->specific_min_run;
+   $specific_min_run_str = "and id_run '>=' ".$self->specific_min_run;
   }
 
   return $self->bin_directory . "imeta qu -z seq -d target = 1 and study = '".$self->name."' $no_pending_lanes_str and type = ".$self->file_type." $specific_min_run_str and total_reads != 0  |";
