@@ -1,6 +1,6 @@
 ml_warehouse:
   database: mlwarehouse
-  host:     mlwh-db
+  host:     mlwh-db-ro
   port:     3435
   user:     insert_username
   password: insert_password
