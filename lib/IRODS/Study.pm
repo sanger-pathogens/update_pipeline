@@ -44,7 +44,7 @@ sub _illumina_irods_query
   my $no_pending_lanes_str = '';
   if($self->no_pending_lanes == 1 )
   {
-    $no_pending_lanes_str = ' and manual_qc like "%"';
+    $no_pending_lanes_str = ' and manual_qc = "1"';
   }
   
   my $specific_min_run_str = '';
